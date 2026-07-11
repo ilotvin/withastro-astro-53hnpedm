@@ -5,6 +5,8 @@ const mdProjects = Object.entries(mdModules).map(([path, project]) => ({
   url: `/projects/${path.split('/').pop().replace('.md', '')}`,
   title: project.frontmatter.title,
   summary: project.frontmatter.summary,
+  tags: project.frontmatter.tags ?? [],
+  funnel: project.frontmatter.funnel ?? [],
 }));
 
 const astroProjects = [
@@ -12,12 +14,12 @@ const astroProjects = [
     url: '/projects/email-send-analysis',
     title: 'Email Send Analysis with SFMC Data Views',
     summary: 'Connecting Salesforce Marketing Cloud system data views into a full send-to-engagement funnel for end-to-end email analysis.',
+    tags: ['Email Analysis'],
+    funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
 ];
 
 const projects = [...astroProjects, ...mdProjects].filter((p) => p.title);
-
-const funnel = ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'];
 ---
 
 <!DOCTYPE html>
@@ -31,32 +33,24 @@ const funnel = ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'];
         * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
         h1 { margin: 0 0 8px; }
-        .intro { color: #555; margin: 0 0 28px; }
-        .funnel-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 0 0 12px; }
-        .funnel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
-        .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; font-weight: 600; color: var(--accent); background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 6px; padding: 6px 12px; white-space: nowrap; }
-        .funnel-arrow { color: #bbb; font-size: 1rem; }
+        .intro { color: #555; margin: 0 0 30px; }
         hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
         .project-card { border: 1px solid var(--line); padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
         .project-card:hover { border-color: var(--accent); }
+        .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+        .tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 999px; padding: 4px 12px; }
         .project-link { font-size: 1.5rem; color: var(--accent); font-weight: bold; margin: 0 0 5px 0; }
-        .project-summary { color: #555; margin: 0; }
+        .project-summary { color: #555; margin: 0 0 16px; }
+        .funnel-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 0 0 10px; }
+        .funnel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: #444; background: #f6f8fa; border: 1px solid #e1e4e6; border-radius: 6px; padding: 5px 10px; white-space: nowrap; }
+        .funnel-arrow { color: #bbb; font-size: 0.95rem; }
         .empty-state { color: #999; font-style: italic; }
     </style>
 </head>
 <body>
     <h1>Welcome to My Platform</h1>
     <p class="intro">Select a project below to see the visual architecture and technical breakdowns.</p>
-
-    <p class="funnel-label">The email data-view funnel</p>
-    <div class="funnel-strip">
-        {funnel.map((step, i) => (
-            <>
-                <span class="funnel-step">{step}</span>
-                {i < funnel.length - 1 && <span class="funnel-arrow">→</span>}
-            </>
-        ))}
-    </div>
 
     <hr />
 
@@ -66,8 +60,28 @@ const funnel = ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'];
         ) : (
             projects.map((project) => (
                 <a href={project.url} class="project-card">
+                    {project.tags.length > 0 && (
+                        <div class="tag-row">
+                            {project.tags.map((tag) => (
+                                <span class="tag" data-tag={tag}>{tag}</span>
+                            ))}
+                        </div>
+                    )}
                     <div class="project-link">{project.title}</div>
                     <p class="project-summary">{project.summary}</p>
+                    {project.funnel.length > 0 && (
+                        <>
+                            <p class="funnel-label">The email data-view funnel</p>
+                            <div class="funnel-strip">
+                                {project.funnel.map((step, i) => (
+                                    <>
+                                        <span class="funnel-step">{step}</span>
+                                        {i < project.funnel.length - 1 && <span class="funnel-arrow">→</span>}
+                                    </>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </a>
             ))
         )}
