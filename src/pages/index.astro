@@ -1,5 +1,8 @@
 ---
-// This finds your project markdown files automatically
+// Import the new file reading tools from Astro
+import { getCollection, defineCollection } from 'astro:content';
+
+// This automatically reads all markdown files inside the current pages directory
 const projects = await Astro.glob('./*.md');
 ---
 <!DOCTYPE html>
@@ -22,14 +25,18 @@ const projects = await Astro.glob('./*.md');
     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
 
     <section>
-        {projects.map((project) => (
-            <div class="project-card">
-                <a href={project.url} class="project-link">
-                    {project.frontmatter.title}
-                </a>
-                <p class="project-summary">{project.frontmatter.summary}</p>
-            </div>
-        ))}
+        {projects.length === 0 ? (
+            <p>No projects found yet. Create a .md file in your pages folder to see it appear here!</p>
+        ) : (
+            projects.map((project) => (
+                <div class="project-card">
+                    <a href={project.url} class="project-link">
+                        {project.frontmatter?.title || "Untitled Project"}
+                    </a>
+                    <p class="project-summary">{project.frontmatter?.summary || "No summary provided."}</p>
+                </div>
+            ))
+        )}
     </section>
 </body>
 </html>
