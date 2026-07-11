@@ -1,5 +1,8 @@
 ---
-const projects = [
+// src/pages/index.astro
+
+// 1. Explicit project configurations (preserving your custom funnel structures)
+const explicitProjects = [
   {
     url: '/projects/email-send-analysis',
     title: 'Email Send Analysis with SFMC Data Views',
@@ -8,6 +11,28 @@ const projects = [
     funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
 ];
+
+// 2. Auto-discover additional markdown project detail pages dynamically
+const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
+
+// 3. Format dynamic markdown files to match our structured array format
+const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [string, any]) => {
+  const slug = filePath.replace('./projects/', '').replace('.md', '');
+  return {
+    url: `/projects/${slug}`,
+    title: file.frontmatter?.title || "Untitled Project",
+    summary: file.frontmatter?.summary || "No summary provided.",
+    tags: file.frontmatter?.tags || [],
+    funnel: file.frontmatter?.funnel || [] // Allows markdown frontmatter to supply custom funnels if wanted
+  };
+});
+
+// 4. Merge them into one unified, de-duplicated project index array
+const allProjectsMap = new Map();
+[...explicitProjects, ...discoveredProjects].forEach(project => {
+  allProjectsMap.set(project.url, project);
+});
+const projects = Array.from(allProjectsMap.values());
 ---
 
 <!DOCTYPE html>
@@ -47,30 +72,33 @@ const projects = [
             <p class="empty-state">No projects found.</p>
         ) : (
             projects.map((project) => (
-                <a href={project.url} class="project-card">
-                    {project.tags.length > 0 && (
-                        <div class="tag-row">
-                            {project.tags.map((tag) => (
-                                <span class="tag" data-tag={tag}>{tag}</span>
-                            ))}
-                        </div>
-                    )}
-                    <div class="project-link">{project.title}</div>
-                    <p class="project-summary">{project.summary}</p>
-                    {project.funnel.length > 0 && (
-                        <>
-                            <p class="funnel-label">The email data-view funnel</p>
-                            <div class="funnel-strip">
-                                {project.funnel.map((step, i) => (
-                                    <>
-                                        <span class="funnel-step">{step}</span>
-                                        {i < project.funnel.length - 1 && <span class="funnel-arrow">→</span>}
-                                    </>
+                <div key={project.url}>
+                    <a href={project.url} class="project-card">
+                        {project.tags.length > 0 && (
+                            <div class="tag-row">
+                                {project.tags.map((tag) => (
+                                    <span class="tag" data-tag={tag}>{tag}</span>
                                 ))}
                             </div>
-                        </>
-                    )}
-                </a>
+                        )}
+                        <div class="project-link">{project.title}</div>
+                        <p class="project-summary">{project.summary}</p>
+                        
+                        {project.funnel && project.funnel.length > 0 && (
+                            <div>
+                                <p class="funnel-label">The email data-view funnel</p>
+                                <div class="funnel-strip">
+                                    {project.funnel.map((step, i) => (
+                                        <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px;" key={step}>
+                                            <span class="funnel-step">{step}</span>
+                                            {i < project.funnel.length - 1 && <span class="funnel-arrow">→</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </a>
+                </div>
             ))
         )}
     </section>
