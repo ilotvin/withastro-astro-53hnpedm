@@ -1,13 +1,18 @@
 ---
 // src/pages/index.astro
 
-// 1. Explicit project configurations (preserving your custom funnel data structures)
+// 1. Explicit project configurations (preserving custom funnel data structures)
 const explicitProjects = [
   {
-    title: 'Email Send Analysis with SFMC Data Views', // Must match or closely resemble the MD title
+    title: 'Email Send Analysis with SFMC Data Views',
     url: '/projects/email-send-analysis',
     funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
+  {
+    title: 'Subscriber Opt-In Lifecycle Infrastructure', // Matches the title of your new Opt-In project
+    url: '/projects/subscriber-opt-in-lifecycle',
+    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation Confirmation'],
+  }
 ];
 
 // 2. Auto-discover markdown project detail pages dynamically
@@ -30,7 +35,6 @@ const finalProjectsMap = new Map();
 
 // First, seed with discovered Markdown files (the real pages)
 discoveredProjects.forEach(proj => {
-  // Normalize the title key to prevent casing mismatch duplicate bugs
   const key = proj.title.toLowerCase().trim();
   finalProjectsMap.set(key, proj);
 });
@@ -40,11 +44,9 @@ explicitProjects.forEach(explicitProj => {
   const key = explicitProj.title.toLowerCase().trim();
   
   if (finalProjectsMap.has(key)) {
-    // If markdown file exists, enrich it with the funnel array
     const existing = finalProjectsMap.get(key);
     finalProjectsMap.set(key, { ...existing, funnel: explicitProj.funnel });
   } else {
-    // Fallback if the markdown file doesn't exist yet
     finalProjectsMap.set(key, {
       ...explicitProj,
       summary: explicitProj.summary || "Summary loading from project file...",
@@ -107,7 +109,7 @@ const projects = Array.from(finalProjectsMap.values());
                         
                         {project.funnel && project.funnel.length > 0 && (
                             <div>
-                                <p class="funnel-label">The email data-view funnel</p>
+                                <p class="funnel-label">Pipeline Visual Flow</p>
                                 <div class="funnel-strip">
                                     {project.funnel.map((step, i) => (
                                         <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px;" key={step}>
