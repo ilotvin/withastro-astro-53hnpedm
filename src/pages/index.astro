@@ -1,21 +1,19 @@
 ---
 // src/pages/index.astro
 
-// 1. Explicit project configurations (preserving your custom funnel structures)
+// 1. Explicit project configurations (preserving your custom funnel data structures)
 const explicitProjects = [
   {
+    title: 'Email Send Analysis with SFMC Data Views', // Must match or closely resemble the MD title
     url: '/projects/email-send-analysis',
-    title: 'Email Send Analysis with SFMC Data Views',
-    summary: 'Connecting Salesforce Marketing Cloud system data views into a full send-to-engagement funnel for end-to-end email analysis.',
-    tags: ['Email Analysis'],
     funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
 ];
 
-// 2. Auto-discover additional markdown project detail pages dynamically
+// 2. Auto-discover markdown project detail pages dynamically
 const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
 
-// 3. Format dynamic markdown files to match our structured array format
+// 3. Format dynamic markdown files
 const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [string, any]) => {
   const slug = filePath.replace('./projects/', '').replace('.md', '');
   return {
@@ -23,16 +21,39 @@ const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [strin
     title: file.frontmatter?.title || "Untitled Project",
     summary: file.frontmatter?.summary || "No summary provided.",
     tags: file.frontmatter?.tags || [],
-    funnel: file.frontmatter?.funnel || [] // Allows markdown frontmatter to supply custom funnels if wanted
+    funnel: file.frontmatter?.funnel || []
   };
 });
 
-// 4. Merge them into one unified, de-duplicated project index array
-const allProjectsMap = new Map();
-[...explicitProjects, ...discoveredProjects].forEach(project => {
-  allProjectsMap.set(project.url, project);
+// 4. SMART MERGE: Merge by Title so you never get duplicate cards
+const finalProjectsMap = new Map();
+
+// First, seed with discovered Markdown files (the real pages)
+discoveredProjects.forEach(proj => {
+  // Normalize the title key to prevent casing mismatch duplicate bugs
+  const key = proj.title.toLowerCase().trim();
+  finalProjectsMap.set(key, proj);
 });
-const projects = Array.from(allProjectsMap.values());
+
+// Next, overlay the explicit funnel data on top if titles align
+explicitProjects.forEach(explicitProj => {
+  const key = explicitProj.title.toLowerCase().trim();
+  
+  if (finalProjectsMap.has(key)) {
+    // If markdown file exists, enrich it with the funnel array
+    const existing = finalProjectsMap.get(key);
+    finalProjectsMap.set(key, { ...existing, funnel: explicitProj.funnel });
+  } else {
+    // Fallback if the markdown file doesn't exist yet
+    finalProjectsMap.set(key, {
+      ...explicitProj,
+      summary: explicitProj.summary || "Summary loading from project file...",
+      tags: explicitProj.tags || []
+    });
+  }
+});
+
+const projects = Array.from(finalProjectsMap.values());
 ---
 
 <!DOCTYPE html>
@@ -74,7 +95,7 @@ const projects = Array.from(allProjectsMap.values());
             projects.map((project) => (
                 <div key={project.url}>
                     <a href={project.url} class="project-card">
-                        {project.tags.length > 0 && (
+                        {project.tags && project.tags.length > 0 && (
                             <div class="tag-row">
                                 {project.tags.map((tag) => (
                                     <span class="tag" data-tag={tag}>{tag}</span>
