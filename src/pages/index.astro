@@ -1,17 +1,15 @@
 ---
 // src/pages/index.astro
 
-// 1. Explicit project configurations (preserving custom funnel data structures)
+// 1. Explicit project configurations (mapping funnels to your exact file slugs)
 const explicitProjects = [
   {
-    title: 'Email Send Analysis with SFMC Data Views',
-    url: '/projects/email-send-analysis',
+    slug: 'sfmc-email-analytics', // Matches sfmc-email-analytics.md
     funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
   {
-    title: 'Subscriber Opt-In Lifecycle Infrastructure', // Matches the title of your new Opt-In project
-    url: '/projects/subscriber-opt-in-lifecycle',
-    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation Confirmation'],
+    slug: 'consent-sync', // Matches consent-sync.astro if applicable
+    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation'],
   }
 ];
 
@@ -22,6 +20,7 @@ const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
 const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [string, any]) => {
   const slug = filePath.replace('./projects/', '').replace('.md', '');
   return {
+    slug,
     url: `/projects/${slug}`,
     title: file.frontmatter?.title || "Untitled Project",
     summary: file.frontmatter?.summary || "No summary provided.",
@@ -30,27 +29,28 @@ const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [strin
   };
 });
 
-// 4. SMART MERGE: Merge by Title so you never get duplicate cards
+// 4. SMART MERGE: Merge by the file slug to ensure exactly one unique card per project
 const finalProjectsMap = new Map();
 
-// First, seed with discovered Markdown files (the real pages)
+// First, seed with discovered Markdown files
 discoveredProjects.forEach(proj => {
-  const key = proj.title.toLowerCase().trim();
-  finalProjectsMap.set(key, proj);
+  finalProjectsMap.set(proj.slug, proj);
 });
 
-// Next, overlay the explicit funnel data on top if titles align
+// Next, append or overlay explicit data configurations
 explicitProjects.forEach(explicitProj => {
-  const key = explicitProj.title.toLowerCase().trim();
-  
-  if (finalProjectsMap.has(key)) {
-    const existing = finalProjectsMap.get(key);
-    finalProjectsMap.set(key, { ...existing, funnel: explicitProj.funnel });
+  if (finalProjectsMap.has(explicitProj.slug)) {
+    const existing = finalProjectsMap.get(explicitProj.slug);
+    finalProjectsMap.set(explicitProj.slug, { ...existing, funnel: explicitProj.funnel });
   } else {
-    finalProjectsMap.set(key, {
-      ...explicitProj,
-      summary: explicitProj.summary || "Summary loading from project file...",
-      tags: explicitProj.tags || []
+    // Fallback card layout if the markdown file hasn't been created yet
+    finalProjectsMap.set(explicitProj.slug, {
+      slug: explicitProj.slug,
+      url: `/projects/${explicitProj.slug}`,
+      title: explicitProj.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      summary: "Summary configuration loading from project file...",
+      tags: [],
+      funnel: explicitProj.funnel
     });
   }
 });
