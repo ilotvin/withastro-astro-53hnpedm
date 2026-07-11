@@ -1,11 +1,23 @@
 ---
-const projects = Object.values(
-  import.meta.glob('./projects/*.md', { eager: true })
-).map((project) => ({
-  url: `/projects/${project.file.split('/').pop().replace('.md', '')}`,
+const mdModules = import.meta.glob('./projects/*.md', { eager: true });
+
+const mdProjects = Object.entries(mdModules).map(([path, project]) => ({
+  url: `/projects/${path.split('/').pop().replace('.md', '')}`,
   title: project.frontmatter.title,
   summary: project.frontmatter.summary,
 }));
+
+const astroProjects = [
+  {
+    url: '/projects/email-send-analysis',
+    title: 'Email Send Analysis with SFMC Data Views',
+    summary: 'Connecting Salesforce Marketing Cloud system data views into a full send-to-engagement funnel for end-to-end email analysis.',
+  },
+];
+
+const projects = [...astroProjects, ...mdProjects].filter((p) => p.title);
+
+const funnel = ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'];
 ---
 
 <!DOCTYPE html>
@@ -15,26 +27,50 @@ const projects = Object.values(
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Professional Portfolio</title>
     <style>
+        :root { --accent: #0055ff; --line: #e1e4e6; }
+        * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
-        .project-card { border: 1px solid #e1e4e6; padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
-        .project-card:hover { border-color: #0055ff; }
-        .project-link { font-size: 1.5rem; color: #0055ff; font-weight: bold; margin: 0 0 5px 0; }
+        h1 { margin: 0 0 8px; }
+        .intro { color: #555; margin: 0 0 28px; }
+        .funnel-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 0 0 12px; }
+        .funnel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; font-weight: 600; color: var(--accent); background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 6px; padding: 6px 12px; white-space: nowrap; }
+        .funnel-arrow { color: #bbb; font-size: 1rem; }
+        hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
+        .project-card { border: 1px solid var(--line); padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
+        .project-card:hover { border-color: var(--accent); }
+        .project-link { font-size: 1.5rem; color: var(--accent); font-weight: bold; margin: 0 0 5px 0; }
         .project-summary { color: #555; margin: 0; }
+        .empty-state { color: #999; font-style: italic; }
     </style>
 </head>
 <body>
     <h1>Welcome to My Platform</h1>
-    <p>Select a project below to see the visual architecture and technical breakdowns.</p>
+    <p class="intro">Select a project below to see the visual architecture and technical breakdowns.</p>
 
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
+    <p class="funnel-label">The email data-view funnel</p>
+    <div class="funnel-strip">
+        {funnel.map((step, i) => (
+            <>
+                <span class="funnel-step">{step}</span>
+                {i < funnel.length - 1 && <span class="funnel-arrow">→</span>}
+            </>
+        ))}
+    </div>
+
+    <hr />
 
     <section>
-        {projects.map((project) => (
-            <a href={project.url} class="project-card">
-                <div class="project-link">{project.title}</div>
-                <p class="project-summary">{project.summary}</p>
-            </a>
-        ))}
+        {projects.length === 0 ? (
+            <p class="empty-state">No projects found. Add a file to src/pages/projects/</p>
+        ) : (
+            projects.map((project) => (
+                <a href={project.url} class="project-card">
+                    <div class="project-link">{project.title}</div>
+                    <p class="project-summary">{project.summary}</p>
+                </a>
+            ))
+        )}
     </section>
 </body>
 </html>
