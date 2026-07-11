@@ -1,0 +1,195 @@
+---
+const project = {
+  title: "Consent synchronisation engine",
+  summary:
+    "A daily automated pipeline that reconciles customer communication preferences across email and SMS between the authoritative CRM and Salesforce Marketing Cloud. Consent state propagates in both directions with a full audit trail, enforcing subscription-status integrity across systems.",
+  context: "Salesforce Marketing Cloud · data engineering",
+  status: "Live · daily",
+  detailUrl: "/projects/consent-sync-detail",
+  tags: [
+    "SQL / delta detection",
+    "SFMC Automation Studio",
+    "Contacts REST API (SSJS)",
+    "SFTP data exchange",
+    "MobileConnect / SMS",
+    "Data modelling",
+    "Compliance / consent",
+    "Pipeline architecture",
+  ],
+};
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{project.title}</title>
+    <style>
+      :root {
+        --accent: #0055ff;
+        --accent-bg: #f0f5ff;
+        --accent-line: #d6e4ff;
+        --line: #e1e4e6;
+        --ink: #222;
+        --muted: #555;
+        --soft: #f7f8fa;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      .context {
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 0.03em;
+        margin: 0 0 10px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      h1 { margin: 0 0 8px; font-size: 2rem; }
+      .status {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-bg);
+        border: 1px solid var(--accent-line);
+        border-radius: 999px;
+        padding: 6px 14px;
+        white-space: nowrap;
+      }
+      .summary {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 16px 0 28px;
+      }
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 32px;
+      }
+      .tag {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+        background: var(--accent-bg);
+        border: 1px solid var(--accent-line);
+        border-radius: 999px;
+        padding: 4px 12px;
+      }
+      .visual {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--soft);
+        padding: 28px 24px;
+        margin: 0 0 32px;
+      }
+      .visual-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 0 0 20px;
+      }
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .node {
+        flex: 1 1 120px;
+        min-width: 120px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 12px;
+        text-align: center;
+      }
+      .node .n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-bg);
+        color: var(--accent);
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      .node .label { font-size: 0.9rem; font-weight: 600; }
+      .arrow {
+        align-self: center;
+        color: var(--accent);
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+      @media (max-width: 640px) {
+        .flow { flex-direction: column; }
+        .arrow { transform: rotate(90deg); align-self: center; }
+        .node { flex: 1 1 auto; }
+      }
+      .cta {
+        display: inline-block;
+        text-decoration: none;
+        font-weight: 600;
+        color: #fff;
+        background: var(--accent);
+        border-radius: 8px;
+        padding: 12px 22px;
+        transition: opacity 0.2s;
+      }
+      .cta:hover { opacity: 0.88; }
+    </style>
+  </head>
+  <body>
+    <p class="context">{project.context}</p>
+
+    <div class="head">
+      <h1>{project.title}</h1>
+      <span class="status">{project.status}</span>
+    </div>
+
+    <p class="summary">{project.summary}</p>
+
+    <div class="tag-row">
+      {project.tags.map((tag) => (
+        <span class="tag" data-tag={tag}>{tag}</span>
+      ))}
+    </div>
+
+    <div class="visual">
+      <p class="visual-title">The daily flow</p>
+      <div class="flow">
+        <div class="node"><div class="n">1</div><div class="label">Ingest</div></div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><div class="n">2</div><div class="label">Detect change</div></div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><div class="n">3</div><div class="label">Sync email</div></div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><div class="n">4</div><div class="label">Sync SMS</div></div>
+        <div class="arrow">&rarr;</div>
+        <div class="node"><div class="n">5</div><div class="label">Write back</div></div>
+      </div>
+    </div>
+
+    <a class="cta" href={project.detailUrl}>Read the full breakdown &rarr;</a>
+  </body>
+</html> 
