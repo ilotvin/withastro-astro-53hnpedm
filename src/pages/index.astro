@@ -1,10 +1,3 @@
----
-// Import the new file reading tools from Astro
-import { getCollection, defineCollection } from 'astro:content';
-
-// This automatically reads all markdown files inside the current pages directory
-const projects = await Astro.glob('./*.md');
----
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,10 +5,10 @@ const projects = await Astro.glob('./*.md');
     <title>My Professional Portfolio</title>
     <style>
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
-        .project-card { border: 1px solid #e1e4e6; padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; }
+        .project-card { border: 1px solid #e1e4e6; padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
         .project-card:hover { border-color: #0055ff; }
-        .project-link { font-size: 1.5rem; color: #0055ff; text-decoration: none; font-weight: bold; }
-        .project-summary { color: #555; margin-top: 5px; }
+        .project-link { font-size: 1.5rem; color: #0055ff; font-weight: bold; margin: 0 0 5px 0; }
+        .project-summary { color: #555; margin: 0; }
     </style>
 </head>
 <body>
@@ -25,18 +18,11 @@ const projects = await Astro.glob('./*.md');
     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
 
     <section>
-        {projects.length === 0 ? (
-            <p>No projects found yet. Create a .md file in your pages folder to see it appear here!</p>
-        ) : (
-            projects.map((project) => (
-                <div class="project-card">
-                    <a href={project.url} class="project-link">
-                        {project.frontmatter?.title || "Untitled Project"}
-                    </a>
-                    <p class="project-summary">{project.frontmatter?.summary || "No summary provided."}</p>
-                </div>
-            ))
-        )}
+        <!-- Project Link Card -->
+        <a href="/my-first-project" class="project-card">
+            <div class="project-link">Automated Marketing Pipeline</div>
+            <p class="project-summary">An end-to-end infrastructure setup built to scale client acquisition seamlessly.</p>
+        </a>
     </section>
 </body>
 </html>
