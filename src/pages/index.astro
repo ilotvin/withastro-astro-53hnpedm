@@ -1,7 +1,18 @@
+---
+const projects = Object.values(
+  import.meta.glob('./projects/*.md', { eager: true })
+).map((project) => ({
+  url: `/projects/${project.file.split('/').pop().replace('.md', '')}`,
+  title: project.frontmatter.title,
+  summary: project.frontmatter.summary,
+}));
+---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Professional Portfolio</title>
     <style>
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
@@ -14,15 +25,16 @@
 <body>
     <h1>Welcome to My Platform</h1>
     <p>Select a project below to see the visual architecture and technical breakdowns.</p>
-    
+
     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
 
     <section>
-        <!-- Project Link Card -->
-        <a href="/my-first-project" class="project-card">
-            <div class="project-link">Automated Marketing Pipeline</div>
-            <p class="project-summary">An end-to-end infrastructure setup built to scale client acquisition seamlessly.</p>
-        </a>
+        {projects.map((project) => (
+            <a href={project.url} class="project-card">
+                <div class="project-link">{project.title}</div>
+                <p class="project-summary">{project.summary}</p>
+            </a>
+        ))}
     </section>
 </body>
 </html>
