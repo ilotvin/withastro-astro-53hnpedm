@@ -1,15 +1,5 @@
 ---
-const mdModules = import.meta.glob('./projects/*.md', { eager: true });
-
-const mdProjects = Object.entries(mdModules).map(([path, project]) => ({
-  url: `/projects/${path.split('/').pop().replace('.md', '')}`,
-  title: project.frontmatter.title,
-  summary: project.frontmatter.summary,
-  tags: project.frontmatter.tags ?? [],
-  funnel: project.frontmatter.funnel ?? [],
-}));
-
-const astroProjects = [
+const projects = [
   {
     url: '/projects/email-send-analysis',
     title: 'Email Send Analysis with SFMC Data Views',
@@ -18,8 +8,6 @@ const astroProjects = [
     funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
   },
 ];
-
-const projects = [...astroProjects, ...mdProjects].filter((p) => p.title);
 ---
 
 <!DOCTYPE html>
@@ -56,7 +44,7 @@ const projects = [...astroProjects, ...mdProjects].filter((p) => p.title);
 
     <section>
         {projects.length === 0 ? (
-            <p class="empty-state">No projects found. Add a file to src/pages/projects/</p>
+            <p class="empty-state">No projects found.</p>
         ) : (
             projects.map((project) => (
                 <a href={project.url} class="project-card">
