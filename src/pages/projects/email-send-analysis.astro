@@ -1,0 +1,82 @@
+---
+const funnel = [
+  { view: '_Job', desc: 'The anchor — one row per send', color: '#6b7280' },
+  { view: '_Sent', desc: 'The denominator — who we sent to', color: '#0055ff' },
+  { view: '_Open', desc: 'Engagement — who opened', color: '#0d9488' },
+  { view: '_Click', desc: 'Engagement — who tapped a link', color: '#0d9488' },
+  { view: '_Bounce', desc: 'Delivery failures', color: '#d97706' },
+  { view: '_Unsubscribe', desc: 'Opt-out events', color: '#dc2626' },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Send Analysis — SFMC Data Views</title>
+    <style>
+        :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; color: var(--ink); line-height: 1.6; }
+        .back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: var(--accent); }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
+        .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 40px; max-width: 60ch; }
+        .funnel-intro { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 20px; }
+        .funnel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 48px; }
+        .stage { display: flex; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; background: #fff; }
+        .stage-view { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem; font-weight: 600; min-width: 120px; }
+        .stage-desc { color: var(--ink); font-size: 0.95rem; }
+        .arrow { text-align: center; color: #ccc; font-size: 1.1rem; line-height: 1; }
+        .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 48px; }
+        .principle { border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+        .principle h3 { margin: 0 0 6px; font-size: 1rem; }
+        .principle p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+        .cta { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; }
+        .cta:hover { background: #0044cc; }
+        @media (max-width: 560px) {
+            .stage { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .stage-view { min-width: 0; }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← All projects</a>
+    <h1>Email Send Analysis with SFMC Data Views</h1>
+    <p class="lede">
+        Connecting Salesforce Marketing Cloud's system data views into a single send-to-engagement funnel —
+        so one email send can be traced from delivery through opens, clicks, bounces, and opt-outs.
+    </p>
+
+    <p class="funnel-intro">The funnel — every view traces back to the Job</p>
+    <div class="funnel">
+        {funnel.map((stage, i) => (
+            <div>
+                <div class="stage" style={`border-left: 4px solid ${stage.color}`}>
+                    <span class="stage-view" style={`color: ${stage.color}`}>{stage.view}</span>
+                    <span class="stage-desc">{stage.desc}</span>
+                </div>
+                {i < funnel.length - 1 && <div class="arrow">↓</div>}
+            </div>
+        ))}
+    </div>
+
+    <div class="principles">
+        <div class="principle">
+            <h3>One anchor key</h3>
+            <p>Every event view joins back to <code>_Job</code> on <code>JobID</code>, with <code>JobID + SubscriberKey</code> identifying a subscriber within a send.</p>
+        </div>
+        <div class="principle">
+            <h3>Right key, right question</h3>
+            <p><code>JobID</code> is one send; <code>EmailID</code> is the content across every send of it — choosing correctly is the whole game.</p>
+        </div>
+        <div class="principle">
+            <h3>Delivered = not bounced</h3>
+            <p>SFMC has no positive delivery view, so delivery is derived as <code>_Sent</code> minus <code>_Bounce</code> — simple and reliable.</p>
+        </div>
+    </div>
+
+    <a href="/projects/sfmc-email-analytics" class="cta">Read the full technical breakdown →</a>
+</body>
+</html>
