@@ -1,65 +1,45 @@
 ---
 // src/pages/index.astro
 
-// 1. Explicit project configurations (mapping funnels to your exact file slugs)
-const explicitProjects = [
+// Projects that are single .astro pages (no auto-discovered .md) — define fully here
+const explicitCards = [
   {
-    slug: 'sfmc-email-analytics', // Matches sfmc-email-analytics.md
-    funnel: ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
-  },
-  {
-    slug: 'consent-sync', // Matches consent-sync.astro if applicable
-    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation'],
-  },
-  {
-    slug: 'selling-points-analytics-detail', // Matches selling-points-analytics-detail.md
+    slug: 'selling-points-analytics',
+    url: '/projects/selling-points-analytics',
+    title: 'Selling Points Analytics Data Extension',
+    summary: 'Building an SFMC Data Extension that consolidates selling-point analytics from raw source data into a structured, reportable dataset surfaced on a landing page.',
+    tags: ['Data Analytics'],
     funnel: ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 'Reporting'],
-  }
+  },
 ];
 
-// 2. Auto-discover markdown project detail pages dynamically
+// Funnel overlays for auto-discovered .md projects (keyed by .md slug)
+const funnelOverlays = {
+  'sfmc-email-analytics': ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
+};
+
+// URL overrides so a .md-discovered card can point at its .astro overview instead of the raw .md
+const urlOverrides = {
+  'sfmc-email-analytics': '/projects/email-send-analysis',
+};
+
+// Auto-discover markdown project detail pages
 const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
 
-// 3. Format dynamic markdown files
 const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [string, any]) => {
   const slug = filePath.replace('./projects/', '').replace('.md', '');
   return {
     slug,
-    url: `/projects/${slug}`,
+    url: urlOverrides[slug] || `/projects/${slug}`,
     title: file.frontmatter?.title || "Untitled Project",
     summary: file.frontmatter?.summary || "No summary provided.",
     tags: file.frontmatter?.tags || [],
-    funnel: file.frontmatter?.funnel || []
+    funnel: funnelOverlays[slug] || file.frontmatter?.funnel || []
   };
 });
 
-// 4. SMART MERGE: Merge by the file slug to ensure exactly one unique card per project
-const finalProjectsMap = new Map();
-
-// First, seed with discovered Markdown files
-discoveredProjects.forEach(proj => {
-  finalProjectsMap.set(proj.slug, proj);
-});
-
-// Next, append or overlay explicit data configurations
-explicitProjects.forEach(explicitProj => {
-  if (finalProjectsMap.has(explicitProj.slug)) {
-    const existing = finalProjectsMap.get(explicitProj.slug);
-    finalProjectsMap.set(explicitProj.slug, { ...existing, funnel: explicitProj.funnel });
-  } else {
-    // Fallback card layout if the markdown file hasn't been created yet
-    finalProjectsMap.set(explicitProj.slug, {
-      slug: explicitProj.slug,
-      url: `/projects/${explicitProj.slug}`,
-      title: explicitProj.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-      summary: "Summary configuration loading from project file...",
-      tags: [],
-      funnel: explicitProj.funnel
-    });
-  }
-});
-
-const projects = Array.from(finalProjectsMap.values());
+// Merge: explicit .astro-only cards first, then discovered .md cards
+const projects = [...explicitCards, ...discoveredProjects];
 ---
 
 <!DOCTYPE html>
@@ -110,7 +90,7 @@ const projects = Array.from(finalProjectsMap.values());
                         )}
                         <div class="project-link">{project.title}</div>
                         <p class="project-summary">{project.summary}</p>
-                        
+
                         {project.funnel && project.funnel.length > 0 && (
                             <div>
                                 <p class="funnel-label">Pipeline Visual Flow</p>
