@@ -1,0 +1,73 @@
+---
+const pipeline = ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 'Reporting'];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selling Points Analytics DE — SFMC</title>
+    <style>
+        :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; color: var(--ink); line-height: 1.6; }
+        .back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: var(--accent); }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
+        .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 32px; max-width: 62ch; }
+        .pipeline-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
+        .pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 40px; }
+        .step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: #444; background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; white-space: nowrap; }
+        .arrow { color: #bbb; font-size: 0.95rem; }
+        h2 { font-size: 1.35rem; margin: 36px 0 12px; }
+        p { margin: 0 0 16px; }
+        .figure { margin: 24px 0 40px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fafbfc; }
+        .figure img { width: 100%; height: auto; display: block; }
+        .figure figcaption { font-size: 0.85rem; color: var(--muted); padding: 12px 16px; border-top: 1px solid var(--line); }
+        .img-placeholder { display: flex; align-items: center; justify-content: center; min-height: 280px; color: #aaa; font-size: 0.9rem; text-align: center; padding: 40px; }
+        .cta { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; }
+        .cta:hover { background: #0044cc; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← All projects</a>
+    <h1>Selling Points Analytics Data Extension</h1>
+    <p class="lede">
+        Building a Salesforce Marketing Cloud Data Extension that consolidates selling-point analytics —
+        turning raw source data into a structured, reportable dataset that surfaces performance by selling point.
+    </p>
+
+    <p class="pipeline-label">Pipeline visual flow</p>
+    <div class="pipeline">
+        {pipeline.map((step, i) => (
+            <div style="display: contents;">
+                <span class="step">{step}</span>
+                {i < pipeline.length - 1 && <span class="arrow">→</span>}
+            </div>
+        ))}
+    </div>
+
+    <h2>What this shows</h2>
+    <p>
+        A repeatable process for creating an analytics Data Extension focused on selling points: extracting the
+        relevant source data with SQL, shaping it into a purpose-built DE with defined field types and a primary key,
+        and structuring the output so it can be read directly for reporting and decision-making.
+    </p>
+    <p>
+        The screenshot below shows the resulting page — the analytics view produced from the DE.
+    </p>
+
+    <figure class="figure">
+        <!-- Replace the placeholder div below with your screenshot:
+             <img src="/images/selling-points-analytics.png" alt="Selling points analytics page" /> -->
+        <div class="img-placeholder">
+            Screenshot goes here — drop your image in <code>public/images/</code><br />
+            and replace this block with an &lt;img&gt; tag.
+        </div>
+        <figcaption>The analytics page generated from the selling-points Data Extension.</figcaption>
+    </figure>
+
+    <a href="/projects/selling-points-analytics-detail" class="cta">Read the full technical breakdown →</a>
+</body>
+</html>
