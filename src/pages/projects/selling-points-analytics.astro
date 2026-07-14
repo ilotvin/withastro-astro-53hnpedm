@@ -17,17 +17,18 @@ const pipeline = ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 
         h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
         .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 32px; max-width: 62ch; }
         .pipeline-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 12px; }
-        .pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 40px; }
+        .pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 44px; }
         .step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: #444; background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; white-space: nowrap; }
         .arrow { color: #bbb; font-size: 0.95rem; }
-        h2 { font-size: 1.35rem; margin: 36px 0 12px; }
+        h2 { font-size: 1.4rem; margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+        h3 { font-size: 1.05rem; margin: 24px 0 6px; color: var(--accent); }
         p { margin: 0 0 16px; }
-        .figure { margin: 24px 0 40px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fafbfc; }
+        ol.steps { margin: 0 0 16px; padding-left: 20px; }
+        ol.steps li { margin-bottom: 12px; }
+        .figure { margin: 24px 0 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fafbfc; }
         .figure img { width: 100%; height: auto; display: block; }
         .figure figcaption { font-size: 0.85rem; color: var(--muted); padding: 12px 16px; border-top: 1px solid var(--line); }
-        .img-placeholder { display: flex; align-items: center; justify-content: center; min-height: 280px; color: #aaa; font-size: 0.9rem; text-align: center; padding: 40px; }
-        .cta { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; }
-        .cta:hover { background: #0044cc; }
+        .img-placeholder { display: flex; align-items: center; justify-content: center; min-height: 300px; color: #aaa; font-size: 0.9rem; text-align: center; padding: 40px; }
     </style>
 </head>
 <body>
@@ -35,7 +36,7 @@ const pipeline = ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 
     <h1>Selling Points Analytics Data Extension</h1>
     <p class="lede">
         Building a Salesforce Marketing Cloud Data Extension that consolidates selling-point analytics —
-        turning raw source data into a structured, reportable dataset that surfaces performance by selling point.
+        turning raw source data into a structured, reportable dataset, surfaced on a landing page.
     </p>
 
     <p class="pipeline-label">Pipeline visual flow</p>
@@ -48,27 +49,50 @@ const pipeline = ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 
         ))}
     </div>
 
-    <h2>What this shows</h2>
+    <h2>Background &amp; goal</h2>
     <p>
-        A repeatable process for creating an analytics Data Extension focused on selling points: extracting the
-        relevant source data with SQL, shaping it into a purpose-built DE with defined field types and a primary key,
-        and structuring the output so it can be read directly for reporting and decision-making.
+        Marketing teams need to know which selling points actually drive engagement and conversion — but that
+        information usually sits scattered across raw send, engagement, and product data. The goal of this project
+        is to consolidate it into a single, purpose-built Data Extension that surfaces performance <em>by selling
+        point</em>, so the results can be read and reported on directly without manual assembly each time.
     </p>
     <p>
-        The screenshot below shows the resulting page — the analytics view produced from the DE.
+        The output is designed to feed a landing page that presents the analytics in a clean, shareable view for
+        business stakeholders.
+    </p>
+
+    <h2>The process — building the Data Extension</h2>
+    <p>
+        The Data Extension is built as a repeatable pipeline, moving from raw source data through to a structured,
+        reportable output:
+    </p>
+    <ol class="steps">
+        <li><strong>Extract the source data.</strong> Pull the relevant records with SQL, filtered to the sends and selling points in scope.</li>
+        <li><strong>Shape the Data Extension.</strong> Define explicit field types, lengths, and a primary key so each row maps cleanly to a selling point and its associated metrics.</li>
+        <li><strong>Aggregate by selling point.</strong> Structure the query so metrics roll up per selling point, producing one clear record per point.</li>
+        <li><strong>Refresh on schedule.</strong> Automate the pipeline so the Data Extension stays current as new data arrives.</li>
+    </ol>
+
+    <h3>Surfacing it on a landing page</h3>
+    <p>
+        The finished Data Extension feeds a landing page that reads directly from it, presenting selling-point
+        performance in a readable, stakeholder-friendly layout — turning a back-end dataset into a shareable report.
+    </p>
+
+    <h2>The result</h2>
+    <p>
+        The screenshot below shows the analytics landing page produced from the Data Extension.
     </p>
 
     <figure class="figure">
         <!-- When your screenshot is ready, put it in public/images/ and replace the
              placeholder div below with this line:
-             <img src="/images/selling-points-analytics.png" alt="Selling points analytics page" /> -->
+             <img src="/images/selling-points-analytics.png" alt="Selling points analytics landing page" /> -->
         <div class="img-placeholder">
             Screenshot goes here — drop your image in <code>public/images/</code><br />
             and replace this block with an &lt;img&gt; tag.
         </div>
-        <figcaption>The analytics page generated from the selling-points Data Extension.</figcaption>
+        <figcaption>The analytics landing page generated from the selling-points Data Extension.</figcaption>
     </figure>
-
-    <a href="/projects/selling-points-analytics-detail" class="cta">Read the full technical breakdown →</a>
 </body>
 </html>
