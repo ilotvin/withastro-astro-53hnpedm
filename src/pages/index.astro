@@ -11,6 +11,14 @@ const explicitCards = [
     tags: ['Data Analytics'],
     funnel: ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 'Reporting'],
   },
+  {
+    slug: 'consent-sync',
+    url: '/projects/consent-sync',
+    title: 'Consent Sync',
+    summary: 'Summary configuration loading from project file...',
+    tags: [],
+    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation'],
+  },
 ];
 
 // Funnel overlays for auto-discovered .md projects (keyed by .md slug)
@@ -18,7 +26,7 @@ const funnelOverlays = {
   'sfmc-email-analytics': ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
 };
 
-// URL overrides so a .md-discovered card can point at its .astro overview instead of the raw .md
+// URL overrides so a .md-discovered card points at its .astro overview instead of the raw .md
 const urlOverrides = {
   'sfmc-email-analytics': '/projects/email-send-analysis',
 };
