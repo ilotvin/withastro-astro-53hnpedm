@@ -44,6 +44,18 @@ const project = {
         color: var(--ink);
         line-height: 1.6;
       }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: var(--accent);
+        text-decoration: none;
+        margin: 0 0 28px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+      }
+      .back-link:hover { opacity: 0.7; }
       .context {
         font-size: 0.8rem;
         color: var(--muted);
@@ -160,6 +172,8 @@ const project = {
     </style>
   </head>
   <body>
+    <a href="/" class="back-link">← Back to projects</a>
+
     <p class="context">{project.context}</p>
 
     <div class="head">
@@ -192,4 +206,4 @@ const project = {
 
     <a class="cta" href={project.detailUrl}>Read the full breakdown &rarr;</a>
   </body>
-</html> 
+</html>
