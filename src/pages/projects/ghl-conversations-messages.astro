@@ -1,0 +1,142 @@
+---
+const funnel = [
+  { view: 'Conversation', desc: 'Mutable snapshot — one row per contact thread', color: '#0d9488' },
+  { view: 'Message', desc: 'Immutable event — one row per message, forever', color: '#993C1D' },
+];
+
+const conversationInsights = [
+  { title: 'Volume by channel', desc: 'How many conversations per WhatsApp, Call, Email, etc.' },
+  { title: 'Growth over time', desc: 'New conversations created per day/week, via dateAdded' },
+  { title: 'Current backlog', desc: 'Unread counts, open vs. assigned conversations right now' },
+  { title: 'Recency', desc: 'Which threads have gone quiet, via dateUpdated / lastMessageDate' },
+];
+
+const messageInsights = [
+  { title: 'Message volume', desc: 'Total messages sent/received per contact, per day, per channel' },
+  { title: 'Response time', desc: 'Time between an inbound message and the outbound reply' },
+  { title: 'Conversation depth', desc: 'How many messages it takes to reach a booking or a sale' },
+  { title: 'Content analysis', desc: 'Keyword or sentiment trends across all message bodies over time' },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GHL Data Model — Conversations vs Messages</title>
+    <style>
+        :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; --teal: #0d9488; --teal-bg: #e1f5ee; --coral: #993C1D; --coral-bg: #faece7; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; color: var(--ink); line-height: 1.6; }
+        .back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: var(--accent); }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
+        .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 40px; max-width: 62ch; }
+        .funnel-intro { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 20px; }
+        .funnel { display: flex; flex-direction: column; gap: 10px; margin-bottom: 48px; }
+        .stage { display: flex; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; background: #fff; }
+        .stage-view { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95rem; font-weight: 600; min-width: 130px; }
+        .stage-desc { color: var(--ink); font-size: 0.95rem; }
+        h2 { font-size: 1.4rem; margin: 40px 0 6px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+        .section-sub { color: var(--muted); font-size: 0.95rem; margin: 0 0 20px; }
+        .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .insight-card { border-radius: 10px; padding: 20px; }
+        .insight-card.teal { background: var(--teal-bg); }
+        .insight-card.coral { background: var(--coral-bg); }
+        .insight-card h3 { margin: 0 0 8px; font-size: 1rem; }
+        .insight-card.teal h3 { color: var(--teal); }
+        .insight-card.coral h3 { color: var(--coral); }
+        .insight-card p { margin: 0; font-size: 0.9rem; color: var(--ink); }
+        .recap { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 24px 0 8px; }
+        .recap-card { border: 1px solid var(--line); border-radius: 10px; padding: 20px; background: #fff; }
+        .recap-card h3 { margin: 0 0 10px; font-size: 1.05rem; }
+        .recap-card.teal h3 { color: var(--teal); }
+        .recap-card.coral h3 { color: var(--coral); }
+        .recap-card p { margin: 0 0 6px; font-size: 0.9rem; color: var(--muted); }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f6f8fa; border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-size: 0.85em; }
+        @media (max-width: 560px) {
+            .stage { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .stage-view { min-width: 0; }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← All projects</a>
+    <h1>GHL data model: conversations vs messages</h1>
+    <p class="lede">
+        Working notes from analysing GoHighLevel's conversation and messaging API — the distinction between a
+        mutable, current-state snapshot and an immutable, append-only historical log, and what each one is
+        actually useful for.
+    </p>
+
+    <p class="funnel-intro">Two different kinds of records</p>
+    <div class="funnel">
+        {funnel.map((stage) => (
+            <div class="stage" style={`border-left: 4px solid ${stage.color}`}>
+                <span class="stage-view" style={`color: ${stage.color}`}>{stage.view}</span>
+                <span class="stage-desc">{stage.desc}</span>
+            </div>
+        ))}
+    </div>
+
+    <h2>What happens when a message is sent</h2>
+    <p class="section-sub">
+        Sending a WhatsApp message for the first time to a contact creates two linked objects: a new
+        <code>Conversation</code> (its own <code>id</code>, <code>dateAdded</code> that never changes again,
+        <code>contactId</code>) and a new <code>Message</code> (its own <code>id</code>, linked back via
+        <code>conversationId</code>, carrying the body and direction). Sending a second message to the same
+        contact reuses the existing conversation — only a new message row is created, and the conversation's
+        summary fields (<code>lastMessageDate</code>, <code>lastMessageBody</code>) are simply overwritten.
+    </p>
+
+    <h2>What you can analyze from conversations</h2>
+    <p class="section-sub">Snapshot data — good for current-state and volume questions.</p>
+    <div class="insight-grid">
+        {conversationInsights.map((item) => (
+            <div class="insight-card teal">
+                <h3>{item.title}</h3>
+                <p>{item.desc}</p>
+            </div>
+        ))}
+    </div>
+
+    <h2>What you can analyze from messages</h2>
+    <p class="section-sub">Historical log — good for behavior, volume-over-time, and content questions.</p>
+    <div class="insight-grid">
+        {messageInsights.map((item) => (
+            <div class="insight-card coral">
+                <h3>{item.title}</h3>
+                <p>{item.desc}</p>
+            </div>
+        ))}
+    </div>
+
+    <h2>Recap</h2>
+    <div class="recap">
+        <div class="recap-card teal">
+            <h3>Conversation</h3>
+            <p>Current status of a thread.</p>
+            <p>Overwritten with each new message.</p>
+            <p>One row per contact-channel pair.</p>
+        </div>
+        <div class="recap-card coral">
+            <h3>Message</h3>
+            <p>Permanent record of one event.</p>
+            <p>Never changes after creation.</p>
+            <p>One row per message, forever.</p>
+        </div>
+    </div>
+
+<h2>Primary key & upsert logic</h2>
+    <p class="section-sub">
+        <code>Conversation.id</code> is the primary key — one unique conversation record per contact-thread.
+        When new activity happens (a new message, a tag change, anything), that same existing row is updated
+        in place — overwriting <code>lastMessageDate</code>, <code>lastMessageBody</code>, <code>dateUpdated</code>,
+        etc. — rather than inserting a new row. This is the upsert logic the backfill and daily sync scripts are
+        built around: check if the <code>id</code> already exists, and if so, update its fields; if not, append
+        it as a new row.
+    </p>
+
+</body>
+</html>
