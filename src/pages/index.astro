@@ -1,46 +1,8 @@
 ---
 // src/pages/index.astro
 
-// Projects that are single .astro pages (no auto-discovered .md) — define fully here
-const explicitCards = [
-  {
-    slug: 'selling-points-analytics',
-    url: '/projects/selling-points-analytics',
-    title: 'Selling Points Analytics Data Extension',
-    summary: 'Building an SFMC Data Extension that consolidates selling-point analytics from raw source data into a structured, reportable dataset surfaced on a landing page.',
-    tags: ['Data Analytics'],
-    funnel: ['Source Data', 'SQL Query', 'Analytics DE', 'Selling Points', 'Reporting'],
-    visible: true, // set to false to hide from the homepage list (page stays reachable by direct URL)
-  },
-  {
-    slug: 'consent-sync',
-    url: '/projects/consent-sync',
-    title: 'Consent Sync',
-    summary: 'Summary configuration loading from project file...',
-    tags: [],
-    funnel: ['Landing Page', 'Form Submit', 'API Trigger', 'Double Opt-In Email', 'Confirmation'],
-    visible: true,
-  },
-   { // ← paste the new object here, as the third entry
-    slug: 'ghl-conversations-messages',
-    url: '/projects/ghl-conversations-messages',
-    title: 'GHL Data Model: Conversations vs Messages',
-    summary: 'Analysis of GoHighLevel\'s conversation and messaging API — the distinction between a mutable snapshot and an immutable historical log, and what each is useful for.',
-    tags: ['Data Analytics','API'],
-    funnel: ['Conversation', 'Message'],
-    visible: true,
-  },
-];
 
-// Funnel overlays for auto-discovered .md projects (keyed by .md slug)
-const funnelOverlays = {
-  'sfmc-email-analytics': ['_Job', '_Sent', '_Open', '_Click', '_Bounce', '_Unsubscribe'],
-};
-
-// URL overrides so a .md-discovered card points at its .astro overview instead of the raw .md
-const urlOverrides = {
-  'sfmc-email-analytics': '/projects/email-send-analysis',
-};
+import { projectsConfig, funnelOverlays, urlOverrides } from '../config/projects.config';
 
 // Auto-discover markdown project detail pages
 const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
@@ -54,13 +16,13 @@ const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [strin
     summary: file.frontmatter?.summary || "No summary provided.",
     tags: file.frontmatter?.tags || [],
     funnel: funnelOverlays[slug] || file.frontmatter?.funnel || [],
-    // Default to visible unless the .md frontmatter explicitly sets `visible: false`
     visible: file.frontmatter?.visible !== false,
+    type: 'markdown',
   };
 });
 
-// Merge: explicit .astro-only cards first, then discovered .md cards
-const allProjects = [...explicitCards, ...discoveredProjects];
+// Merge: config projects first, then discovered .md projects
+const allProjects = [...projectsConfig, ...discoveredProjects];
 
 // Only show projects marked visible on the homepage list.
 // Hidden projects are simply omitted here — their pages still exist and are
