@@ -1,0 +1,116 @@
+---
+const project = {
+  title: "V3 Points",
+  summary: "Test page — placeholder detail view for the V3 Points project.",
+  context: "Salesforce Marketing Cloud · data engineering",
+  status: "Test",
+  detailUrl: "/",
+  tags: ["Test page"],
+};
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{project.title}</title>
+    <style>
+      :root {
+        --accent: #0055ff;
+        --accent-bg: #f0f5ff;
+        --accent-line: #d6e4ff;
+        --line: #e1e4e6;
+        --ink: #222;
+        --muted: #555;
+        --soft: #f7f8fa;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: var(--accent);
+        text-decoration: none;
+        margin: 0 0 28px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+      }
+      .back-link:hover { opacity: 0.7; }
+      .context {
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 0.03em;
+        margin: 0 0 10px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      h1 { margin: 0 0 8px; font-size: 2rem; }
+      .status {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-bg);
+        border: 1px solid var(--accent-line);
+        border-radius: 999px;
+        padding: 6px 14px;
+        white-space: nowrap;
+      }
+      .summary {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 16px 0 28px;
+      }
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 32px;
+      }
+      .tag {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+        background: var(--accent-bg);
+        border: 1px solid var(--accent-line);
+        border-radius: 999px;
+        padding: 4px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="/" class="back-link">← Back to projects</a>
+
+    <p class="context">{project.context}</p>
+
+    <div class="head">
+      <h1>{project.title}</h1>
+      <span class="status">{project.status}</span>
+    </div>
+
+    <p class="summary">{project.summary}</p>
+
+    <div class="tag-row">
+      {project.tags.map((tag) => (
+        <span class="tag" data-tag={tag}>{tag}</span>
+      ))}
+    </div>
+  </body>
+</html>
