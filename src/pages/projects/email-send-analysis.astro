@@ -19,8 +19,18 @@ const funnel = [
         :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; }
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; color: var(--ink); line-height: 1.6; }
-        .back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
-        .back:hover { color: var(--accent); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-decoration: none;
+            margin: 0 0 28px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.7; }
         h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
         .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 40px; max-width: 60ch; }
         .funnel-intro { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 20px; }
@@ -33,6 +43,7 @@ const funnel = [
         .principle { border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
         .principle h3 { margin: 0 0 6px; font-size: 1rem; }
         .principle p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f6f8fa; border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; font-size: 0.85em; }
         .cta { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; }
         .cta:hover { background: #0044cc; }
         @media (max-width: 560px) {
@@ -42,7 +53,8 @@ const funnel = [
     </style>
 </head>
 <body>
-    <a href="/" class="back">← All projects</a>
+    <a href="/" class="back-link">← Back to projects</a>
+    
     <h1>Email Send Analysis with SFMC Data Views</h1>
     <p class="lede">
         Connecting Salesforce Marketing Cloud's system data views into a single send-to-engagement funnel —
