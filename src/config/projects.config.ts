@@ -13,6 +13,16 @@ export interface Project {
   
   export const projectsConfig: Project[] = [
     {
+      slug: 'v3-points',
+      url: '/projects/v3-points',
+      title: 'V3 Points',
+      summary: 'Test page — placeholder detail view for the V3 Points project.',
+      tags: ['Test page'],
+      funnel: [],
+      visible: true,
+      type: 'astro',
+    },
+    {
       slug: 'selling-points-analytics',
       url: '/projects/selling-points-analytics',
       title: 'Selling Points Analytics Data Extension',
