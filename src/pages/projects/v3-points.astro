@@ -1,12 +1,51 @@
 ---
+// src/pages/projects/v3-points.astro
+
 const project = {
   title: "V3 Points",
-  summary: "Test page — placeholder detail view for the V3 Points project.",
+  subtitle: "Nespresso & You 3 — Loyalty Points Mechanism",
   context: "Salesforce Marketing Cloud · data engineering",
-  status: "Test",
-  detailUrl: "/",
-  tags: ["Test page"],
+  status: "Live · daily",
 };
+
+// Placeholder — swap with the real asset path once the image is uploaded,
+// e.g. import heroImage from '../../assets/v3-points-hero.png';
+const heroImageSrc = "/images/v3-points-hero.png";
+
+// Drill-down sections. Each `url` should point to a detail page —
+// stub these out as new .astro/.md files under src/pages/projects/.
+const drilldowns = [
+  {
+    title: "Daily Points Calculation",
+    summary:
+      "The core nightly automation: bridge consolidation, Delta_Cust filtering, CY/PY split, and the final Net_Final_V3 update.",
+    url: "/projects/v3-points/daily-calculation",
+  },
+  {
+    title: "CY / PY Split Logic",
+    summary:
+      "How current-year and prior-year balances are calculated separately based on membership month, and merged into a single net figure.",
+    url: "/projects/v3-points/cy-py-split",
+  },
+  {
+    title: "Earn Log Architecture",
+    summary:
+      "The append-only ledger pattern behind NY3_Earn_Log — bridge tables, NOT EXISTS dedup, and the composite key that keeps it safe.",
+    url: "/projects/v3-points/earn-log",
+  },
+  {
+    title: "Delta Mechanism",
+    summary:
+      "The five-condition filter that decides which customers get recalculated each day, scoped against validated DE_Contacts records.",
+    url: "/projects/v3-points/delta-mechanism",
+  },
+  {
+    title: "Known Issues & Fixes",
+    summary:
+      "Open investigations: prior-year redemption gaps, negative balance carry-forward, and membership date sync discrepancies.",
+    url: "/projects/v3-points/known-issues",
+  },
+];
 ---
 
 <!DOCTYPE html>
@@ -17,20 +56,22 @@ const project = {
     <title>{project.title}</title>
     <style>
       :root {
-        --accent: #0055ff;
-        --accent-bg: #f0f5ff;
-        --accent-line: #d6e4ff;
-        --line: #e1e4e6;
-        --ink: #222;
-        --muted: #555;
-        --soft: #f7f8fa;
+        --accent: #4d8dff;
+        --accent-bg: rgba(77, 141, 255, 0.12);
+        --accent-line: rgba(77, 141, 255, 0.35);
+        --bg: #0b0d12;
+        --panel: #12151c;
+        --line: #23262f;
+        --ink: #eceef2;
+        --muted: #9aa1ac;
       }
       * { box-sizing: border-box; }
       body {
         font-family: system-ui, sans-serif;
-        max-width: 800px;
+        max-width: 820px;
         margin: 0 auto;
-        padding: 40px 20px;
+        padding: 56px 20px 80px;
+        background: var(--bg);
         color: var(--ink);
         line-height: 1.6;
       }
@@ -41,11 +82,12 @@ const project = {
         font-size: 0.9rem;
         color: var(--accent);
         text-decoration: none;
-        margin: 0 0 28px;
+        margin: 0 0 32px;
         font-weight: 500;
         transition: opacity 0.2s;
       }
       .back-link:hover { opacity: 0.7; }
+
       .context {
         font-size: 0.8rem;
         color: var(--muted);
@@ -59,7 +101,8 @@ const project = {
         gap: 16px;
         flex-wrap: wrap;
       }
-      h1 { margin: 0 0 8px; font-size: 2rem; }
+      h1 { margin: 0 0 6px; font-size: 2.4rem; letter-spacing: -0.01em; }
+      .subtitle { color: var(--muted); font-size: 1.05rem; margin: 0 0 4px; }
       .status {
         flex-shrink: 0;
         font-size: 0.75rem;
@@ -71,27 +114,88 @@ const project = {
         padding: 6px 14px;
         white-space: nowrap;
       }
-      .summary {
-        color: var(--muted);
-        font-size: 1.05rem;
-        margin: 16px 0 28px;
+
+      .hero {
+        margin: 36px 0 40px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: var(--panel);
       }
-      .tag-row {
+      .hero img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .hero-placeholder {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 0 0 32px;
+        align-items: center;
+        justify-content: center;
+        min-height: 260px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
       }
-      .tag {
-        font-size: 0.75rem;
+
+      .lede {
+        font-size: 1.1rem;
+        color: var(--ink);
+        margin: 0 0 20px;
+      }
+      .explanation {
+        color: var(--muted);
+        font-size: 1rem;
+        margin: 0 0 40px;
+      }
+      .explanation p { margin: 0 0 16px; }
+      .explanation strong { color: var(--ink); }
+
+      .section-label {
+        font-size: 0.78rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 0 0 16px;
+      }
+
+      .drilldown-grid {
+        display: grid;
+        gap: 14px;
+      }
+      .drilldown-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px 22px;
+        transition: border-color 0.2s, transform 0.2s;
+      }
+      .drilldown-card:hover {
+        border-color: var(--accent-line);
+        transform: translateY(-1px);
+      }
+      .drilldown-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .drilldown-title .arrow {
         color: var(--accent);
-        background: var(--accent-bg);
-        border: 1px solid var(--accent-line);
-        border-radius: 999px;
-        padding: 4px 12px;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      .drilldown-summary {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin: 0;
       }
     </style>
   </head>
@@ -101,15 +205,50 @@ const project = {
     <p class="context">{project.context}</p>
 
     <div class="head">
-      <h1>{project.title}</h1>
+      <div>
+        <h1>{project.title}</h1>
+        <p class="subtitle">{project.subtitle}</p>
+      </div>
       <span class="status">{project.status}</span>
     </div>
 
-    <p class="summary">{project.summary}</p>
+    <div class="hero">
+      <img src={heroImageSrc} alt="V3 points mechanism overview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+      <div class="hero-placeholder" style="display: none;">Hero image will appear here</div>
+    </div>
 
-    <div class="tag-row">
-      {project.tags.map((tag) => (
-        <span class="tag" data-tag={tag}>{tag}</span>
+    <p class="lede">
+      The V3 engine is the sole source of truth for every customer's loyalty point balance —
+      calculated fresh each night from an immutable transaction history.
+    </p>
+
+    <div class="explanation">
+      <p>
+        Every night, a daily automation walks through the full lifecycle of a customer's points:
+        it consolidates new activity from the <strong>Earn Log</strong>, filters down to only the
+        customers affected that day through the <strong>Delta mechanism</strong>, and recalculates
+        each customer's balance using a <strong>Current Year / Prior Year split</strong> — because
+        a customer's membership month determines whether recent activity should still count against
+        last year's balance or this year's.
+      </p>
+      <p>
+        The result feeds <strong>Net_Final_V3</strong>, the definitive balance table, which in turn
+        drives what customers see on the loyalty site and what's available to redeem. Nothing is
+        ever overwritten in the raw log — history stays append-only, and every correction or reset
+        is recorded as a new entry rather than an edit.
+      </p>
+    </div>
+
+    <p class="section-label">Explore the mechanism</p>
+    <div class="drilldown-grid">
+      {drilldowns.map((item) => (
+        <a class="drilldown-card" href={item.url}>
+          <div class="drilldown-title">
+            <span>{item.title}</span>
+            <span class="arrow">→</span>
+          </div>
+          <p class="drilldown-summary">{item.summary}</p>
+        </a>
       ))}
     </div>
   </body>
