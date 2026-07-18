@@ -1,196 +1,425 @@
----
-const project = {
-  title: "Email Analytics with Salesforce Marketing Cloud Data Views",
-  summary: "Deep hands-on knowledge of the SFMC email tracking data model — analysing the full send-to-engagement funnel via SQL, building rolling export pipelines into master Data Extensions, and diagnosing real deliverability and bounce problems.",
-  context: "Salesforce Marketing Cloud · data engineering",
-  status: "Live",
-};
----
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{project.title}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Log Date Reconciliation Mechanism</title>
     <style>
-      :root {
-        --accent: #0055ff;
-        --accent-bg: #f0f5ff;
-        --accent-line: #d6e4ff;
-        --line: #e1e4e6;
-        --ink: #222;
-        --muted: #555;
-        --soft: #f7f8fa;
-      }
-      * { box-sizing: border-box; }
-      body {
-        font-family: system-ui, sans-serif;
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 40px 20px;
-        color: var(--ink);
-        line-height: 1.7;
-      }
-      .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.9rem;
-        color: var(--accent);
-        text-decoration: none;
-        margin: 0 0 28px;
-        font-weight: 500;
-        transition: opacity 0.2s;
-      }
-      .back-link:hover { opacity: 0.7; }
-      .context {
-        font-size: 0.8rem;
-        color: var(--muted);
-        letter-spacing: 0.03em;
-        margin: 0 0 10px;
-      }
-      .head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-      }
-      h1 { margin: 0; font-size: 2.2rem; }
-      .status {
-        flex-shrink: 0;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--accent);
-        background: var(--accent-bg);
-        border: 1px solid var(--accent-line);
-        border-radius: 999px;
-        padding: 6px 14px;
-        white-space: nowrap;
-      }
-      .summary {
-        color: var(--muted);
-        font-size: 1.05rem;
-        margin: 16px 0 28px;
-        max-width: 65ch;
-      }
-      h2 {
-        font-size: 1.6rem;
-        margin: 40px 0 16px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--accent);
-      }
-      h3 {
-        font-size: 1.15rem;
-        margin: 24px 0 12px;
-        font-weight: 600;
-      }
-      h4 {
-        font-size: 1.05rem;
-        margin: 20px 0 10px;
-        font-weight: 600;
-      }
-      p {
-        margin: 0 0 16px;
-        max-width: 75ch;
-      }
-      ul {
-        margin: 0 0 20px 20px;
-        padding: 0;
-      }
-      li {
-        margin: 8px 0;
-        max-width: 70ch;
-      }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        background: #f6f8fa;
-        border: 1px solid var(--line);
-        border-radius: 4px;
-        padding: 2px 6px;
-        font-size: 0.9em;
-      }
-      strong {
-        font-weight: 600;
-        color: var(--ink);
-      }
-      em {
-        font-style: italic;
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .presentation-container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .slide {
+            display: none;
+            padding: 60px;
+            min-height: 600px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 30px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .slide-subtitle {
+            font-size: 24px;
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+        
+        .slide-content {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .slide-content p {
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .problem-box {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .solution-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .code-block {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        
+        .list-item {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .list-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .controls {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        button {
+            background-color: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .slide-counter {
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .analogy-container {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #00838f;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .flow-box {
+            background: #e3f2fd;
+            padding: 15px 20px;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            border: 2px solid #2196F3;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .title-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .title-slide .slide-title {
+            color: white;
+            border-bottom-color: white;
+            font-size: 56px;
+        }
+        
+        .title-slide .slide-subtitle {
+            color: #e0e0e0;
+            font-size: 28px;
+        }
+        
+        .title-slide .slide-content {
+            color: #f0f0f0;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
-    <a href="/" class="back-link">← Back to projects</a>
-
-    <p class="context">{project.context}</p>
-
-    <div class="head">
-      <h1>{project.title}</h1>
-      <span class="status">{project.status}</span>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="slide-title">Redeem Log Date Reconciliation</div>
+            <div class="slide-subtitle">Synchronizing Order and Redemption Data</div>
+            <div class="slide-content">
+                <p style="margin-top: 40px;">A comprehensive mechanism for identifying and resolving date discrepancies between DE_Order_Details and NY3_Redeem_Log</p>
+                <p style="margin-top: 60px; font-size: 16px;">Data Quality Assurance Initiative</p>
+            </div>
+        </div>
+        
+        <!-- Slide 2: The Problem -->
+        <div class="slide">
+            <div class="slide-title">The Problem: Date Discrepancies</div>
+            <div class="slide-content">
+                <div class="problem-box">
+                    <strong>Issue:</strong> Inconsistency between redemption dates across two data sources
+                </div>
+                
+                <p><strong>Two Primary Data Sources:</strong></p>
+                <div class="list-item">DE_Order_Details: Backend invoice data (Invoice_Date) - authoritative source</div>
+                <div class="list-item">NY3_Redeem_Log: API-based website data (Date_Time) - potentially delayed</div>
+                
+                <p style="margin-top: 30px;"><strong>Real Example:</strong></p>
+                <div class="highlight">
+                    Customer 7763266's reward redemption:<br>
+                    • Orders_Details shows: 2024-05-29<br>
+                    • Redeem_Log shows: 2024-09-01<br>
+                    • Discrepancy: 4 months difference
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Root Cause -->
+        <div class="slide">
+            <div class="slide-title">Why This Happens</div>
+            <div class="slide-content">
+                <p><strong>Data Source Lag:</strong></p>
+                <div class="list-item">Orders_Details is updated directly from backend systems with real invoice dates</div>
+                <div class="list-item">Redeem_Log arrives via API from the website with processing delays</div>
+                <div class="list-item">CRC (boutique) redemptions can arrive up to 3 months late</div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box">Backend Invoice</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Orders_Details<br>(Accurate)</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">API Delay</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">Redeem_Log<br>(Delayed)</div>
+                </div>
+                
+                <p style="margin-top: 30px;"><strong>Result:</strong> Customer loyalty point calculations become unreliable</p>
+            </div>
+        </div>
+        
+        <!-- Slide 4: The Solution -->
+        <div class="slide">
+            <div class="slide-title">The Reconciliation Mechanism</div>
+            <div class="slide-content">
+                <p><strong>Core Principle:</strong> DE_Order_Details is the authoritative source</p>
+                
+                <div class="solution-box">
+                    <strong>Three-Step Process:</strong><br><br>
+                    <strong>Step 1: Identify Discrepancies</strong><br>
+                    Compare dates between both tables using DATEDIFF function<br><br>
+                    <strong>Step 2: Cross-Reference</strong><br>
+                    Join records by Customer ID and Product ID<br><br>
+                    <strong>Step 3: Update or Insert</strong><br>
+                    Sync Redeem_Log dates with Orders_Details dates
+                </div>
+                
+                <p style="margin-top: 30px;"><strong>Update Logic:</strong></p>
+                <div class="list-item">If record exists in both: Update Redeem_Log date to match Orders_Details</div>
+                <div class="list-item">If record exists only in Orders_Details: Add it to Redeem_Log</div>
+                <div class="list-item">Always use the earlier, more accurate Orders_Details date</div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: The Query -->
+        <div class="slide">
+            <div class="slide-title">Detection Query</div>
+            <div class="slide-content">
+                <p><strong>Identifying Date Discrepancies:</strong></p>
+                <div class="code-block">
+SELECT TOP 100 PERCENT
+  CAST(o.Cust_id AS INT) AS Cust_id,
+  r.Gift_id,
+  r.Points,
+  r.Date_Time,
+  o.Invoice_Date,
+  DATEDIFF(month, o.Invoice_Date, r.Date_Time) AS Month_Diff
+FROM DE_Order_Details o
+JOIN NY3_Redeem_Log r
+  ON CAST(r.Cust_id AS INT) = CAST(o.Cust_id AS INT)
+  AND r.Gift_id = o.Product
+WHERE o.Product LIKE 'REWARD%'
+  AND DATEDIFF(month, o.Invoice_Date, r.Date_Time) <> 0
+ORDER BY o.Cust_id, o.Invoice_Date
+                </div>
+                
+                <p><strong>What This Query Does:</strong></p>
+                <div class="list-item">Finds all REWARD product transactions</div>
+                <div class="list-item">Identifies where month difference is not zero</div>
+                <div class="list-item">Returns all discrepancies for review and correction</div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: The Analogy -->
+        <div class="slide">
+            <div class="slide-title">Understanding the Mechanism</div>
+            <div class="slide-content">
+                <div class="analogy-container">
+                    <strong>Analogy: Two Clocks Tracking One Event</strong><br><br>
+                    <strong>Orders_Details (Official Clock):</strong><br>
+                    Accurate, authoritative timepiece showing the true moment of redemption<br><br>
+                    <strong>Redeem_Log (Less Precise Clock):</strong><br>
+                    Updates arrive with delays via API and batch imports<br><br>
+                    <strong>Our Mechanism (The Synchronizer):</strong><br>
+                    Continuously compares both clocks and adjusts the less precise one to match the official time
+                </div>
+                
+                <p style="margin-top: 30px;">This ensures that all downstream customer calculations—loyalty points, balances, and rewards—are based on accurate transaction dates.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Benefits & Impact -->
+        <div class="slide">
+            <div class="slide-title">Benefits & Business Impact</div>
+            <div class="slide-content">
+                <p><strong>Data Quality Improvements:</strong></p>
+                <div class="list-item">Eliminates date-based calculation errors affecting ~17% of customer base</div>
+                <div class="list-item">Ensures accurate point balances and loyalty program integrity</div>
+                <div class="list-item">Reduces customer complaints from incorrect redemption records</div>
+                
+                <p style="margin-top: 30px;"><strong>Operational Benefits:</strong></p>
+                <div class="list-item">Automated detection prevents manual reconciliation overhead</div>
+                <div class="list-item">Audit trail preserved for compliance and investigation</div>
+                <div class="list-item">Enables accurate financial reporting for loyalty program</div>
+                
+                <p style="margin-top: 30px;"><strong>Long-term Strategy:</strong></p>
+                <div class="list-item">Partner with backend team to adjust source data (order entry date instead of invoice date) to prevent discrepancies upstream</div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Implementation -->
+        <div class="slide">
+            <div class="slide-title">Implementation Approach</div>
+            <div class="slide-content">
+                <p><strong>Current Status:</strong></p>
+                <div class="list-item">Mechanism designed and tested with Marketing Cloud data extensions</div>
+                <div class="list-item">Query logic validated against known discrepancies</div>
+                <div class="list-item">Cross-functional collaboration: Noam (date logic fixes), Marina (import mechanisms)</div>
+                
+                <p style="margin-top: 30px;"><strong>Next Steps:</strong></p>
+                <div class="list-item">Deploy automated detection running on defined schedule</div>
+                <div class="list-item">Monitor Import_Redeem_Log_CRC for delayed redemptions</div>
+                <div class="list-item">Review and resolve identified discrepancies</div>
+                <div class="list-item">Coordinate with backend team on upstream data improvements</div>
+                
+                <p style="margin-top: 30px;"><strong>Monitoring:</strong></p>
+                <div class="list-item">Track resolution rates and discrepancy trends</div>
+                <div class="list-item">Validate customer point calculations post-correction</div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Summary -->
+        <div class="slide title-slide">
+            <div class="slide-title">Key Takeaways</div>
+            <div class="slide-content" style="text-align: left; font-size: 20px;">
+                <p>✓ Date discrepancies between Orders and Redeem Log affect customer trust and loyalty calculations</p>
+                <p>✓ Root cause: API delays and system lag between data sources</p>
+                <p>✓ Solution: Systematic reconciliation mechanism using Orders_Details as authoritative source</p>
+                <p>✓ Impact: Improved data quality for ~400 customers (17% of base)</p>
+                <p>✓ Benefit: Accurate loyalty program administration and customer satisfaction</p>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button onclick="previousSlide()">← Previous</button>
+            <span class="slide-counter"><span id="current-slide">1</span> / 9</span>
+            <button onclick="nextSlide()">Next →</button>
+        </div>
     </div>
-
-    <p class="summary">{project.summary}</p>
-
-    <h2>Project Overview</h2>
-    <p>
-      Focused expertise in analysing the email lifecycle inside Salesforce Marketing Cloud by querying its system data views directly. This work covers understanding how the tracking views relate, building a repeatable export pipeline that feeds master Data Extensions, and turning a real deliverability incident into a durable understanding of bounces and the metrics that describe them.
-    </p>
-
-    <h2>The email data model</h2>
-    <p>The email tracking data views form a funnel that all traces back to a single anchor:</p>
-    <ul>
-      <li><strong><code>_Job</code></strong> — the anchor view; one row per send, keyed by <code>JobID</code>. Carries the send's identity: <code>EmailID</code> (the content asset), <code>EmailName</code>, <code>EmailSendDefinition</code> (the reusable send configuration), timings, and journey/triggered keys.</li>
-      <li><strong><code>_Sent</code></strong> — who the send was attempted to; the denominator for every rate.</li>
-      <li><strong><code>_Open</code> / <code>_Click</code></strong> — engagement events, with <code>_Click</code> carrying the <code>URL</code> and <code>LinkName</code> of the tapped link.</li>
-      <li><strong><code>_Bounce</code></strong> — delivery failures, with category, type, and SMTP reason.</li>
-      <li><strong><code>_Unsubscribe</code></strong> — opt-out events tied to the send.</li>
-    </ul>
-    <p>Every event view joins back to <code>_Job</code> on <code>JobID</code>, with the composite <code>JobID</code> + <code>SubscriberKey</code> identifying a single subscriber's record within a send (plus <code>EventDate</code> where events repeat, such as multiple opens or clicks).</p>
-
-    <h2>Identifier modelling — knowing which key answers which question</h2>
-    <p>A core piece of this knowledge is choosing the right identifier for the analytical question:</p>
-    <ul>
-      <li><strong><code>JobID</code></strong> — one specific send (a single deployment).</li>
-      <li><strong><code>EmailID</code></strong> — the content asset itself; the same email sent several times shares one <code>EmailID</code> across different <code>JobID</code>s.</li>
-      <li><strong><code>EmailName</code></strong> — the human-readable label, useful for grouping but reusable/renamable, so less reliable than <code>EmailID</code>.</li>
-      <li><strong><code>EmailSendDefinition</code></strong> — the reusable send configuration (audience, classification, sender/delivery profiles), distinct from the content it references.</li>
-      <li><strong><code>TriggererSendDefinitionObjectID</code></strong> — the grouping key for journey and triggered sends, where <code>EmailSendDefinition</code> does not apply.</li>
-    </ul>
-    <p>To analyse every send of one email, resolve the <code>EmailID</code> from <code>_Job</code>, then pull the tracking events for the resulting set of <code>JobID</code>s.</p>
-
-    <h2>Rolling 10-day export pipeline into master Data Extensions</h2>
-    <p>Built a repeatable pipeline that exports the full email funnel on a rolling 10-day window and appends the results into master Data Extensions, so the analytical dataset stays current without re-pulling full history.</p>
-    <ul>
-      <li><strong><code>_Job</code></strong> is windowed on <code>CreatedDate</code> — the only non-nullable date on the view. This is a deliberate choice: <code>DeliveredTime</code> is NULL for all triggered sends and <code>SchedTime</code> / <code>PickupTime</code> are nullable, so filtering on any of those would silently drop records from the window. <code>CreatedDate</code> guarantees every job in the period is captured.</li>
-      <li>The event views (<code>_Sent</code>, <code>_Open</code>, <code>_Click</code>, <code>_Bounce</code>, <code>_Unsubscribe</code>) are windowed on their <code>EventDate</code>, then appended to their respective master DEs — each run adding the latest ten days of activity to the accumulating dataset.</li>
-    </ul>
-
-    <h2>Deliverability & bounces — a diagnosed incident and the knowledge that came from it</h2>
-
-    <h3>The error encountered</h3>
-    <p>A send showed a large bounce count — thousands of failures on a single job. The instinctive read was "thousands of bad addresses to remove." Investigating the <code>_Bounce</code> detail proved that reading wrong, and that investigation is where the real understanding formed.</p>
-
-    <h3>What the analysis revealed</h3>
-    <p>The bounces were not one problem but several, and only a minority were genuine dead addresses:</p>
-    <ul>
-      <li><strong>Block and technical push-backs</strong> made up the majority — the receiving mail servers rejecting or deferring, not bad data on the sending side. A large share carried SMTP code <strong>421</strong> with Yahoo's message about messages being temporarily deferred due to unexpected volume or complaints — a <strong>reputation / sending-volume signal</strong>, not an address problem.</li>
-      <li><strong>Hard bounces (SMTP 550)</strong> — "bad destination mailbox" / "mailbox cancelled" — were the genuine list-hygiene portion: real dead addresses to scrub. These were only about a quarter of the total.</li>
-      <li>Failures clustered heavily around a few ISPs (Yahoo plus Israeli providers), meaning a block at one or two of them drove a disproportionate share of the count.</li>
-    </ul>
-
-    <h3>What this demonstrates knowing</h3>
-    <p>The lesson — and the transferable knowledge — is that a raw bounce count must not be treated as bad-address count. Remediation has to target the actual cause: hard 550s call for list scrubbing, while block/deferral bounces point at sending reputation and volume, which is fixed on the sending side (send rate, IP warm-up, reputation) rather than by deleting addresses.</p>
-
-    <h2>Correct metrics — knowing what the numbers actually mean</h2>
-    <p>Precise definitions that keep the analysis honest:</p>
-    <ul>
-      <li><strong>Sent</strong> = rows in <code>_Sent</code>; this is <em>attempted</em> sends (send volume), not proof of inbox arrival.</li>
-      <li><strong>Delivered</strong> = <code>_Sent</code> minus anyone appearing in <code>_Bounce</code> for the same job. SFMC has no positive "delivered" confirmation view, so delivery is derived as "not bounced" — a simple, reliable rule rather than a fragile multi-condition check. It means "the mail server accepted it," not "reached the inbox."</li>
-      <li><strong>Bounce rate</strong> = bounces ÷ <em>sent</em> — never divided by delivered, since delivered is already sent-minus-bounce.</li>
-      <li><strong>Hard-bounce rate</strong> tracked separately as the true list-quality signal, so transient deferrals don't mask (or inflate) the real hygiene number.</li>
-    </ul>
-
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+        
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+        
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+    </script>
 </body>
 </html>
