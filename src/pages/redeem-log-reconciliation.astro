@@ -1,0 +1,196 @@
+---
+const project = {
+  title: "Email Analytics with Salesforce Marketing Cloud Data Views",
+  summary: "Deep hands-on knowledge of the SFMC email tracking data model — analysing the full send-to-engagement funnel via SQL, building rolling export pipelines into master Data Extensions, and diagnosing real deliverability and bounce problems.",
+  context: "Salesforce Marketing Cloud · data engineering",
+  status: "Live",
+};
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{project.title}</title>
+    <style>
+      :root {
+        --accent: #0055ff;
+        --accent-bg: #f0f5ff;
+        --accent-line: #d6e4ff;
+        --line: #e1e4e6;
+        --ink: #222;
+        --muted: #555;
+        --soft: #f7f8fa;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        color: var(--ink);
+        line-height: 1.7;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: var(--accent);
+        text-decoration: none;
+        margin: 0 0 28px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+      }
+      .back-link:hover { opacity: 0.7; }
+      .context {
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 0.03em;
+        margin: 0 0 10px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      h1 { margin: 0; font-size: 2.2rem; }
+      .status {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent);
+        background: var(--accent-bg);
+        border: 1px solid var(--accent-line);
+        border-radius: 999px;
+        padding: 6px 14px;
+        white-space: nowrap;
+      }
+      .summary {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 16px 0 28px;
+        max-width: 65ch;
+      }
+      h2 {
+        font-size: 1.6rem;
+        margin: 40px 0 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--accent);
+      }
+      h3 {
+        font-size: 1.15rem;
+        margin: 24px 0 12px;
+        font-weight: 600;
+      }
+      h4 {
+        font-size: 1.05rem;
+        margin: 20px 0 10px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 16px;
+        max-width: 75ch;
+      }
+      ul {
+        margin: 0 0 20px 20px;
+        padding: 0;
+      }
+      li {
+        margin: 8px 0;
+        max-width: 70ch;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: #f6f8fa;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.9em;
+      }
+      strong {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      em {
+        font-style: italic;
+      }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Back to projects</a>
+
+    <p class="context">{project.context}</p>
+
+    <div class="head">
+      <h1>{project.title}</h1>
+      <span class="status">{project.status}</span>
+    </div>
+
+    <p class="summary">{project.summary}</p>
+
+    <h2>Project Overview</h2>
+    <p>
+      Focused expertise in analysing the email lifecycle inside Salesforce Marketing Cloud by querying its system data views directly. This work covers understanding how the tracking views relate, building a repeatable export pipeline that feeds master Data Extensions, and turning a real deliverability incident into a durable understanding of bounces and the metrics that describe them.
+    </p>
+
+    <h2>The email data model</h2>
+    <p>The email tracking data views form a funnel that all traces back to a single anchor:</p>
+    <ul>
+      <li><strong><code>_Job</code></strong> — the anchor view; one row per send, keyed by <code>JobID</code>. Carries the send's identity: <code>EmailID</code> (the content asset), <code>EmailName</code>, <code>EmailSendDefinition</code> (the reusable send configuration), timings, and journey/triggered keys.</li>
+      <li><strong><code>_Sent</code></strong> — who the send was attempted to; the denominator for every rate.</li>
+      <li><strong><code>_Open</code> / <code>_Click</code></strong> — engagement events, with <code>_Click</code> carrying the <code>URL</code> and <code>LinkName</code> of the tapped link.</li>
+      <li><strong><code>_Bounce</code></strong> — delivery failures, with category, type, and SMTP reason.</li>
+      <li><strong><code>_Unsubscribe</code></strong> — opt-out events tied to the send.</li>
+    </ul>
+    <p>Every event view joins back to <code>_Job</code> on <code>JobID</code>, with the composite <code>JobID</code> + <code>SubscriberKey</code> identifying a single subscriber's record within a send (plus <code>EventDate</code> where events repeat, such as multiple opens or clicks).</p>
+
+    <h2>Identifier modelling — knowing which key answers which question</h2>
+    <p>A core piece of this knowledge is choosing the right identifier for the analytical question:</p>
+    <ul>
+      <li><strong><code>JobID</code></strong> — one specific send (a single deployment).</li>
+      <li><strong><code>EmailID</code></strong> — the content asset itself; the same email sent several times shares one <code>EmailID</code> across different <code>JobID</code>s.</li>
+      <li><strong><code>EmailName</code></strong> — the human-readable label, useful for grouping but reusable/renamable, so less reliable than <code>EmailID</code>.</li>
+      <li><strong><code>EmailSendDefinition</code></strong> — the reusable send configuration (audience, classification, sender/delivery profiles), distinct from the content it references.</li>
+      <li><strong><code>TriggererSendDefinitionObjectID</code></strong> — the grouping key for journey and triggered sends, where <code>EmailSendDefinition</code> does not apply.</li>
+    </ul>
+    <p>To analyse every send of one email, resolve the <code>EmailID</code> from <code>_Job</code>, then pull the tracking events for the resulting set of <code>JobID</code>s.</p>
+
+    <h2>Rolling 10-day export pipeline into master Data Extensions</h2>
+    <p>Built a repeatable pipeline that exports the full email funnel on a rolling 10-day window and appends the results into master Data Extensions, so the analytical dataset stays current without re-pulling full history.</p>
+    <ul>
+      <li><strong><code>_Job</code></strong> is windowed on <code>CreatedDate</code> — the only non-nullable date on the view. This is a deliberate choice: <code>DeliveredTime</code> is NULL for all triggered sends and <code>SchedTime</code> / <code>PickupTime</code> are nullable, so filtering on any of those would silently drop records from the window. <code>CreatedDate</code> guarantees every job in the period is captured.</li>
+      <li>The event views (<code>_Sent</code>, <code>_Open</code>, <code>_Click</code>, <code>_Bounce</code>, <code>_Unsubscribe</code>) are windowed on their <code>EventDate</code>, then appended to their respective master DEs — each run adding the latest ten days of activity to the accumulating dataset.</li>
+    </ul>
+
+    <h2>Deliverability & bounces — a diagnosed incident and the knowledge that came from it</h2>
+
+    <h3>The error encountered</h3>
+    <p>A send showed a large bounce count — thousands of failures on a single job. The instinctive read was "thousands of bad addresses to remove." Investigating the <code>_Bounce</code> detail proved that reading wrong, and that investigation is where the real understanding formed.</p>
+
+    <h3>What the analysis revealed</h3>
+    <p>The bounces were not one problem but several, and only a minority were genuine dead addresses:</p>
+    <ul>
+      <li><strong>Block and technical push-backs</strong> made up the majority — the receiving mail servers rejecting or deferring, not bad data on the sending side. A large share carried SMTP code <strong>421</strong> with Yahoo's message about messages being temporarily deferred due to unexpected volume or complaints — a <strong>reputation / sending-volume signal</strong>, not an address problem.</li>
+      <li><strong>Hard bounces (SMTP 550)</strong> — "bad destination mailbox" / "mailbox cancelled" — were the genuine list-hygiene portion: real dead addresses to scrub. These were only about a quarter of the total.</li>
+      <li>Failures clustered heavily around a few ISPs (Yahoo plus Israeli providers), meaning a block at one or two of them drove a disproportionate share of the count.</li>
+    </ul>
+
+    <h3>What this demonstrates knowing</h3>
+    <p>The lesson — and the transferable knowledge — is that a raw bounce count must not be treated as bad-address count. Remediation has to target the actual cause: hard 550s call for list scrubbing, while block/deferral bounces point at sending reputation and volume, which is fixed on the sending side (send rate, IP warm-up, reputation) rather than by deleting addresses.</p>
+
+    <h2>Correct metrics — knowing what the numbers actually mean</h2>
+    <p>Precise definitions that keep the analysis honest:</p>
+    <ul>
+      <li><strong>Sent</strong> = rows in <code>_Sent</code>; this is <em>attempted</em> sends (send volume), not proof of inbox arrival.</li>
+      <li><strong>Delivered</strong> = <code>_Sent</code> minus anyone appearing in <code>_Bounce</code> for the same job. SFMC has no positive "delivered" confirmation view, so delivery is derived as "not bounced" — a simple, reliable rule rather than a fragile multi-condition check. It means "the mail server accepted it," not "reached the inbox."</li>
+      <li><strong>Bounce rate</strong> = bounces ÷ <em>sent</em> — never divided by delivered, since delivered is already sent-minus-bounce.</li>
+      <li><strong>Hard-bounce rate</strong> tracked separately as the true list-quality signal, so transient deferrals don't mask (or inflate) the real hygiene number.</li>
+    </ul>
+
+</body>
+</html>
