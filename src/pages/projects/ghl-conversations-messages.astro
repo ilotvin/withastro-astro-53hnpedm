@@ -29,8 +29,18 @@ const messageInsights = [
         :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; --teal: #0d9488; --teal-bg: #e1f5ee; --coral: #993C1D; --coral-bg: #faece7; }
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; max-width: 860px; margin: 0 auto; padding: 48px 20px 64px; color: var(--ink); line-height: 1.6; }
-        .back { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
-        .back:hover { color: var(--accent); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-decoration: none;
+            margin: 0 0 28px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.7; }
         h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 16px 0 8px; letter-spacing: -0.02em; }
         .lede { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--muted); margin: 0 0 40px; max-width: 62ch; }
         .funnel-intro { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 20px; }
@@ -62,7 +72,8 @@ const messageInsights = [
     </style>
 </head>
 <body>
-    <a href="/" class="back">← All projects</a>
+    <a href="/" class="back-link">← Back to projects</a>
+    
     <h1>GHL data model: conversations vs messages</h1>
     <p class="lede">
         Working notes from analysing GoHighLevel's conversation and messaging API — the distinction between a
@@ -128,7 +139,7 @@ const messageInsights = [
         </div>
     </div>
 
-<h2>Primary key & upsert logic</h2>
+    <h2>Primary key & upsert logic</h2>
     <p class="section-sub">
         <code>Conversation.id</code> is the primary key — one unique conversation record per contact-thread.
         When new activity happens (a new message, a tag change, anything), that same existing row is updated
