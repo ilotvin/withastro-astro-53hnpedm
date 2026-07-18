@@ -19,7 +19,7 @@ export interface Project {
       summary: 'Test page — placeholder detail view for the V3 Points project.',
       tags: ['Test page'],
       funnel: [],
-      visible: true,
+      visible: flase,
       type: 'astro',
     },
     {
