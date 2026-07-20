@@ -1,6 +1,8 @@
 ---
 // src/pages/projects/consent-sync-detail.astro
 
+import Layout from '../../layouts/Layout.astro';
+
 const project = {
   title: "Consent synchronisation engine",
   context: "Salesforce Marketing Cloud · data engineering",
@@ -13,12 +15,7 @@ const imageSrc = "/images/consent-sync-detail.png";
 const imageAlt = "Consent synchronisation engine illustration";
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{project.title}</title>
+<Layout title={project.title} description={`Visual breakdown of ${project.title}.`}>
     <style>
       :root {
         --accent: #0055ff;
@@ -81,8 +78,7 @@ const imageAlt = "Consent synchronisation engine illustration";
         text-align: center;
       }
     </style>
-  </head>
-  <body>
+
     <a href={project.backUrl} class="back-link">← Back to consent sync</a>
 
     <p class="context">{project.context}</p>
@@ -98,5 +94,4 @@ const imageAlt = "Consent synchronisation engine illustration";
         Image will appear here once saved to public/images/consent-sync-detail.png
       </div>
     </div>
-  </body>
-</html>
+</Layout>
