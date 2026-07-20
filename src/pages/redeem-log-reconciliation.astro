@@ -1,5 +1,8 @@
 ---
 // src/pages/redeem-log-reconciliation.astro
+
+import Layout from '../layouts/Layout.astro';
+
 const title = "Redeem Log Date Reconciliation Mechanism";
 
 const slides = [
@@ -15,13 +18,7 @@ const slides = [
 ];
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-  </head>
-  <body>
+<Layout title={title} description="A mechanism for identifying and resolving date discrepancies between DE_Order_Details and NY3_Redeem_Log.">
     <div class="presentation-container">
       <!-- Slide 1: Title -->
       <div class="slide active title-slide" data-slide="0">
@@ -456,5 +453,4 @@ ORDER BY o.Cust_id, o.Invoice_Date
         font-size: 20px;
       }
     </style>
-  </body>
-</html>
+</Layout>
