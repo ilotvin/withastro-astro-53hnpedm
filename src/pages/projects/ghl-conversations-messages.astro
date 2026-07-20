@@ -1,4 +1,8 @@
 ---
+// src/pages/projects/ghl-conversations-messages.astro
+
+import Layout from '../../layouts/Layout.astro';
+
 const funnel = [
   { view: 'Conversation', desc: 'Mutable snapshot — one row per contact thread', color: '#0d9488' },
   { view: 'Message', desc: 'Immutable event — one row per message, forever', color: '#993C1D' },
@@ -19,12 +23,7 @@ const messageInsights = [
 ];
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GHL Data Model — Conversations vs Messages</title>
+<Layout title="GHL Data Model — Conversations vs Messages" description="The distinction between a mutable current-state snapshot and an immutable historical log in GoHighLevel's API.">
     <style>
         :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; --teal: #0d9488; --teal-bg: #e1f5ee; --coral: #993C1D; --coral-bg: #faece7; }
         * { box-sizing: border-box; }
@@ -70,10 +69,9 @@ const messageInsights = [
             .stage-view { min-width: 0; }
         }
     </style>
-</head>
-<body>
+
     <a href="/" class="back-link">← Back to projects</a>
-    
+
     <h1>GHL data model: conversations vs messages</h1>
     <p class="lede">
         Working notes from analysing GoHighLevel's conversation and messaging API — the distinction between a
@@ -149,5 +147,4 @@ const messageInsights = [
         it as a new row.
     </p>
 
-</body>
-</html>
+</Layout>
