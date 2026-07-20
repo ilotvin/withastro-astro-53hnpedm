@@ -26,9 +26,18 @@ const projects = allProjects.filter((project) => project.visible !== false);
 
 <Layout title="Ilan Lotvin — Portfolio" description="Marketing Technology Architect, Lifecycle & CRM Expert, Data Analyst">
     <style>
-        :root { --accent: #0055ff; --line: #e1e4e6; }
+        :root {
+            --accent: #4d8dff;
+            --accent-bg: rgba(77, 141, 255, 0.12);
+            --accent-line: rgba(77, 141, 255, 0.35);
+            --bg: #0b0d12;
+            --panel: #12151c;
+            --line: #23262f;
+            --ink: #eceef2;
+            --muted: #9aa1ac;
+        }
         * { box-sizing: border-box; }
-        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: var(--bg); color: var(--ink); }
 
         .about { padding: 48px 0 40px; text-align: center; }
         .about-name {
@@ -37,54 +46,54 @@ const projects = allProjects.filter((project) => project.visible !== false);
             font-weight: 400;
             letter-spacing: -0.5px;
             margin: 0 0 4px;
-            color: #111;
+            color: var(--ink);
         }
         .about-role {
             font-family: Georgia, 'Times New Roman', serif;
             font-size: 1rem;
             font-style: italic;
-            color: #555;
+            color: var(--muted);
             margin: 0 0 6px;
         }
         .about-contact {
             font-size: 0.8rem;
-            color: #999;
+            color: var(--muted);
             letter-spacing: 0.03em;
             margin: 0 0 36px;
         }
-        .about-contact a { color: #0055ff; text-decoration: none; }
+        .about-contact a { color: var(--accent); text-decoration: none; }
         .about-body {
             font-family: Georgia, 'Times New Roman', serif;
             font-size: 1.05rem;
             line-height: 1.85;
-            color: #333;
+            color: var(--ink);
             max-width: 680px;
             text-align: left;
         }
         .about-body p { margin: 0 0 18px; }
         .about-body p:last-child { margin: 0; }
 
-        .divider { border: 0; border-top: 1px solid #e5e5e5; margin: 40px 0; }
+        .divider { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
 
         .portfolio-heading {
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: #999;
+            color: var(--muted);
             margin: 0 0 24px;
         }
-        .project-card { border: 1px solid var(--line); padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
-        .project-card:hover { border-color: var(--accent); }
+        .project-card { border: 1px solid var(--line); padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; background: var(--panel); }
+        .project-card:hover { border-color: var(--accent-line); }
         .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
-        .tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 999px; padding: 4px 12px; }
-        .project-link { font-size: 1.5rem; color: var(--accent); font-weight: bold; margin: 0 0 5px 0; }
-        .project-summary { color: #555; margin: 0 0 16px; font-size: 0.95rem; }
-        .funnel-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 0 0 10px; }
+        .tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-line); border-radius: 999px; padding: 4px 12px; }
+        .project-link { font-size: 1.5rem; color: var(--ink); font-weight: bold; margin: 0 0 5px 0; }
+        .project-summary { color: var(--muted); margin: 0 0 16px; font-size: 0.95rem; }
+        .funnel-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
         .funnel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-        .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: #444; background: #f6f8fa; border: 1px solid #e1e4e6; border-radius: 6px; padding: 5px 10px; white-space: nowrap; }
-        .funnel-arrow { color: #bbb; font-size: 0.95rem; }
-        .empty-state { color: #999; font-style: italic; }
+        .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; white-space: nowrap; }
+        .funnel-arrow { color: var(--muted); font-size: 0.95rem; }
+        .empty-state { color: var(--muted); font-style: italic; }
     </style>
 
     <div class="about">
