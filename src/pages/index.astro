@@ -4,7 +4,6 @@
 import Layout from '../layouts/Layout.astro';
 import { projectsConfig, funnelOverlays, urlOverrides } from '../config/projects.config';
 
-// Auto-discover markdown project detail pages
 const mdFiles = import.meta.glob('./projects/*.md', { eager: true });
 
 const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [string, any]) => {
@@ -21,29 +20,66 @@ const discoveredProjects = Object.entries(mdFiles).map(([filePath, file]: [strin
   };
 });
 
-// Merge: config projects first, then discovered .md projects
 const allProjects = [...projectsConfig, ...discoveredProjects];
-
-// Only show projects marked visible on the homepage list.
-// Hidden projects are simply omitted here — their pages still exist and are
-// reachable if you share the direct URL, they just won't appear in this list.
 const projects = allProjects.filter((project) => project.visible !== false);
 ---
 
-<Layout title="My Professional Portfolio" description="Select a project to see the visual architecture and technical breakdowns.">
+<Layout title="Ilan Lotvin — Portfolio" description="Marketing Technology Architect, Lifecycle & CRM Expert, Data Analyst">
     <style>
         :root { --accent: #0055ff; --line: #e1e4e6; }
         * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #222; }
-        h1 { margin: 0 0 8px; }
-        .intro { color: #555; margin: 0 0 30px; }
-        hr { margin: 30px 0; border: 0; border-top: 1px solid #eee; }
+
+        .about { padding: 48px 0 40px; text-align: center; }
+        .about-name {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 2.4rem;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+            margin: 0 0 4px;
+            color: #111;
+        }
+        .about-role {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1rem;
+            font-style: italic;
+            color: #555;
+            margin: 0 0 6px;
+        }
+        .about-contact {
+            font-size: 0.8rem;
+            color: #999;
+            letter-spacing: 0.03em;
+            margin: 0 0 36px;
+        }
+        .about-contact a { color: #0055ff; text-decoration: none; }
+        .about-body {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 1.05rem;
+            line-height: 1.85;
+            color: #333;
+            max-width: 680px;
+            text-align: left;
+        }
+        .about-body p { margin: 0 0 18px; }
+        .about-body p:last-child { margin: 0; }
+
+        .divider { border: 0; border-top: 1px solid #e5e5e5; margin: 40px 0; }
+
+        .portfolio-heading {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #999;
+            margin: 0 0 24px;
+        }
         .project-card { border: 1px solid var(--line); padding: 20px; margin-bottom: 20px; border-radius: 8px; transition: border-color 0.2s; text-decoration: none; display: block; }
         .project-card:hover { border-color: var(--accent); }
         .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
         .tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 999px; padding: 4px 12px; }
         .project-link { font-size: 1.5rem; color: var(--accent); font-weight: bold; margin: 0 0 5px 0; }
-        .project-summary { color: #555; margin: 0 0 16px; }
+        .project-summary { color: #555; margin: 0 0 16px; font-size: 0.95rem; }
         .funnel-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin: 0 0 10px; }
         .funnel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
         .funnel-step { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; font-weight: 600; color: #444; background: #f6f8fa; border: 1px solid #e1e4e6; border-radius: 6px; padding: 5px 10px; white-space: nowrap; }
@@ -51,11 +87,28 @@ const projects = allProjects.filter((project) => project.visible !== false);
         .empty-state { color: #999; font-style: italic; }
     </style>
 
-    <h1>Welcome to My Platform</h1>
-    <p class="intro">Select a project below to see the visual architecture and technical breakdowns.</p>
+    <div class="about">
+        <div class="about-name">Ilan Lotvin, CPA</div>
+        <div class="about-role">Marketing Technology Architect &nbsp;·&nbsp; Data Analyst &nbsp;·&nbsp; End-to-End Solutions Developer</div>
+        <div class="about-contact">
+            +972-54-665-5862 &nbsp;·&nbsp;
+            <a href="mailto:ilotvin@gmail.com">ilotvin@gmail.com</a> &nbsp;·&nbsp;
+            Israel
+        </div>
 
-    <hr />
+        <div class="about-body">
+            <p>I care deeply about details while always keeping the big picture in mind. My natural approach starts with making sure I fully understand the question before building anything — then I test on a single example first, before scaling the logic.</p>
+            <p>I genuinely enjoy exploring data in Excel, digging into pipelines when something looks off, and tracing errors back to their root cause. There's real satisfaction in that detective work.</p>
+            <p>I'm constantly improving my API knowledge, and I invest time in refining my Claude-based tools to make my daily workflows smarter and faster.</p>
+            <p>My financial reporting background taught me how to handle complex, multi-layered logic with accuracy — the same discipline I bring to automation and data pipelines.</p>
+            <p>I communicate well — whether with clients, stakeholders, or teammates — and I genuinely enjoy translating business requirements into data structures and automated flows.</p>
+            <p>I document as much as possible, build methodology around repetitive tasks, and always aim to practice, learn, and improve.</p>
+        </div>
+    </div>
 
+    <hr class="divider" />
+
+    <div class="portfolio-heading">My Portfolio</div>
     <section>
         {projects.length === 0 ? (
             <p class="empty-state">No projects found.</p>
