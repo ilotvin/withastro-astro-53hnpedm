@@ -1,4 +1,8 @@
 ---
+// src/pages/projects/sfmc-email-analytics.astro
+
+import Layout from '../../layouts/Layout.astro';
+
 const project = {
   title: "Email Analytics with Salesforce Marketing Cloud Data Views",
   summary: "Deep hands-on knowledge of the SFMC email tracking data model — analysing the full send-to-engagement funnel via SQL, building rolling export pipelines into master Data Extensions, and diagnosing real deliverability and bounce problems.",
@@ -7,12 +11,7 @@ const project = {
 };
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{project.title}</title>
+<Layout title={project.title} description={project.summary}>
     <style>
       :root {
         --accent: #0055ff;
@@ -120,8 +119,7 @@ const project = {
         font-style: italic;
       }
     </style>
-</head>
-<body>
+
     <a href="/" class="back-link">← Back to projects</a>
 
     <p class="context">{project.context}</p>
@@ -192,5 +190,4 @@ const project = {
       <li><strong>Hard-bounce rate</strong> tracked separately as the true list-quality signal, so transient deferrals don't mask (or inflate) the real hygiene number.</li>
     </ul>
 
-</body>
-</html>
+</Layout>
