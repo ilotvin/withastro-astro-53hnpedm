@@ -1,6 +1,8 @@
 ---
 // src/pages/projects/v3-points.astro
 
+import Layout from '../../layouts/Layout.astro';
+
 const project = {
   title: "V3 Points",
   subtitle: "Nespresso & You 3 — Loyalty Points Mechanism",
@@ -48,12 +50,7 @@ const drilldowns = [
 ];
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{project.title}</title>
+<Layout title={project.title} description={project.subtitle}>
     <style>
       :root {
         --accent: #4d8dff;
@@ -198,8 +195,7 @@ const drilldowns = [
         margin: 0;
       }
     </style>
-  </head>
-  <body>
+
     <a href="/" class="back-link">← Back to projects</a>
 
     <p class="context">{project.context}</p>
@@ -251,5 +247,4 @@ const drilldowns = [
         </a>
       ))}
     </div>
-  </body>
-</html>
+</Layout>
