@@ -1,4 +1,8 @@
 ---
+// src/pages/projects/email-send-analysis.astro
+
+import Layout from '../../layouts/Layout.astro';
+
 const funnel = [
   { view: '_Job', desc: 'The anchor — one row per send', color: '#6b7280' },
   { view: '_Sent', desc: 'The denominator — who we sent to', color: '#0055ff' },
@@ -9,12 +13,7 @@ const funnel = [
 ];
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Send Analysis — SFMC Data Views</title>
+<Layout title="Email Send Analysis — SFMC Data Views" description="Connecting Salesforce Marketing Cloud's system data views into a single send-to-engagement funnel.">
     <style>
         :root { --accent: #0055ff; --ink: #1a1a1a; --muted: #666; --line: #e1e4e6; }
         * { box-sizing: border-box; }
@@ -51,10 +50,9 @@ const funnel = [
             .stage-view { min-width: 0; }
         }
     </style>
-</head>
-<body>
+
     <a href="/" class="back-link">← Back to projects</a>
-    
+
     <h1>Email Send Analysis with SFMC Data Views</h1>
     <p class="lede">
         Connecting Salesforce Marketing Cloud's system data views into a single send-to-engagement funnel —
@@ -90,5 +88,4 @@ const funnel = [
     </div>
 
     <a href="/projects/sfmc-email-analytics" class="cta">Read the full technical breakdown →</a>
-</body>
-</html>
+</Layout>
