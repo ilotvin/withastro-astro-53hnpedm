@@ -15,11 +15,11 @@ export interface Project {
     {
       slug: 'v3-points',
       url: '/projects/v3-points',
-      title: 'V3 Points',
-      summary: 'Test page — placeholder detail view for the V3 Points project.',
-      tags: ['Test page'],
+      title: 'Loyalty Points computing system',
+      summary: 'Loyalty ecosystem & points computation engine.',
+      tags: ['end to end'],
       funnel: [],
-      visible: false,
+      visible: true,
       type: 'astro',
     },
     {

@@ -4,15 +4,13 @@
 import Layout from '../../layouts/Layout.astro';
 
 const project = {
-  title: "V3 Points",
-  subtitle: "Nespresso & You 3 — Loyalty Points Mechanism",
+  title: "Loyalty Program - Points Calculation engine",
+  subtitle: "",
   context: "Salesforce Marketing Cloud · data engineering",
   status: "Live · daily",
 };
 
-// Placeholder — swap with the real asset path once the image is uploaded,
-// e.g. import heroImage from '../../assets/v3-points-hero.png';
-const heroImageSrc = "/images/v3-points-hero.png";
+const heroImageSrc = "/images/v3_calc_engine_generic.svg";
 
 // Drill-down sections. Each `url` should point to a detail page —
 // stub these out as new .astro/.md files under src/pages/projects/.
@@ -20,32 +18,26 @@ const drilldowns = [
   {
     title: "Daily Points Calculation",
     summary:
-      "The core nightly automation: bridge consolidation, Delta_Cust filtering, CY/PY split, and the final Net_Final_V3 update.",
+      "The core nightly automation: consolidating new activity, filtering down to the customers affected that day, and producing each customer's final balance update.",
     url: "/projects/v3-points/daily-calculation",
   },
   {
     title: "CY / PY Split Logic",
     summary:
-      "How current-year and prior-year balances are calculated separately based on membership month, and merged into a single net figure.",
+      "How each of the 12 membership-month groups aggregates its own points, and how deletion events carry forward into future balances.",
     url: "/projects/v3-points/cy-py-split",
   },
   {
     title: "Earn Log Architecture",
     summary:
-      "The append-only ledger pattern behind NY3_Earn_Log — bridge tables, NOT EXISTS dedup, and the composite key that keeps it safe.",
+      "The append-only ledger pattern behind the earning log — every new record is checked against what's already there before being inserted, so history stays immutable and nothing is ever duplicated or overwritten.",
     url: "/projects/v3-points/earn-log",
   },
   {
     title: "Delta Mechanism",
     summary:
-      "The five-condition filter that decides which customers get recalculated each day, scoped against validated DE_Contacts records.",
+      "The five-condition filter that decides which customers get recalculated each day, scoped against a validated customer list.",
     url: "/projects/v3-points/delta-mechanism",
-  },
-  {
-    title: "Known Issues & Fixes",
-    summary:
-      "Open investigations: prior-year redemption gaps, negative balance carry-forward, and membership date sync discrepancies.",
-    url: "/projects/v3-points/known-issues",
   },
 ];
 ---
@@ -93,10 +85,11 @@ const drilldowns = [
       }
       .head {
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-align: center;
       }
       h1 { margin: 0 0 6px; font-size: 2.4rem; letter-spacing: -0.01em; }
       .subtitle { color: var(--muted); font-size: 1.05rem; margin: 0 0 4px; }
@@ -214,24 +207,23 @@ const drilldowns = [
     </div>
 
     <p class="lede">
-      The V3 engine is the sole source of truth for every customer's loyalty point balance —
-      calculated fresh each night from an immutable transaction history.
+      The engine is the sole source of truth for every customer's loyalty point balance —
+      calculated from the earning and redemption points across the various loyalty sources.
     </p>
 
     <div class="explanation">
       <p>
-        Every night, a daily automation walks through the full lifecycle of a customer's points:
-        it consolidates new activity from the <strong>Earn Log</strong>, filters down to only the
-        customers affected that day through the <strong>Delta mechanism</strong>, and recalculates
-        each customer's balance using a <strong>Current Year / Prior Year split</strong> — because
-        a customer's membership month determines whether recent activity should still count against
-        last year's balance or this year's.
+        Every day, points earned from different sources — purchases, promotions, and other program
+        activities — are digested into a single <strong>earning points report</strong>. Each entry is
+        checked against what's already recorded before it's added, so the history stays clean and
+        nothing gets counted twice.
       </p>
       <p>
-        The result feeds <strong>Net_Final_V3</strong>, the definitive balance table, which in turn
-        drives what customers see on the loyalty site and what's available to redeem. Nothing is
-        ever overwritten in the raw log — history stays append-only, and every correction or reset
-        is recorded as a new entry rather than an edit.
+        That report feeds the <strong>loyalty points engine</strong>, which applies the program's
+        annual logic: every customer has a personal 12-month membership cycle, and their points
+        accumulate across that cycle based on their membership month. Once the 12 months close, the
+        customer gets one additional month to redeem whatever balance remains — after that, anything
+        left unused is removed, and a new 12-month cycle begins.
       </p>
     </div>
 
