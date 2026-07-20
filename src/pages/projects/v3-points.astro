@@ -4,8 +4,8 @@
 import Layout from '../../layouts/Layout.astro';
 
 const project = {
-  title: "L1oyalty Program - Points Calculation engine",
-  subtitle: "",
+  title: "Loyalty Points Calculation",
+  subtitle: "Loyalty Points Mechanism",
   context: "Salesforce Marketing Cloud · data engineering",
   status: "Live · daily",
 };
@@ -218,6 +218,7 @@ const drilldowns = [
         checked against what's already recorded before it's added, so the history stays clean and
         nothing gets counted twice.
       </p>
+      <img src="/images/earnin_sources.svg" alt="Earning sources feeding the earning points report" style="display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; margin: 8px 0 24px; background: var(--panel);" />
       <p>
         That report feeds the <strong>loyalty points engine</strong>, which applies the program's
         annual logic: every customer has a personal 12-month membership cycle, and their points
