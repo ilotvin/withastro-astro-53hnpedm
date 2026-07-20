@@ -1,7 +1,7 @@
 ---
 // src/pages/index.astro
 
-
+import Layout from '../layouts/Layout.astro';
 import { projectsConfig, funnelOverlays, urlOverrides } from '../config/projects.config';
 
 // Auto-discover markdown project detail pages
@@ -30,12 +30,7 @@ const allProjects = [...projectsConfig, ...discoveredProjects];
 const projects = allProjects.filter((project) => project.visible !== false);
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Professional Portfolio</title>
+<Layout title="My Professional Portfolio" description="Select a project to see the visual architecture and technical breakdowns.">
     <style>
         :root { --accent: #0055ff; --line: #e1e4e6; }
         * { box-sizing: border-box; }
@@ -55,8 +50,7 @@ const projects = allProjects.filter((project) => project.visible !== false);
         .funnel-arrow { color: #bbb; font-size: 0.95rem; }
         .empty-state { color: #999; font-style: italic; }
     </style>
-</head>
-<body>
+
     <h1>Welcome to My Platform</h1>
     <p class="intro">Select a project below to see the visual architecture and technical breakdowns.</p>
 
@@ -97,5 +91,4 @@ const projects = allProjects.filter((project) => project.visible !== false);
             ))
         )}
     </section>
-</body>
-</html>
+</Layout>
