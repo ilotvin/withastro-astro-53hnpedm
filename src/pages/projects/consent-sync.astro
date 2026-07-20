@@ -1,4 +1,8 @@
 ---
+// src/pages/projects/consent-sync.astro
+
+import Layout from '../../layouts/Layout.astro';
+
 const project = {
   title: "Consent synchronisation engine",
   summary:
@@ -19,12 +23,7 @@ const project = {
 };
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{project.title}</title>
+<Layout title={project.title} description={project.summary}>
     <style>
       :root {
         --accent: #0055ff;
@@ -170,8 +169,7 @@ const project = {
       }
       .cta:hover { opacity: 0.88; }
     </style>
-  </head>
-  <body>
+
     <a href="/" class="back-link">← Back to projects</a>
 
     <p class="context">{project.context}</p>
@@ -205,5 +203,4 @@ const project = {
     </div>
 
     <a class="cta" href={project.detailUrl}>Read the full breakdown &rarr;</a>
-  </body>
-</html>
+</Layout>
