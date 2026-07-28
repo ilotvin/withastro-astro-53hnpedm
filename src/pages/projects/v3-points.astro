@@ -1,42 +1,36 @@
 ---
 // src/pages/projects/v3-points.astro
-
 import Layout from '../../layouts/Layout.astro';
-
 const project = {
   title: "Loyalty Points Calculation",
   subtitle: "Loyalty Points Mechanism",
   context: "Salesforce Marketing Cloud · data engineering",
   status: "Live · daily",
 };
-
 const heroImageSrc = "/images/v3_calc_engine_generic.svg";
-
 // Drill-down sections. Each `url` should point to a detail page —
 // stub these out as new .astro/.md files under src/pages/projects/.
 const drilldowns = [
   {
-    title: "Loyalty Points Computation",
+    title: "Daily Points Calculation",
     summary:
-      "Points are aggregated over a customer's 12-month membership year. Any balance left at the end of that year can still be used during a 13th month before it expires.",
-    caption: "See the challenges involved in building this system — and how they were solved.",
-    url: "/projects/v3-points/points-computation",
+      "The core nightly automation: consolidating new activity, filtering down to the customers affected that day, and producing each customer's final balance update.",
+    url: "/projects/v3-points/daily-calculation",
   },
   {
-    title: "Earn Log Architecture",
+    title: "CY / PY Split Logic",
     summary:
-      "The append-only ledger pattern behind the earning log — every new record is checked against what's already there before being inserted, so history stays immutable and nothing is ever duplicated or overwritten.",
-    url: "/projects/v3-points/earn-log",
+      "The core computation challenge in a rolling loyalty program: aggregating each of the 12 membership-month groups independently, and calculating exactly how many points get deleted once a customer reaches their 13th month.",
+    url: "/projects/v3-points/cy-py-split",
   },
   {
     title: "Delta Mechanism",
     summary:
-      "The five-condition filter that decides which customers get recalculated each day, scoped against a validated customer list.",
+      "One of the keys to running a loyalty program's daily computations is scoping the work to only customers with new activity — rather than recalculating every customer, every day.",
     url: "/projects/v3-points/delta-mechanism",
   },
 ];
 ---
-
 <Layout title={project.title} description={project.subtitle}>
     <style>
       :root {
@@ -71,7 +65,6 @@ const drilldowns = [
         transition: opacity 0.2s;
       }
       .back-link:hover { opacity: 0.7; }
-
       .context {
         font-size: 0.8rem;
         color: var(--muted);
@@ -99,7 +92,6 @@ const drilldowns = [
         padding: 6px 14px;
         white-space: nowrap;
       }
-
       .hero {
         margin: 36px 0 40px;
         border-radius: 14px;
@@ -121,7 +113,6 @@ const drilldowns = [
         font-size: 0.9rem;
         letter-spacing: 0.02em;
       }
-
       .lede {
         font-size: 1.1rem;
         color: var(--ink);
@@ -134,7 +125,6 @@ const drilldowns = [
       }
       .explanation p { margin: 0 0 16px; }
       .explanation strong { color: var(--ink); }
-
       .section-label {
         font-size: 0.78rem;
         font-weight: 600;
@@ -143,7 +133,6 @@ const drilldowns = [
         color: var(--muted);
         margin: 0 0 16px;
       }
-
       .drilldown-grid {
         display: grid;
         gap: 14px;
@@ -183,11 +172,8 @@ const drilldowns = [
         margin: 0;
       }
     </style>
-
     <a href="/" class="back-link">← Back to projects</a>
-
     <p class="context">{project.context}</p>
-
     <div class="head">
       <div>
         <h1>{project.title}</h1>
@@ -195,17 +181,14 @@ const drilldowns = [
       </div>
       <span class="status">{project.status}</span>
     </div>
-
     <div class="hero">
       <img src={heroImageSrc} alt="V3 points mechanism overview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
       <div class="hero-placeholder" style="display: none;">Hero image will appear here</div>
     </div>
-
     <p class="lede">
       The engine is the sole source of truth for every customer's loyalty point balance —
       calculated from the earning and redemption points across the various loyalty sources.
     </p>
-
     <div class="explanation">
       <p>
         Every day, points earned from different sources — purchases, promotions, and other program
@@ -223,7 +206,6 @@ const drilldowns = [
         left unused is removed, and a new 12-month cycle begins.
       </p>
     </div>
-
     <p class="section-label">Explore the mechanism</p>
     <div class="drilldown-grid">
       {drilldowns.map((item) => (
