@@ -1,0 +1,143 @@
+---
+// src/pages/projects/v3-points/points-computation.astro
+
+import Layout from '../../../layouts/Layout.astro';
+
+const page = {
+  title: "Loyalty Program Points Calculation",
+  backUrl: "/projects/v3-points",
+};
+
+// Placeholder — swap once the diagram/image is uploaded, e.g.:
+// public/images/points-computation-logic.png
+const logicImageSrc = "/images/Map.png";
+const logicImageAlt = "Logic presentation of the loyalty points calculation";
+---
+
+<Layout title={page.title} description="How a loyalty club calculates daily earning and redemption, aggregated per membership year, with a 13th-month expiry rule.">
+    <style>
+      :root {
+        --accent: #4d8dff;
+        --accent-bg: rgba(77, 141, 255, 0.12);
+        --accent-line: rgba(77, 141, 255, 0.35);
+        --bg: #0b0d12;
+        --panel: #12151c;
+        --line: #23262f;
+        --ink: #eceef2;
+        --muted: #9aa1ac;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 56px 20px 80px;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: var(--accent);
+        text-decoration: none;
+        margin: 0 0 32px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+      }
+      .back-link:hover { opacity: 0.7; }
+
+      h1 {
+        margin: 0 0 24px;
+        font-size: 2.2rem;
+        letter-spacing: -0.01em;
+      }
+
+      .lede {
+        font-size: 1.1rem;
+        color: var(--ink);
+        margin: 0 0 40px;
+        max-width: 65ch;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+        margin: 0 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--accent);
+      }
+
+      .challenge-box {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 10px;
+        padding: 20px 22px;
+        margin: 0 0 40px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      .challenge-box strong { color: var(--ink); }
+
+      .logic-section {
+        margin: 0 0 40px;
+      }
+
+      .logic-image-frame {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        overflow: hidden;
+        margin: 0 0 12px;
+      }
+      .logic-image-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .logic-image-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 260px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        padding: 20px;
+        text-align: center;
+      }
+    </style>
+
+    <a href={page.backUrl} class="back-link">← Back to V3 Points</a>
+
+    <h1>{page.title}</h1>
+
+    <p class="lede">
+      A loyalty club calculates the total earning and redemption of customers on a daily basis.
+      Customers can aggregate points across their membership year cycle. Any points not spent by
+      the 13th month will be deleted.
+    </p>
+
+    <h2>The Challenge</h2>
+    <div class="challenge-box">
+      The program has to account for <strong>12 different membership months</strong> at once —
+      every customer's cycle starts on a different month. For each customer, the system needs to
+      calculate their running balance <strong>and</strong> the correct deletion action, based on
+      their own membership month rather than a single shared calendar date.
+    </div>
+
+    <h2>Logic Presentation</h2>
+    <div class="logic-section">
+      <div class="logic-image-frame">
+        <img
+          src={logicImageSrc}
+          alt={logicImageAlt}
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+        />
+        <div class="logic-image-placeholder" style="display: none;">
+          Logic diagram will appear here once uploaded
+        </div>
+      </div>
+    </div>
+</Layout>
