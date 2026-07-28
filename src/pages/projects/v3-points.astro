@@ -16,16 +16,11 @@ const heroImageSrc = "/images/v3_calc_engine_generic.svg";
 // stub these out as new .astro/.md files under src/pages/projects/.
 const drilldowns = [
   {
-    title: "Daily Points Calculation",
+    title: "Loyalty Points Computation",
     summary:
-      "The core nightly automation: consolidating new activity, filtering down to the customers affected that day, and producing each customer's final balance update.",
-    url: "/projects/v3-points/daily-calculation",
-  },
-  {
-    title: "CY / PY Split Logic",
-    summary:
-      "How each of the 12 membership-month groups aggregates its own points, and how deletion events carry forward into future balances.",
-    url: "/projects/v3-points/cy-py-split",
+      "Points are aggregated over a customer's 12-month membership year. Any balance left at the end of that year can still be used during a 13th month before it expires.",
+    caption: "See the challenges involved in building this system — and how they were solved.",
+    url: "/projects/v3-points/points-computation",
   },
   {
     title: "Earn Log Architecture",
