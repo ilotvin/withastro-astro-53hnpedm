@@ -1,7 +1,6 @@
 ---
-// src/pages/form.astro  →  יהיה זמין בכתובת /form
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx42ZLm0iacKX9hopoe5DHfqaC2D0TTw91nDz-XeJPcZaW9nfE3Yv0mO_YLR.../exec";
+// src/pages/form.astro  →  זמין בכתובת /form
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx42ZLm0iacKX9hopoe5DHfqaC2D0TTw91nDz-XeJPcZaW9nfE3Yv0mO_YLRe9wdXVn/exec";
 ---
 
 <html lang="he" dir="rtl">
@@ -78,9 +77,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx42ZLm0iacKX9hopoe5
     }
     .done h2 { margin: 0 0 8px; color: #1f2937; }
     .done p { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
-    .again {
-      background: #f3f4f6; color: #374151;
-    }
+    .again { background: #f3f4f6; color: #374151; }
     .again:hover:not(:disabled) { background: #e5e7eb; }
     .hidden { display: none; }
   </style>
@@ -161,7 +158,8 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx42ZLm0iacKX9hopoe5
       try {
         await fetch(SCRIPT_URL, {
           method: "POST",
-          body: new URLSearchParams({ name, phone, age, email })
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ name, phone, age, email })
         });
 
         $("formView").classList.add("hidden");
