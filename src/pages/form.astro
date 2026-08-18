@@ -1,0 +1,184 @@
+---
+// src/pages/form.astro  →  יהיה זמין בכתובת /form
+const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+---
+
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>טופס הרשמה</title>
+
+  <meta property="og:title" content="טופס הרשמה" />
+  <meta property="og:description" content="מלאו את הפרטים ונחזור אליכם" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .card {
+      background: #fff;
+      width: 100%;
+      max-width: 460px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.08);
+      padding: 32px 24px;
+    }
+    h1 { margin: 0 0 6px; font-size: 24px; text-align: center; color: #1f2937; }
+    .sub { margin: 0 0 24px; text-align: center; color: #6b7280; font-size: 14px; }
+    label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 15px; }
+    .req { color: #ef4444; margin-right: 3px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 18px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+    }
+    input.ltr { direction: ltr; text-align: left; }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #22c55e;
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    button:hover:not(:disabled) { background: #16a34a; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .msg { margin-top: 16px; padding: 12px; border-radius: 10px; font-size: 14px; text-align: center; }
+    .err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .done { text-align: center; padding: 20px 0; }
+    .check {
+      width: 64px; height: 64px; margin: 0 auto 16px;
+      background: #dcfce7; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: #16a34a;
+    }
+    .done h2 { margin: 0 0 8px; color: #1f2937; }
+    .done p { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
+    .again {
+      background: #f3f4f6; color: #374151;
+    }
+    .again:hover:not(:disabled) { background: #e5e7eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <div id="formView">
+      <h1>טופס הרשמה</h1>
+      <p class="sub">כל הפרטים נשמרים אצלנו בלבד</p>
+
+      <label for="name">שם מלא<span class="req">*</span></label>
+      <input type="text" id="name" autocomplete="name" />
+
+      <label for="phone">טלפון<span class="req">*</span></label>
+      <input type="tel" id="phone" class="ltr" inputmode="numeric"
+             placeholder="050-123-4567" autocomplete="tel" />
+
+      <label for="age">גיל<span class="req">*</span></label>
+      <input type="number" id="age" class="ltr" min="1" max="120" inputmode="numeric" />
+
+      <label for="email">כתובת מייל<span class="req">*</span></label>
+      <input type="email" id="email" class="ltr"
+             placeholder="name@example.com" autocomplete="email" />
+
+      <button id="submitBtn">שליחה</button>
+      <div id="err" class="msg err hidden"></div>
+    </div>
+
+    <div id="doneView" class="done hidden">
+      <div class="check">✓</div>
+      <h2>תודה רבה!</h2>
+      <p>הפרטים שלך נקלטו בהצלחה.</p>
+      <button class="again" id="againBtn">מילוי טופס נוסף</button>
+    </div>
+
+  </div>
+
+  <script define:vars={{ SCRIPT_URL }}>
+    const $ = (id) => document.getElementById(id);
+    const btn = $("submitBtn");
+    const errBox = $("err");
+
+    function showError(text) {
+      errBox.textContent = text;
+      errBox.classList.remove("hidden");
+    }
+
+    function clearError() {
+      errBox.classList.add("hidden");
+    }
+
+    btn.addEventListener("click", async () => {
+      clearError();
+
+      const name  = $("name").value.trim();
+      const phone = $("phone").value.trim();
+      const age   = $("age").value.trim();
+      const email = $("email").value.trim();
+
+      if (!name || !phone || !age || !email) {
+        showError("נא למלא את כל השדות");
+        return;
+      }
+      if (phone.replace(/\D/g, "").length < 9) {
+        showError("מספר טלפון לא תקין");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError("כתובת מייל לא תקינה");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "שולח...";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: new URLSearchParams({ name, phone, age, email })
+        });
+
+        $("formView").classList.add("hidden");
+        $("doneView").classList.remove("hidden");
+      } catch (e) {
+        showError("השליחה נכשלה. בדקו חיבור אינטרנט ונסו שוב.");
+        btn.disabled = false;
+        btn.textContent = "שליחה";
+      }
+    });
+
+    $("againBtn").addEventListener("click", () => {
+      ["name", "phone", "age", "email"].forEach(id => $(id).value = "");
+      btn.disabled = false;
+      btn.textContent = "שליחה";
+      $("doneView").classList.add("hidden");
+      $("formView").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
