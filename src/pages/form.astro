@@ -156,10 +156,10 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx42ZLm0iacKX9hopoe5
       btn.textContent = "שולח...";
 
       try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ name, phone, age, email })
+        const params = new URLSearchParams({ name, phone, age, email });
+        await fetch(`${SCRIPT_URL}?${params}`, {
+          method: "GET",
+          mode: "no-cors"
         });
 
         $("formView").classList.add("hidden");
