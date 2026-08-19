@@ -3,7 +3,7 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0jaNVzDyhLXitNrDsOk6oUcEWCm4k8D-YZBLQ3tIPhKLhBT7Q/exec";
 
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V4";
+const VERSION = "V5";
 ---
 
 <html lang="he" dir="rtl">
@@ -275,6 +275,9 @@ const VERSION = "V4";
       <label for="goodStuff">מה עושה לך טוב?</label>
       <textarea id="goodStuff" placeholder="אפשר לכתוב בחופשיות..."></textarea>
 
+      <label for="aboutMore">מה עוד אפשר לדעת עליך?</label>
+      <textarea id="aboutMore" placeholder="כל דבר שבא לך לשתף..."></textarea>
+
       <button id="submitBtn">שליחה</button>
       <div id="err" class="msg err hidden"></div>
     </div>
@@ -350,7 +353,8 @@ const VERSION = "V4";
         city:       $("city").value.trim(),
         occupation: $("occupation").value.trim(),
         hobby:      $("hobby").value.trim(),
-        goodStuff:  $("goodStuff").value.trim()
+        goodStuff:  $("goodStuff").value.trim(),
+        aboutMore:  $("aboutMore").value.trim()
       };
 
       // חובה: טלפון ומייל בלבד
@@ -390,7 +394,7 @@ const VERSION = "V4";
     $("againBtn").addEventListener("click", () => {
       ["name","phone","age","email","tripDays","dependsOn","friend",
        "tripStyleOther","roadTripOther","septOctOther",
-       "city","occupation","hobby","goodStuff"]
+       "city","occupation","hobby","goodStuff","aboutMore"]
         .forEach(id => $(id).value = "");
       $("tripStyle").value = "";
       document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
