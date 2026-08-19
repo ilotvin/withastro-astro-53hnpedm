@@ -3,14 +3,14 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0jaNVzDyhLXitNrDsOk6oUcEWCm4k8D-YZBLQ3tIPhKLhBT7Q/exec";
 
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V3";
+const VERSION = "V4";
 ---
 
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>טופס הרשמה לטיול</title>
+  <title>טופס היכרות</title>
 
   <meta property="og:title" content="טופס הרשמה לטיול" />
   <meta property="og:description" content="ספרו לנו איזה טיול מתאים לכם" />
@@ -56,6 +56,14 @@ const VERSION = "V3";
       font-weight: 700;
       color: #16a34a;
       letter-spacing: .5px;
+    }
+    .section .section-sub {
+      display: block;
+      font-weight: 400;
+      color: #9ca3af;
+      font-size: 12px;
+      letter-spacing: 0;
+      margin-top: 4px;
     }
 
     label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 15px; }
@@ -166,20 +174,26 @@ const VERSION = "V3";
 
     <div id="formView">
       <div class="version">{VERSION}</div>
-      <h1>טופס הרשמה לטיול</h1>
-      <p class="sub">ספרו לנו מה מתאים לכם ונבנה את הטיול יחד</p>
+      <h1>טופס היכרות</h1>
+      <p class="sub">טופס היכרות ראשוני ובדיקת רלוונטיות</p>
 
       <div class="section">פרטים אישיים</div>
 
       <label for="name">שם מלא</label>
       <input type="text" id="name" autocomplete="name" />
 
-      <label for="phone">טלפון<span class="req">*</span></label>
-      <input type="tel" id="phone" class="ltr" inputmode="numeric"
-             placeholder="050-123-4567" autocomplete="tel" />
+      <label>מגדר</label>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="gender" value="אישה" /><span>אישה</span></label>
+        <label class="opt"><input type="radio" name="gender" value="גבר" /><span>גבר</span></label>
+      </div>
 
       <label for="age">גיל</label>
       <input type="number" id="age" class="ltr" min="1" max="120" inputmode="numeric" />
+
+      <label for="phone">טלפון<span class="req">*</span></label>
+      <input type="tel" id="phone" class="ltr" inputmode="numeric"
+             placeholder="050-123-4567" autocomplete="tel" />
 
       <label for="email">כתובת מייל<span class="req">*</span></label>
       <input type="email" id="email" class="ltr"
@@ -225,9 +239,6 @@ const VERSION = "V3";
         <label class="opt"><input type="radio" name="canDrive" value="אולי" /><span>אולי</span></label>
       </div>
 
-      <label for="dependsOn">במה זה תלוי?</label>
-      <textarea id="dependsOn" placeholder="אפשר לפרט כאן..."></textarea>
-
       <label>נוח לך לצאת לטיול בחודשים ספטמבר-אוקטובר?</label>
       <div class="opts">
         <label class="opt"><input type="radio" name="septOct" value="כן" /><span>כן</span></label>
@@ -238,9 +249,31 @@ const VERSION = "V3";
         <input type="text" id="septOctOther" placeholder="אילו חודשים כן מתאימים?" />
       </div>
 
-      <label for="friend">מוזמנים לשתף ברעיון או שאלה        <span class="hint">אפשר לרשום שם, או להשאיר ריק</span>
+      <label for="friend">מוזמנים להציע או לשאול
+        <span class="hint">או סתם לשתף במשהו</span>
       </label>
-      <input type="text" id="friend" placeholder="או כל דבר אחר" />
+      <input type="text" id="friend" placeholder="כתבו כאן..." />
+
+      <label for="dependsOn">מקום להערות בהקשר לשאלות
+        <span class="hint">למשל: במה תלויה היכולת לנהוג, או כל דבר שרוצים להוסיף</span>
+      </label>
+      <textarea id="dependsOn" placeholder="אפשר לפרט כאן..."></textarea>
+
+      <div class="section">שאלות המשך
+        <span class="section-sub">קצת עלייך - כדי שנכיר טוב יותר</span>
+      </div>
+
+      <label for="city">מקום מגורים</label>
+      <input type="text" id="city" placeholder="עיר או אזור" />
+
+      <label for="occupation">עיסוק</label>
+      <input type="text" id="occupation" placeholder="במה את/ה עוסק/ת?" />
+
+      <label for="hobby">תחביב</label>
+      <input type="text" id="hobby" placeholder="מה את/ה אוהב/ת לעשות?" />
+
+      <label for="goodStuff">מה עושה לך טוב?</label>
+      <textarea id="goodStuff" placeholder="אפשר לכתוב בחופשיות..."></textarea>
 
       <button id="submitBtn">שליחה</button>
       <div id="err" class="msg err hidden"></div>
@@ -302,17 +335,22 @@ const VERSION = "V3";
       clearError();
 
       const data = {
-        name:      $("name").value.trim(),
-        phone:     $("phone").value.trim(),
-        age:       $("age").value.trim(),
-        email:     $("email").value.trim(),
-        tripStyle: combine($("tripStyle").value, "tripStyleOther"),
-        tripDays:  $("tripDays").value.trim(),
-        roadTrip:  combine(radioVal("roadTrip"), "roadTripOther"),
-        canDrive:  radioVal("canDrive"),
-        dependsOn: $("dependsOn").value.trim(),
-        septOct:   combine(radioVal("septOct"), "septOctOther"),
-        friend:    $("friend").value.trim()
+        name:       $("name").value.trim(),
+        phone:      $("phone").value.trim(),
+        age:        $("age").value.trim(),
+        email:      $("email").value.trim(),
+        tripStyle:  combine($("tripStyle").value, "tripStyleOther"),
+        tripDays:   $("tripDays").value.trim(),
+        roadTrip:   combine(radioVal("roadTrip"), "roadTripOther"),
+        canDrive:   radioVal("canDrive"),
+        dependsOn:  $("dependsOn").value.trim(),
+        septOct:    combine(radioVal("septOct"), "septOctOther"),
+        friend:     $("friend").value.trim(),
+        gender:     radioVal("gender"),
+        city:       $("city").value.trim(),
+        occupation: $("occupation").value.trim(),
+        hobby:      $("hobby").value.trim(),
+        goodStuff:  $("goodStuff").value.trim()
       };
 
       // חובה: טלפון ומייל בלבד
@@ -351,7 +389,8 @@ const VERSION = "V3";
 
     $("againBtn").addEventListener("click", () => {
       ["name","phone","age","email","tripDays","dependsOn","friend",
-       "tripStyleOther","roadTripOther","septOctOther"]
+       "tripStyleOther","roadTripOther","septOctOther",
+       "city","occupation","hobby","goodStuff"]
         .forEach(id => $(id).value = "");
       $("tripStyle").value = "";
       document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
