@@ -3,14 +3,14 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0jaNVzDyhLXitNrDsOk6oUcEWCm4k8D-YZBLQ3tIPhKLhBT7Q/exec";
 
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V2";
+const VERSION = "V3";
 ---
 
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>טופס היכרות</title>
+  <title>טופס הרשמה לטיול</title>
 
   <meta property="og:title" content="טופס הרשמה לטיול" />
   <meta property="og:description" content="ספרו לנו איזה טיול מתאים לכם" />
@@ -166,8 +166,8 @@ const VERSION = "V2";
 
     <div id="formView">
       <div class="version">{VERSION}</div>
-      <h1>טופס היכרות</h1>
-      <p class="sub">טוסס היכרות ראשוני ובדיקת רלוונטיות</p>
+      <h1>טופס הרשמה לטיול</h1>
+      <p class="sub">ספרו לנו מה מתאים לכם ונבנה את הטיול יחד</p>
 
       <div class="section">פרטים אישיים</div>
 
@@ -204,7 +204,9 @@ const VERSION = "V2";
       </label>
       <input type="text" id="tripDays" placeholder="למשל: 4-6 ימים" />
 
-      <label>מתאים לך להצטרף לטיול road trip?</label>
+      <label>מתאים לך להצטרף לטיול road trip?
+        <span class="hint">טיול עם רכב שכור, לינה במקומות שונים ומעבר בין יעדים לאורך הדרך</span>
+      </label>
       <div class="opts">
         <label class="opt"><input type="radio" name="roadTrip" value="כן" /><span>כן</span></label>
         <label class="opt"><input type="radio" name="roadTrip" value="לא" /><span>לא</span></label>
@@ -236,8 +238,8 @@ const VERSION = "V2";
         <input type="text" id="septOctOther" placeholder="אילו חודשים כן מתאימים?" />
       </div>
 
-      <label for="friend">מוזמנים להציע או לשאול
-        <span class="hint">או סתם לשתף במשהו</span>
+      <label for="friend">יש חבר/ה שירצו להצטרף גם כן?
+        <span class="hint">אפשר לרשום שם, או להשאיר ריק</span>
       </label>
       <input type="text" id="friend" placeholder="שם החבר/ה" />
 
