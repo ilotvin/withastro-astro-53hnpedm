@@ -1,6 +1,9 @@
 ---
 // src/pages/form.astro  →  זמין בכתובת /form
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0jaNVzDyhLXitNrDsOk6oUcEWCm4k8D-YZBLQ3tIPhKLhBT7Q/exec";
+
+// עדכנו את המספר בכל שינוי בטופס
+const VERSION = "V1";
 ---
 
 <html lang="he" dir="rtl">
@@ -32,6 +35,15 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0ja
       border-radius: 16px;
       box-shadow: 0 10px 40px rgba(0,0,0,.08);
       padding: 32px 24px;
+    }
+    .version {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      direction: ltr;
     }
     h1 { margin: 0 0 6px; font-size: 24px; text-align: center; color: #1f2937; }
     .sub { margin: 0 0 8px; text-align: center; color: #6b7280; font-size: 14px; }
@@ -138,6 +150,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0ja
   <div class="card">
 
     <div id="formView">
+      <div class="version">{VERSION}</div>
       <h1>טופס הרשמה לטיול</h1>
       <p class="sub">ספרו לנו מה מתאים לכם ונבנה את הטיול יחד</p>
 
