@@ -3,7 +3,7 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhAkhccqQwX1K6-j0jaNVzDyhLXitNrDsOk6oUcEWCm4k8D-YZBLQ3tIPhKLhBT7Q/exec";
 
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V1";
+const VERSION = "V2";
 ---
 
 <html lang="he" dir="rtl">
@@ -90,22 +90,37 @@ const VERSION = "V1";
     .other-box input { margin-bottom: 0; }
 
     .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-    .opt { flex: 1 1 auto; min-width: 80px; position: relative; }
-    .opt input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
-    .opt span {
+
+    /* כל אפשרות היא label - לחיצה בכל מקום בוחרת */
+    label.opt {
+      flex: 1 1 auto;
+      min-width: 80px;
+      position: relative;
+      margin: 0;
+      cursor: pointer;
+    }
+    label.opt input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+    }
+    label.opt span {
       display: block;
       text-align: center;
       padding: 11px 14px;
       border: 1px solid #d1d5db;
       border-radius: 10px;
       font-size: 15px;
+      font-weight: 400;
       color: #374151;
-      cursor: pointer;
       transition: all .15s;
       user-select: none;
     }
-    .opt span:hover { background: #f9fafb; }
-    .opt input:checked + span {
+    label.opt:hover span { background: #f9fafb; }
+    label.opt input:checked + span {
       background: #dcfce7;
       border-color: #22c55e;
       color: #15803d;
@@ -156,14 +171,14 @@ const VERSION = "V1";
 
       <div class="section">פרטים אישיים</div>
 
-      <label for="name">שם מלא<span class="req">*</span></label>
+      <label for="name">שם מלא</label>
       <input type="text" id="name" autocomplete="name" />
 
       <label for="phone">טלפון<span class="req">*</span></label>
       <input type="tel" id="phone" class="ltr" inputmode="numeric"
              placeholder="050-123-4567" autocomplete="tel" />
 
-      <label for="age">גיל<span class="req">*</span></label>
+      <label for="age">גיל</label>
       <input type="number" id="age" class="ltr" min="1" max="120" inputmode="numeric" />
 
       <label for="email">כתובת מייל<span class="req">*</span></label>
@@ -172,7 +187,7 @@ const VERSION = "V1";
 
       <div class="section">העדפות טיול</div>
 
-      <label for="tripStyle">סגנון טיול מועדף<span class="req">*</span></label>
+      <label for="tripStyle">סגנון טיול מועדף</label>
       <select id="tripStyle">
         <option value="">בחרו אפשרות...</option>
         <option value="בטן גב">בטן גב</option>
@@ -184,38 +199,38 @@ const VERSION = "V1";
         <input type="text" id="tripStyleOther" placeholder="פרטו איזה סגנון..." />
       </div>
 
-      <label for="tripDays">כמות ימים מועדפת לטיול<span class="req">*</span>
+      <label for="tripDays">כמות ימים מועדפת לטיול
         <span class="hint">אפשר לציין טווח, לדוגמה: 4-6 ימים</span>
       </label>
       <input type="text" id="tripDays" placeholder="למשל: 4-6 ימים" />
 
-      <label>מתאים לך להצטרף לטיול road trip?<span class="req">*</span></label>
+      <label>מתאים לך להצטרף לטיול road trip?</label>
       <div class="opts">
-        <div class="opt"><input type="radio" name="roadTrip" value="כן" /><span>כן</span></div>
-        <div class="opt"><input type="radio" name="roadTrip" value="לא" /><span>לא</span></div>
-        <div class="opt"><input type="radio" name="roadTrip" value="אחר" /><span>אחר</span></div>
+        <label class="opt"><input type="radio" name="roadTrip" value="כן" /><span>כן</span></label>
+        <label class="opt"><input type="radio" name="roadTrip" value="לא" /><span>לא</span></label>
+        <label class="opt"><input type="radio" name="roadTrip" value="אחר" /><span>אחר</span></label>
       </div>
       <div class="other-box hidden" id="roadTripOtherBox">
         <input type="text" id="roadTripOther" placeholder="פרטו..." />
       </div>
 
-      <label>האם תוכל/י לנהוג בחו"ל?<span class="req">*</span>
+      <label>האם תוכל/י לנהוג בחו"ל?
         <span class="hint">נדרש להוציא רישיון בינלאומי</span>
       </label>
       <div class="opts">
-        <div class="opt"><input type="radio" name="canDrive" value="כן" /><span>כן</span></div>
-        <div class="opt"><input type="radio" name="canDrive" value="לא" /><span>לא</span></div>
-        <div class="opt"><input type="radio" name="canDrive" value="אולי" /><span>אולי</span></div>
+        <label class="opt"><input type="radio" name="canDrive" value="כן" /><span>כן</span></label>
+        <label class="opt"><input type="radio" name="canDrive" value="לא" /><span>לא</span></label>
+        <label class="opt"><input type="radio" name="canDrive" value="אולי" /><span>אולי</span></label>
       </div>
 
       <label for="dependsOn">במה זה תלוי?</label>
       <textarea id="dependsOn" placeholder="אפשר לפרט כאן..."></textarea>
 
-      <label>נוח לך לצאת לטיול בחודשים ספטמבר-אוקטובר?<span class="req">*</span></label>
+      <label>נוח לך לצאת לטיול בחודשים ספטמבר-אוקטובר?</label>
       <div class="opts">
-        <div class="opt"><input type="radio" name="septOct" value="כן" /><span>כן</span></div>
-        <div class="opt"><input type="radio" name="septOct" value="לא" /><span>לא</span></div>
-        <div class="opt"><input type="radio" name="septOct" value="אחר" /><span>אחר</span></div>
+        <label class="opt"><input type="radio" name="septOct" value="כן" /><span>כן</span></label>
+        <label class="opt"><input type="radio" name="septOct" value="לא" /><span>לא</span></label>
+        <label class="opt"><input type="radio" name="septOct" value="אחר" /><span>אחר</span></label>
       </div>
       <div class="other-box hidden" id="septOctOtherBox">
         <input type="text" id="septOctOther" placeholder="אילו חודשים כן מתאימים?" />
@@ -269,7 +284,7 @@ const VERSION = "V1";
     function combine(choice, otherId) {
       if (choice !== "אחר") return choice;
       const txt = $(otherId).value.trim();
-      return txt ? `אחר: ${txt}` : "";
+      return txt ? `אחר: ${txt}` : "אחר";
     }
 
     function showError(text) {
@@ -299,9 +314,9 @@ const VERSION = "V1";
         friend:    $("friend").value.trim()
       };
 
-      const required = ["name","phone","age","email","tripStyle","tripDays","roadTrip","canDrive","septOct"];
-      if (required.some(k => !data[k])) {
-        showError("נא למלא את כל שדות החובה. אם בחרתם 'אחר' - נא לפרט בתיבה.");
+      // חובה: טלפון ומייל בלבד
+      if (!data.phone || !data.email) {
+        showError("נא למלא טלפון וכתובת מייל");
         return;
       }
       if (data.phone.replace(/\D/g, "").length < 9) {
