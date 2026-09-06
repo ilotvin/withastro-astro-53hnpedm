@@ -1,12 +1,12 @@
 ---
 // src/pages/Rosh_shana.astro  →  זמין בכתובת /Rosh_shana
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzx06YrmfzAo-ocEw19JSUv5HFnnZwys-NOJ8eexC169xjRtlYXfg5eMAI9adW2Ctf0/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzx06YrnmfzAo-ocEw19JSUvSHFnnZwys-NOJ8/exec";
 
 // כתובת הבסיס של האתר — נדרשת לתצוגה המקדימה בוואטסאפ
 const SITE = "https://atroproject1.vercel.app";
 
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V6";
+const VERSION = "V7";
 ---
 
 <html lang="he" dir="rtl">
@@ -88,6 +88,18 @@ const VERSION = "V6";
     label { display: block; font-weight: 600; color: #44403c; margin-bottom: 6px; font-size: 15px; }
     .hint { font-weight: 400; color: #a8a29e; font-size: 13px; display: block; margin-top: 2px; }
     .req { color: #ef4444; margin-right: 3px; }
+
+    /* הערת עלות מתחת לשאלת ארוחת הערב */
+    .note {
+      margin: -6px 0 18px;
+      padding: 10px 12px;
+      background: #fffbeb;
+      border-right: 3px solid #f59e0b;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #92400e;
+      line-height: 1.5;
+    }
 
     input, select, textarea {
       width: 100%;
@@ -198,7 +210,7 @@ const VERSION = "V6";
     <div id="formView">
       <div class="version">{VERSION}</div>
       <h1>טופס הרשמה</h1>
-      <p class="sub">מנגנים שרים ביחד -ערב ראש השנה</p>
+      <p class="sub">כמה פרטים קצרים כדי שנכיר</p>
 
       <div class="section">פרטים אישיים</div>
 
@@ -234,12 +246,15 @@ const VERSION = "V6";
       </label>
       <textarea id="about" placeholder="אפשר לכתוב בחופשיות..."></textarea>
 
-      <label>מעוניין/ת להשתתף בארוחת ערב?</label>
+      <label>מעוניין/ת להשתתף בארוחת ערב?
+        <span class="hint">כל אחד מכין משהו</span>
+      </label>
       <div class="opts">
         <label class="opt"><input type="radio" name="dinner" value="כן" /><span>כן</span></label>
-        <label class="opt"><input type="radio" name="dinner" value="לא" /><span>לא</span></label>
+        <label class="opt"><input type="radio" name="dinner" value="מעדיף ג'אם בלבד" /><span>מעדיף ג'אם בלבד</span></label>
         <label class="opt"><input type="radio" name="dinner" value="עדיין לא בטוח" /><span>עדיין לא בטוח</span></label>
       </div>
+      <div class="note">* עלות השתתפות בערב 50 ש"ח (עבור דרינקים ואלכוהול)</div>
 
       <button id="submitBtn">שליחה</button>
       <div id="err" class="msg err hidden"></div>
