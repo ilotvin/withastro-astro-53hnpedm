@@ -2,19 +2,36 @@
 // src/pages/Rosh_shana.astro  →  זמין בכתובת /Rosh_shana
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzx06YrnmfzAo-ocEw19JSUvSHFnnZwys-NOJ8/exec";
 
+// כתובת הבסיס של האתר — נדרשת לתצוגה המקדימה בוואטסאפ
+const SITE = "https://atroproject1.vercel.app";
+
 // עדכנו את המספר בכל שינוי בטופס
-const VERSION = "V3";
+const VERSION = "V6";
 ---
 
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>טופס הרשמה</title>
+  <title>שנה טובה — טופס הרשמה</title>
+  <meta name="description" content="כמה פרטים קצרים כדי שנכיר לקראת האירוע" />
 
-  <meta property="og:title" content="טופס הרשמה" />
-  <meta property="og:description" content="טופס הרשמה והיכרות לאירוע" />
+  <!-- תצוגה מקדימה בוואטסאפ / פייסבוק / טלגרם -->
   <meta property="og:type" content="website" />
+  <meta property="og:url" content={`${SITE}/Rosh_shana`} />
+  <meta property="og:title" content="שנה טובה — טופס הרשמה" />
+  <meta property="og:description" content="כמה פרטים קצרים כדי שנכיר לקראת האירוע" />
+  <meta property="og:image" content={`${SITE}/images/rosh_shana.jpg`} />
+  <meta property="og:image:secure_url" content={`${SITE}/images/rosh_shana.jpg`} />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="שנה טובה" />
+  <meta property="og:locale" content="he_IL" />
+
+  <!-- תצוגה מקדימה בטוויטר / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="שנה טובה — טופס הרשמה" />
+  <meta name="twitter:description" content="כמה פרטים קצרים כדי שנכיר לקראת האירוע" />
+  <meta name="twitter:image" content={`${SITE}/images/rosh_shana.jpg`} />
 
   <style>
     * { box-sizing: border-box; }
@@ -35,7 +52,7 @@ const VERSION = "V3";
       max-width: 480px;
       border-radius: 20px;
       box-shadow: 0 12px 44px rgba(180,83,9,.14);
-      padding: 32px 24px 24px;
+      padding: 32px 24px 28px;
       overflow: hidden;
     }
     .version {
@@ -161,9 +178,9 @@ const VERSION = "V3";
     .again:hover:not(:disabled) { background: #e7e5e4; filter: none; }
     .hidden { display: none; }
 
-    /* תמונה בתחתית הכרטיס */
-    .footer-img {
-      margin: 28px -24px -24px;
+    /* תמונה בראש הכרטיס */
+    .header-img {
+      margin: -32px -24px 22px;
       display: block;
       width: calc(100% + 48px);
       height: 170px;
@@ -176,6 +193,8 @@ const VERSION = "V3";
 <body>
   <div class="card">
 
+    <img src="/images/rosh_shana.jpg" alt="שנה טובה" class="header-img" />
+
     <div id="formView">
       <div class="version">{VERSION}</div>
       <h1>טופס הרשמה</h1>
@@ -183,7 +202,7 @@ const VERSION = "V3";
 
       <div class="section">פרטים אישיים</div>
 
-      <label for="name">שם מלא</label>
+      <label for="name">שם מלא<span class="req">*</span></label>
       <input type="text" id="name" autocomplete="name" />
 
       <label for="phone">מספר טלפון<span class="req">*</span></label>
@@ -199,7 +218,7 @@ const VERSION = "V3";
       <label for="age">גיל</label>
       <input type="number" id="age" class="ltr" min="1" max="120" inputmode="numeric" />
 
-      <label for="email">כתובת אימייל<span class="req">*</span></label>
+      <label for="email">כתובת אימייל</label>
       <input type="email" id="email" class="ltr"
              placeholder="name@example.com" autocomplete="email" />
 
@@ -232,8 +251,6 @@ const VERSION = "V3";
       <p>הפרטים שלך נקלטו בהצלחה.</p>
       <button class="again" id="againBtn">מילוי טופס נוסף</button>
     </div>
-
-    <img src="/images/rosh_shana.jpg" alt="שנה טובה" class="footer-img" />
 
   </div>
 
@@ -271,16 +288,17 @@ const VERSION = "V3";
         dinner: radioVal("dinner")
       };
 
-      // חובה: טלפון ומייל בלבד
-      if (!data.phone || !data.email) {
-        showError("נא למלא טלפון וכתובת אימייל");
+      // חובה: שם מלא וטלפון בלבד
+      if (!data.name || !data.phone) {
+        showError("נא למלא שם מלא ומספר טלפון");
         return;
       }
       if (data.phone.replace(/\D/g, "").length < 9) {
         showError("מספר טלפון לא תקין");
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      // מייל אופציונלי — נבדק רק אם מולא
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
         showError("כתובת אימייל לא תקינה");
         return;
       }
