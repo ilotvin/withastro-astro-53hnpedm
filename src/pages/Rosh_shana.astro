@@ -1,0 +1,305 @@
+---
+// src/pages/event.astro  →  זמין בכתובת /event
+// !!! החליפו בכתובת ה-/exec החדשה מ-Apps Script של הגיליון החדש !!!
+const SCRIPT_URL = "PASTE_NEW_SCRIPT_URL_HERE";
+
+// עדכנו את המספר בכל שינוי בטופס
+const VERSION = "V1";
+---
+
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>טופס הרשמה</title>
+
+  <meta property="og:title" content="טופס הרשמה" />
+  <meta property="og:description" content="טופס הרשמה והיכרות לאירוע" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .card {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.08);
+      padding: 32px 24px;
+    }
+    .version {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      direction: ltr;
+    }
+    h1 { margin: 0 0 6px; font-size: 24px; text-align: center; color: #1f2937; }
+    .sub { margin: 0 0 8px; text-align: center; color: #6b7280; font-size: 14px; }
+
+    .section {
+      margin: 28px 0 18px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #dcfce7;
+      font-size: 13px;
+      font-weight: 700;
+      color: #16a34a;
+      letter-spacing: .5px;
+    }
+    .section .section-sub {
+      display: block;
+      font-weight: 400;
+      color: #9ca3af;
+      font-size: 12px;
+      letter-spacing: 0;
+      margin-top: 4px;
+    }
+
+    label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 15px; }
+    .hint { font-weight: 400; color: #9ca3af; font-size: 13px; display: block; margin-top: 2px; }
+    .req { color: #ef4444; margin-right: 3px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      margin-bottom: 18px;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+    }
+    input.ltr { direction: ltr; text-align: left; }
+    textarea { resize: vertical; min-height: 100px; }
+
+    .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+
+    label.opt {
+      flex: 1 1 auto;
+      min-width: 80px;
+      position: relative;
+      margin: 0;
+      cursor: pointer;
+    }
+    label.opt input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+    }
+    label.opt span {
+      display: block;
+      text-align: center;
+      padding: 11px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 400;
+      color: #374151;
+      transition: all .15s;
+      user-select: none;
+    }
+    label.opt:hover span { background: #f9fafb; }
+    label.opt input:checked + span {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #15803d;
+      font-weight: 600;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #22c55e;
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 10px;
+    }
+    button:hover:not(:disabled) { background: #16a34a; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .msg { margin-top: 16px; padding: 12px; border-radius: 10px; font-size: 14px; text-align: center; }
+    .err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .done { text-align: center; padding: 20px 0; }
+    .check {
+      width: 64px; height: 64px; margin: 0 auto 16px;
+      background: #dcfce7; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: #16a34a;
+    }
+    .done h2 { margin: 0 0 8px; color: #1f2937; }
+    .done p { color: #6b7280; font-size: 14px; margin: 0 0 20px; }
+    .again { background: #f3f4f6; color: #374151; }
+    .again:hover:not(:disabled) { background: #e5e7eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <div id="formView">
+      <div class="version">{VERSION}</div>
+      <h1>טופס הרשמה</h1>
+      <p class="sub">כמה פרטים קצרים כדי שנכיר</p>
+
+      <div class="section">פרטים אישיים</div>
+
+      <label for="name">שם מלא</label>
+      <input type="text" id="name" autocomplete="name" />
+
+      <label for="phone">מספר טלפון<span class="req">*</span></label>
+      <input type="tel" id="phone" class="ltr" inputmode="numeric"
+             placeholder="050-123-4567" autocomplete="tel" />
+
+      <label>מגדר</label>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="gender" value="אישה" /><span>אישה</span></label>
+        <label class="opt"><input type="radio" name="gender" value="גבר" /><span>גבר</span></label>
+      </div>
+
+      <label for="age">גיל</label>
+      <input type="number" id="age" class="ltr" min="1" max="120" inputmode="numeric" />
+
+      <label for="email">כתובת אימייל<span class="req">*</span></label>
+      <input type="email" id="email" class="ltr"
+             placeholder="name@example.com" autocomplete="email" />
+
+      <label for="social">לינק לסושיאל
+        <span class="hint">פייסבוק, אינסטגרם או כל פרופיל אחר</span>
+      </label>
+      <input type="url" id="social" class="ltr" placeholder="https://..." />
+
+      <div class="section">קצת עליך</div>
+
+      <label for="about">כמה מילים על עצמך
+        <span class="hint">ספר/י קצת על תחביבים, ומה הסיבה שאת/ה רוצה להצטרף לאירוע?</span>
+      </label>
+      <textarea id="about" placeholder="אפשר לכתוב בחופשיות..."></textarea>
+
+      <label>מעוניין/ת להשתתף בארוחת ערב?</label>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="dinner" value="כן" /><span>כן</span></label>
+        <label class="opt"><input type="radio" name="dinner" value="לא" /><span>לא</span></label>
+        <label class="opt"><input type="radio" name="dinner" value="עדיין לא בטוח" /><span>עדיין לא בטוח</span></label>
+      </div>
+
+      <button id="submitBtn">שליחה</button>
+      <div id="err" class="msg err hidden"></div>
+    </div>
+
+    <div id="doneView" class="done hidden">
+      <div class="check">✓</div>
+      <h2>תודה רבה!</h2>
+      <p>הפרטים שלך נקלטו בהצלחה.</p>
+      <button class="again" id="againBtn">מילוי טופס נוסף</button>
+    </div>
+
+  </div>
+
+  <script define:vars={{ SCRIPT_URL }}>
+    const $ = (id) => document.getElementById(id);
+    const btn = $("submitBtn");
+    const errBox = $("err");
+
+    const radioVal = (name) => {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : "";
+    };
+
+    function showError(text) {
+      errBox.textContent = text;
+      errBox.classList.remove("hidden");
+      errBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function clearError() {
+      errBox.classList.add("hidden");
+    }
+
+    btn.addEventListener("click", async () => {
+      clearError();
+
+      const data = {
+        name:   $("name").value.trim(),
+        phone:  $("phone").value.trim(),
+        gender: radioVal("gender"),
+        age:    $("age").value.trim(),
+        email:  $("email").value.trim(),
+        social: $("social").value.trim(),
+        about:  $("about").value.trim(),
+        dinner: radioVal("dinner")
+      };
+
+      // חובה: טלפון ומייל בלבד
+      if (!data.phone || !data.email) {
+        showError("נא למלא טלפון וכתובת אימייל");
+        return;
+      }
+      if (data.phone.replace(/\D/g, "").length < 9) {
+        showError("מספר טלפון לא תקין");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        showError("כתובת אימייל לא תקינה");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "שולח...";
+
+      try {
+        const params = new URLSearchParams(data);
+        await fetch(`${SCRIPT_URL}?${params}`, {
+          method: "GET",
+          mode: "no-cors"
+        });
+
+        $("formView").classList.add("hidden");
+        $("doneView").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (e) {
+        showError("השליחה נכשלה. בדקו חיבור אינטרנט ונסו שוב.");
+        btn.disabled = false;
+        btn.textContent = "שליחה";
+      }
+    });
+
+    $("againBtn").addEventListener("click", () => {
+      ["name","phone","age","email","social","about"]
+        .forEach(id => $(id).value = "");
+      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+      btn.disabled = false;
+      btn.textContent = "שליחה";
+      $("doneView").classList.add("hidden");
+      $("formView").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
