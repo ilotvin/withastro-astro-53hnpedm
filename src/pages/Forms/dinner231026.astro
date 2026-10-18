@@ -49,6 +49,8 @@
 
     .btn { display: inline-block; font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 2px solid var(--sage); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
     .btn-primary { background: var(--sage); color: var(--sage-ink); }
+    .btn-danger { border-color: var(--danger); color: var(--danger); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .btn:disabled { opacity: .55; cursor: progress; }
     :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
@@ -202,7 +204,10 @@
             <textarea id="notes" name="notes" maxlength="300" placeholder="צמחוני, טבעוני, אלרגיות, הגעה מאוחרת…"></textarea>
           </div>
 
-          <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
+          <div class="actions">
+            <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger" hidden>תמחק אותי</button>
+          </div>
           <p id="saveMsg" class="msg" role="status"></p>
         </form>
 
@@ -243,7 +248,8 @@
       name: $('name'), dish: $('dish'), notes: $('notes'),
       joinGroup: $('joinGroup'), dishField: $('dishField'), payInfo: $('payInfo'),
       saveBtn: $('saveBtn'), saveMsg: $('saveMsg'),
-      socialField: $('socialField'), socialDepends: $('socialDepends')
+      socialField: $('socialField'), socialDepends: $('socialDepends'),
+      deleteBtn: $('deleteBtn')
     };
     let loadedPhone = '';
 
@@ -367,9 +373,11 @@
         if (res.found) {
           fillForm(res.record);
           els.saveBtn.textContent = 'עדכון ההרשמה';
+          els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
         } else {
           els.saveBtn.textContent = 'שמירת ההרשמה';
+          els.deleteBtn.hidden = true;
           setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
         }
       } catch (e) {
@@ -414,6 +422,7 @@
         try { localStorage.setItem('dinner_phone', phone); } catch {}
         loadedPhone = phone;
         els.saveBtn.textContent = 'עדכון ההרשמה';
+        els.deleteBtn.hidden = false;
         const extra = contribution === 'pay' ? ` נעדכן למי להעביר את ה‑${PRICE} ₪ אחרי שכולם ימלאו פרטים.` : '';
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           extra + ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
@@ -422,6 +431,34 @@
         setMsg(els.saveMsg, 'השמירה נכשלה: ' + (err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.' : err.message), 'err');
       } finally {
         els.saveBtn.disabled = false;
+      }
+    });
+
+    els.deleteBtn.addEventListener('click', async () => {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
+      if (!confirm('למחוק את ההרשמה שלך? הפרטים יימחקו ולא תופיע ברשימת המשתתפים.')) return;
+
+      els.deleteBtn.disabled = true; els.saveBtn.disabled = true;
+      setMsg(els.saveMsg, 'מוחקים…');
+      try {
+        const res = await jsonp({ action: 'delete', phone });
+        if (!res.ok) throw new Error(res.error);
+        els.form.reset();
+        loadedPhone = '';
+        try { localStorage.removeItem('dinner_phone'); } catch {}
+        els.saveBtn.textContent = 'שמירת ההרשמה';
+        els.deleteBtn.hidden = true;
+        setMsg(els.loadMsg, '');
+        toggle();
+        setMsg(els.saveMsg, res.status === 'deleted'
+          ? 'ההרשמה נמחקה. אם תשנו את דעתכם, אפשר להירשם מחדש בכל זמן.'
+          : 'לא נמצאה הרשמה עם המספר הזה.', 'ok');
+        loadBoard();
+      } catch (err) {
+        setMsg(els.saveMsg, 'המחיקה נכשלה: ' + (err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.' : err.message), 'err');
+      } finally {
+        els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
       }
     });
 
