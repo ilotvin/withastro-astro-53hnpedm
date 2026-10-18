@@ -5,6 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1C1528" />
   <title>מנגנים שרים ביחד – ארוחת שישי קהילתית</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ארוחת שישי קהילתית" />
   <meta property="og:description" content="ארוחת שישי קהילתית במתחם התחנה. נרשמים, בוחרים מה מכינים, ומעדכנים מתי שרוצים." />
@@ -15,16 +16,9 @@
 
   <style is:global>
     :root {
-      --bg: #F5F2F7; --surface: #FFFFFF; --ink: #241B33; --muted: #6B6178; --line: #D8D1E0;
-      --sage: #3F6B5A; --sage-ink: #FFFFFF; --gold: #9A7614; --gold-soft: #F3E7C2; --danger: #A33B3B;
-      color-scheme: light;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1C1528; --surface: #271E36; --ink: #EFEAF5; --muted: #A99FB8; --line: #3B3050;
-        --sage: #7FB89E; --sage-ink: #14231C; --gold: #E2C25B; --gold-soft: #3A3020; --danger: #E58A8A;
-        color-scheme: dark;
-      }
+      --bg: #1C1528; --surface: #271E36; --ink: #EFEAF5; --muted: #A99FB8; --line: #3B3050;
+      --sage: #7FB89E; --sage-ink: #14231C; --gold: #E2C25B; --gold-soft: #3A3020; --danger: #E58A8A;
+      color-scheme: dark;
     }
 
     * { box-sizing: border-box; }
@@ -37,12 +31,13 @@
     .muted { color: var(--muted); }
 
     .hero { padding: 48px 0 32px; }
+    .subtitle + .cover { margin: 20px 0 0; }
     .subtitle { font-family: "Karantina", sans-serif; font-weight: 700; font-size: clamp(30px, 7vw, 44px); line-height: 1.1; margin: 8px 0 0; color: var(--sage); }
     .intro { font-size: 19px; margin: 24px 0 0; max-width: 32em; }
     .intro p { margin: 0 0 10px; }
     .fine { font-size: 15px; color: var(--muted); margin: 14px 0 0; max-width: 34em; }
     .fine + .fine { margin-top: 6px; }
-    .fine + .cover { margin-top: 24px; }
+    .fine:last-of-type { margin-bottom: 0; }
     .fine b { color: var(--gold); }
     .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); }
     .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -97,6 +92,10 @@
     .paybox { margin: 4px 0 0; font-size: 16px; }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
+    .community { margin-top: 28px; font-size: 0.8em; color: var(--muted); }
+    .community p { margin: 0 0 12px; }
+    .community strong { color: var(--ink); }
+    .community a { color: var(--sage); font-weight: 700; }
     .msg.ok { color: var(--sage); }
     .msg.err { color: var(--danger); }
 
@@ -116,6 +115,9 @@
     <header class="hero">
       <h1>מנגנים שרים ביחד</h1>
       <p class="subtitle">ארוחת שישי קהילתית במתחם התחנה</p>
+      <figure class="cover">
+        <img src="/images/dinner231026.jpg" alt="מנגנים שרים ביחד במתחם התחנה" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+      </figure>
       <div class="intro">
         <p>הטופס מיועד למשתתפים שמעוניינים להצטרף לארוחת שישי.</p>
         <p>כמנהגנו, כל אחד ידאג להכין משהו. השאיפה היא שיהיה איזון בין הרכיבים: פחמימה, חלבון, ירקות וכדומה.</p>
@@ -124,9 +126,6 @@
       <p class="fine"><b>*</b> אם אתם פחות חזקים במטבח, אפשר להעביר 50 ₪ למשתתף אחר שיתנדב להכין מנה בעלות של שניכם. מומלץ במיוחד לקניית בשר או דגים.</p>
       <p class="fine"><b>*</b> בכל עת אפשר לחזור לטופס ולעדכן או לשנות את התשובה שלכם.</p>
       <p class="fine"><b>*</b> אפשר להצטרף לג'אם גם אחרי ארוחת הערב, החל מ‑21:30.</p>
-      <figure class="cover">
-        <img src="/images/dinner231026.jpg" alt="מנגנים שרים ביחד במתחם התחנה" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
-      </figure>
       <p class="note"><b>*</b> אנחנו מתארחים בקרון שבמתחם התחנה, ולכן, למעט בקבוק יין לקידוש, נתבקש לרכוש אלכוהול מהחנות.</p>
       <a class="btn" href="#board">מי כבר נרשם</a>
     </header>
@@ -170,7 +169,7 @@
                 <label><input type="radio" name="contribution" value="cook" />
                   <span>אכין מנה</span></label>
                 <label><input type="radio" name="contribution" value="pay" />
-                  <span>אעביר תשלום לקופה המשותפת<small>כ‑50 ₪. מהסכום הכולל נכין מנה בשרית או דג</small></span></label>
+                  <span>אעביר תשלום<small>מעבירים 50 ₪ לאורח מבשל (נעדכן אחרי שכולם ימלאו פרטים)</small></span></label>
               </div>
             </fieldset>
 
@@ -190,6 +189,14 @@
           <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
           <p id="saveMsg" class="msg" role="status"></p>
         </form>
+
+        <div class="community">
+          <p><strong>מכירים את מנגנים שרים ביחד?</strong><br />
+            אם לא, אפשר להצטרף לקבוצה:
+            <a href="https://chat.whatsapp.com/ImcpNyO1goH1zLorpNDaBA" target="_blank" rel="noopener">לקבוצת הוואטסאפ</a></p>
+          <p>כדי לראות אירועים קודמים, אפשר להציץ באינסטגרם שלי:
+            <a href="https://www.instagram.com/ilan_lotvin" target="_blank" rel="noopener">ilan_lotvin@</a></p>
+        </div>
       </section>
 
       <section id="board" class="board" aria-labelledby="board-title">
@@ -210,9 +217,7 @@
   <script is:inline>
     // ===== הגדרות – לעדכן =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5mfUMIdlQGPLQFIxs7nFAoEPK6torIGydLmY6ibf3g49xCgBDzXfc6lfzpSA_HJeZmA/exec';
-    const PAY_PHONE = '050-0000000';      // המספר להעברה בביט / פייבוקס
-    const PAY_TO = 'אילן';
-    const PRICE = 50;                     // עלות השתתפות משוערת למשתתף
+    const PRICE = 50;                     // עלות השתתפות למשתתף
     // ===========================
 
     const $ = (id) => document.getElementById(id);
@@ -225,7 +230,7 @@
     };
     let loadedPhone = '';
 
-    els.payInfo.textContent = `מעבירים כ‑${PRICE} ₪ בביט או בפייבוקס ל${PAY_TO}: ${PAY_PHONE}`;
+    els.payInfo.textContent = `את ה‑${PRICE} ₪ תעבירו לאורח מבשל. נעדכן למי להעביר אחרי שכולם ימלאו פרטים.`;
 
     // ---------- JSONP ----------
     function jsonp(params) {
@@ -266,7 +271,7 @@
       const stats = [
         ['מצטרפים לארוחה', joined.length],
         ['מכינים מנה', cooks],
-        ['בקופה המשותפת', payers],
+        ['משתתפים בתשלום', payers],
         ['יעדכנו בהמשך', later],
         ["מגיעים לג'אם", jamOnly.length]
       ].filter(([, n]) => n > 0);
@@ -275,8 +280,8 @@
       if (payers || data.fundDish) {
         els.fund.hidden = false;
         els.fund.innerHTML = data.fundDish
-          ? `מהקופה המשותפת נכין: <strong>${esc(data.fundDish)}</strong>`
-          : 'מהקופה המשותפת נכין מנה בשרית או דג, לפי הסכום שייאסף.';
+          ? `מהתשלומים נכין: <strong>${esc(data.fundDish)}</strong>`
+          : 'מי שמשתתף בתשלום יחובר לאורח מבשל. נעדכן אחרי שכולם ימלאו פרטים.';
       } else {
         els.fund.hidden = true;
       }
@@ -288,7 +293,7 @@
         els.table.innerHTML = [...atTable].sort((a, b) => order(a) - order(b)).map((p) => {
           let cls = p.mode, what;
           if (p.mode === 'join' && p.contribution === 'cook') what = esc(p.dish);
-          else if (p.mode === 'join' && p.contribution === 'pay') { what = 'משתתפים בקופה המשותפת'; cls = 'pay'; }
+          else if (p.mode === 'join' && p.contribution === 'pay') { what = 'משתתפים בתשלום לאורח מבשל'; cls = 'pay'; }
           else what = 'יעדכנו בהמשך';
           return `<li class="${cls}"><span class="who">${esc(p.name)}</span><span class="what">${what}</span></li>`;
         }).join('');
@@ -387,7 +392,7 @@
         try { localStorage.setItem('dinner_phone', phone); } catch {}
         loadedPhone = phone;
         els.saveBtn.textContent = 'עדכון ההרשמה';
-        const extra = contribution === 'pay' ? ` נשאר להעביר כ‑${PRICE} ₪ ל${PAY_TO} (${PAY_PHONE}).` : '';
+        const extra = contribution === 'pay' ? ` נעדכן למי להעביר את ה‑${PRICE} ₪ אחרי שכולם ימלאו פרטים.` : '';
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           extra + ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
         loadBoard();
