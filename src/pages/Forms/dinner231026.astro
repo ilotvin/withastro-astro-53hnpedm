@@ -5,9 +5,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ארוחת שישי בקרון – הרשמה</title>
-  <meta property="og:title" content="ארוחת שישי בקרון – הרשמה" />
-  <meta property="og:description" content="נרשמים, בוחרים מה מכינים, ומעדכנים מתי שרוצים." />
+  <title>מנגנים שרים ביחד – ארוחת שישי קהילתית</title>
+  <meta property="og:title" content="מנגנים שרים ביחד – ארוחת שישי קהילתית" />
+  <meta property="og:description" content="ארוחת שישי קהילתית במתחם התחנה. נרשמים, בוחרים מה מכינים, ומעדכנים מתי שרוצים." />
   <meta property="og:image" content="https://atroproject1.vercel.app/images/dinner231026.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,7 +37,11 @@
     .muted { color: var(--muted); }
 
     .hero { padding: 48px 0 32px; }
-    .intro { font-size: 20px; margin: 16px 0 24px; max-width: 32em; }
+    .subtitle { font-family: "Karantina", sans-serif; font-weight: 700; font-size: clamp(30px, 7vw, 44px); line-height: 1.1; margin: 8px 0 0; color: var(--sage); }
+    .intro { font-size: 19px; margin: 24px 0 0; max-width: 32em; }
+    .intro p { margin: 0 0 10px; }
+    .fine { font-size: 15px; color: var(--muted); margin: 14px 0 24px; max-width: 34em; }
+    .fine b { color: var(--gold); }
     .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); }
     .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .cover.is-empty { display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
@@ -108,10 +112,16 @@
 <body>
   <div class="wrap">
     <header class="hero">
-      <h1>ארוחת שישי בקרון</h1>
-      <p class="intro">היי, זהו טופס למעוניינים להצטרף לארוחת שישי. כדי לשמור על איזון בהשקעה בין המשתתפים, כל משתתף יכין מנה בעלות של כ‑50 ₪. מי שפחות חזק במטבח יכול להשתתף בתשלום במקום להכין.</p>
+      <h1>מנגנים שרים ביחד</h1>
+      <p class="subtitle">ארוחת שישי קהילתית במתחם התחנה</p>
+      <div class="intro">
+        <p>הטופס מיועד למשתתפים שמעוניינים להצטרף לארוחת שישי.</p>
+        <p>כמנהגנו, כל אחד ידאג להכין משהו. השאיפה היא שיהיה איזון בין הרכיבים: פחמימה, חלבון, ירקות וכדומה.</p>
+        <p>כדי לשמור על איזון בין המשתתפים, כל אחד ידאג למנה בשווי של כ‑50 ₪.</p>
+      </div>
+      <p class="fine"><b>*</b> אם אתם פחות חזקים במטבח, אפשר להעביר 50 ₪ למשתתף אחר שיתנדב להכין מנה בעלות של שניכם. מומלץ במיוחד לקניית בשר או דגים.</p>
       <figure class="cover">
-        <img src="/images/dinner231026.jpg" alt="ארוחת שישי בקרון" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+        <img src="/images/dinner231026.jpg" alt="מנגנים שרים ביחד במתחם התחנה" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <p class="note"><b>*</b> אנחנו מתארחים בקרון שבמתחם התחנה, ולכן, למעט בקבוק יין לקידוש, נתבקש לרכוש אלכוהול מהחנות.</p>
       <a class="btn" href="#board">מי כבר נרשם</a>
