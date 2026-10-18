@@ -1,0 +1,386 @@
+---
+// ארוחת ערב בקרון – לוח משתתפים + הרשמה ועדכון לפי טלפון
+---
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ארוחת ערב בקרון – מי מכין מה</title>
+  <meta property="og:title" content="ארוחת ערב בקרון – מי מכין מה" />
+  <meta property="og:description" content="נרשמים, בוחרים מה מכינים, ומעדכנים מתי שרוצים." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Karantina:wght@700&display=swap" rel="stylesheet" />
+
+  <style is:global>
+    :root {
+      --bg: #F5F2F7; --surface: #FFFFFF; --ink: #241B33; --muted: #6B6178; --line: #D8D1E0;
+      --sage: #3F6B5A; --sage-ink: #FFFFFF; --gold: #9A7614; --gold-soft: #F3E7C2; --danger: #A33B3B;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1C1528; --surface: #271E36; --ink: #EFEAF5; --muted: #A99FB8; --line: #3B3050;
+        --sage: #7FB89E; --sage-ink: #14231C; --gold: #E2C25B; --gold-soft: #3A3020; --danger: #E58A8A;
+        color-scheme: dark;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Frank Ruhl Libre", serif; font-size: 18px; line-height: 1.65; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; }
+    h1, h2 { font-family: "Karantina", sans-serif; font-weight: 700; line-height: 1; margin: 0; }
+    h1 { font-size: clamp(64px, 16vw, 112px); letter-spacing: -0.01em; }
+    h2 { font-size: 44px; }
+    h3 { font-size: 20px; margin: 28px 0 8px; }
+    .muted { color: var(--muted); }
+
+    .hero { padding: 48px 0 32px; }
+    .lede { font-size: 20px; margin: 12px 0 24px; max-width: 32em; }
+    .note { margin: 28px 0 0; padding: 14px 16px; border-inline-start: 3px solid var(--gold); background: var(--gold-soft); font-size: 16px; }
+    .note b { color: var(--gold); }
+
+    .btn { display: inline-block; font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 2px solid var(--sage); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
+    .btn-primary { background: var(--sage); color: var(--sage-ink); }
+    .btn:disabled { opacity: .55; cursor: progress; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+    .board { padding: 24px 0 8px; }
+    .stats { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .stats li { font-size: 15px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+
+    .fund { margin: 0 0 20px; padding: 16px; border: 1px solid var(--gold); border-radius: 12px; background: var(--surface); }
+
+    .table { list-style: none; margin: 8px 0 0; padding: 12px 0; position: relative; display: grid; grid-template-columns: 1fr 22px 1fr; row-gap: 10px; }
+    .table::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 22px; transform: translateX(-50%); background: var(--sage); border-radius: 11px; }
+    .table li { grid-column: 1; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-inline-end: 8px; }
+    .table li:nth-child(even) { grid-column: 3; margin-inline: 8px 0; }
+    .table .who { font-weight: 700; display: block; }
+    .table .what { font-size: 16px; display: block; }
+    .table li.pay { border-color: var(--gold); }
+    .table li.later .what { color: var(--muted); font-style: italic; }
+    .empty { grid-column: 1 / -1 !important; text-align: center; margin: 0 !important; }
+
+    .jam { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+    .join { padding-top: 40px; border-top: 1px solid var(--line); margin-top: 32px; }
+    .join > p { margin: 8px 0 20px; }
+    .field { margin-bottom: 18px; }
+    .field label, legend { display: block; font-weight: 700; margin-bottom: 6px; }
+    input[type=text], input[type=tel], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display: flex; gap: 10px; align-items: stretch; }
+    .row input { flex: 1; }
+    .hint { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+
+    fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+    .modes { display: grid; gap: 8px; }
+    .modes label { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; font-weight: 400; }
+    .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+    .modes input { margin-top: 6px; accent-color: var(--sage); }
+    .modes small { display: block; color: var(--muted); font-size: 15px; }
+
+    .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
+    .group .modes label { background: var(--bg); }
+    .paybox { margin: 4px 0 0; font-size: 16px; }
+
+    .msg { margin: 12px 0 0; min-height: 1.6em; }
+    .msg.ok { color: var(--sage); }
+    .msg.err { color: var(--danger); }
+
+    @media (max-width: 420px) {
+      .table { grid-template-columns: 14px 1fr; }
+      .table::before { left: auto; right: 0; transform: none; width: 14px; }
+      .table li, .table li:nth-child(even) { grid-column: 2; margin-inline: 10px 0; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .table li { animation: seat .35s ease-out both; }
+      @keyframes seat { from { opacity: 0; transform: translateY(6px); } }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>ארוחת ערב בקרון</h1>
+      <p class="lede">כל אחד מביא משהו לשולחן. רואים מה כבר יש, בוחרים מה להכין, ומעדכנים מתי שרוצים.</p>
+      <a class="btn btn-primary" href="#join">להרשמה או לעדכון</a>
+      <p class="note"><b>*</b> אנחנו מתארחים בקרון שבמתחם התחנה, ולכן, למעט בקבוק יין לקידוש, נתבקש לרכוש אלכוהול מהחנות.</p>
+    </header>
+
+    <main>
+      <section class="board" aria-labelledby="board-title">
+        <h2 id="board-title">מי סביב השולחן</h2>
+        <ul id="stats" class="stats" aria-label="סיכום הרשמות"></ul>
+        <div id="fund" class="fund" hidden></div>
+        <ol id="table" class="table" aria-live="polite">
+          <li class="empty muted">טוענים את רשימת המשתתפים…</li>
+        </ol>
+        <div id="jamWrap" hidden>
+          <h3>מגיעים לג'אם</h3>
+          <ul id="jam" class="jam"></ul>
+        </div>
+      </section>
+
+      <section id="join" class="join" aria-labelledby="join-title">
+        <h2 id="join-title">הרשמה ועדכון</h2>
+        <p class="muted">מספר הטלפון הוא המזהה שלך. נרשמת כבר? הזינו אותו וטענו את הפרטים כדי לעדכן.</p>
+
+        <form id="form" novalidate>
+          <div class="field">
+            <label for="phone">מספר טלפון</label>
+            <div class="row">
+              <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" required />
+              <button type="button" id="loadBtn" class="btn">טעינת פרטים</button>
+            </div>
+            <p id="loadMsg" class="hint"></p>
+          </div>
+
+          <div class="field">
+            <label for="name">שם מלא</label>
+            <input id="name" name="name" type="text" autocomplete="name" required />
+          </div>
+
+          <fieldset>
+            <legend>מה מתאים לך?</legend>
+            <div class="modes">
+              <label><input type="radio" name="mode" value="join" />
+                <span>מצטרף לארוחה</span></label>
+              <label><input type="radio" name="mode" value="later" checked />
+                <span>מעוניין להצטרף ואעדכן בהמשך<small>נרשמים עכשיו עם שם בלבד</small></span></label>
+              <label><input type="radio" name="mode" value="jam" />
+                <span>אגיע לג'אם</span></label>
+            </div>
+          </fieldset>
+
+          <div id="joinGroup" class="group" hidden>
+            <fieldset style="margin-bottom:12px">
+              <legend>איך תשתתפו בארוחה?</legend>
+              <div class="modes">
+                <label><input type="radio" name="contribution" value="cook" />
+                  <span>אכין מנה</span></label>
+                <label><input type="radio" name="contribution" value="pay" />
+                  <span>אעביר תשלום לקופה המשותפת<small>מהסכום הכולל נכין מנה בשרית או דג</small></span></label>
+              </div>
+            </fieldset>
+
+            <div id="dishField" class="field" style="margin-bottom:0" hidden>
+              <label for="dish">מה תכינו?</label>
+              <input id="dish" name="dish" type="text" placeholder="למשל: סלט עדשים עם עשבי תיבול" maxlength="120" />
+              <p class="hint">כדאי להציץ בשולחן למעלה ולבחור משהו שעוד אין.</p>
+            </div>
+            <p id="payInfo" class="paybox" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="notes">הערות <span class="muted">(לא חובה)</span></label>
+            <textarea id="notes" name="notes" maxlength="300" placeholder="צמחוני, טבעוני, אלרגיות, הגעה מאוחרת…"></textarea>
+          </div>
+
+          <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
+          <p id="saveMsg" class="msg" role="status"></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script is:inline>
+    // ===== הגדרות – לעדכן =====
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5mfUMIdlQGPLQFIxs7nFAoEPK6torIGydLmY6ibf3g49xCgBDzXfc6lfzpSA_HJeZmA/exec';
+    const PAY_PHONE = '050-0000000';      // המספר להעברה בביט / פייבוקס
+    const PAY_TO = 'אילן';
+    // ===========================
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      stats: $('stats'), fund: $('fund'), table: $('table'), jam: $('jam'), jamWrap: $('jamWrap'),
+      form: $('form'), phone: $('phone'), loadBtn: $('loadBtn'), loadMsg: $('loadMsg'),
+      name: $('name'), dish: $('dish'), notes: $('notes'),
+      joinGroup: $('joinGroup'), dishField: $('dishField'), payInfo: $('payInfo'),
+      saveBtn: $('saveBtn'), saveMsg: $('saveMsg')
+    };
+    let loadedPhone = '';
+
+    els.payInfo.textContent = `את התשלום מעבירים בביט או בפייבוקס ל${PAY_TO}: ${PAY_PHONE}`;
+
+    // ---------- JSONP ----------
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+        document.head.appendChild(s);
+      });
+    }
+
+    // ---------- helpers ----------
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function normPhone(v) {
+      let d = String(v || '').replace(/\D/g, '');
+      if (d.startsWith('972')) d = '0' + d.slice(3);
+      return d;
+    }
+    const validPhone = (d) => /^0\d{8,9}$/.test(d);
+    function setMsg(el, text, kind) { el.textContent = text; el.className = el.id === 'saveMsg' ? 'msg ' + (kind || '') : 'hint'; }
+    const radioVal = (name) => els.form.querySelector(`input[name=${name}]:checked`)?.value || '';
+
+    // ---------- board ----------
+    function renderBoard(data) {
+      const people = data.people || [];
+      const atTable = people.filter((p) => p.mode !== 'jam');
+      const jamOnly = people.filter((p) => p.mode === 'jam');
+      const joined = people.filter((p) => p.mode === 'join');
+      const cooks = joined.filter((p) => p.contribution === 'cook').length;
+      const payers = joined.filter((p) => p.contribution === 'pay').length;
+      const later = people.filter((p) => p.mode === 'later').length;
+
+      const stats = [
+        ['מצטרפים לארוחה', joined.length],
+        ['מכינים מנה', cooks],
+        ['בקופה המשותפת', payers],
+        ['יעדכנו בהמשך', later],
+        ["מגיעים לג'אם", jamOnly.length]
+      ].filter(([, n]) => n > 0);
+      els.stats.innerHTML = stats.map(([l, n]) => `<li>${l}: ${n}</li>`).join('');
+
+      if (payers || data.fundDish) {
+        els.fund.hidden = false;
+        els.fund.innerHTML = data.fundDish
+          ? `מהקופה המשותפת נכין: <strong>${esc(data.fundDish)}</strong>`
+          : 'מהקופה המשותפת נכין מנה בשרית או דג, לפי הסכום שייאסף.';
+      } else {
+        els.fund.hidden = true;
+      }
+
+      if (!atTable.length) {
+        els.table.innerHTML = '<li class="empty muted">עדיין אין משתתפים. הראשונים לבחור מנה קובעים את התפריט.</li>';
+      } else {
+        const order = (p) => p.mode === 'join' ? (p.contribution === 'cook' ? 0 : 1) : 2;
+        els.table.innerHTML = [...atTable].sort((a, b) => order(a) - order(b)).map((p) => {
+          let cls = p.mode, what;
+          if (p.mode === 'join' && p.contribution === 'cook') what = esc(p.dish);
+          else if (p.mode === 'join' && p.contribution === 'pay') { what = 'משתתפים בקופה המשותפת'; cls = 'pay'; }
+          else what = 'יעדכנו בהמשך';
+          return `<li class="${cls}"><span class="who">${esc(p.name)}</span><span class="what">${what}</span></li>`;
+        }).join('');
+      }
+
+      els.jamWrap.hidden = !jamOnly.length;
+      els.jam.innerHTML = jamOnly.map((p) => `<li>${esc(p.name)}</li>`).join('');
+    }
+
+    async function loadBoard() {
+      try {
+        const data = await jsonp({ action: 'list' });
+        if (!data.ok) throw new Error(data.error);
+        renderBoard(data);
+      } catch (e) {
+        els.table.innerHTML = '<li class="empty muted">לא הצלחנו לטעון את הרשימה. רעננו את הדף בעוד רגע.</li>';
+      }
+    }
+
+    // ---------- form ----------
+    function toggle() {
+      const mode = radioVal('mode');
+      const contribution = radioVal('contribution');
+      els.joinGroup.hidden = mode !== 'join';
+      els.dishField.hidden = !(mode === 'join' && contribution === 'cook');
+      els.payInfo.hidden = !(mode === 'join' && contribution === 'pay');
+    }
+
+    function setRadio(name, value) {
+      els.form.querySelectorAll(`input[name=${name}]`).forEach((r) => { r.checked = r.value === value; });
+    }
+
+    function fillForm(r) {
+      els.name.value = r.name || '';
+      setRadio('mode', r.mode || 'later');
+      setRadio('contribution', r.contribution || '');
+      els.dish.value = r.dish || '';
+      els.notes.value = r.notes || '';
+      toggle();
+    }
+
+    async function loadExisting(silent) {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
+      els.loadBtn.disabled = true;
+      setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
+      try {
+        const res = await jsonp({ action: 'get', phone });
+        if (!res.ok) throw new Error(res.error);
+        loadedPhone = phone;
+        if (res.found) {
+          fillForm(res.record);
+          els.saveBtn.textContent = 'עדכון ההרשמה';
+          setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
+        } else {
+          els.saveBtn.textContent = 'שמירת ההרשמה';
+          setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
+        }
+      } catch (e) {
+        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
+      } finally {
+        els.loadBtn.disabled = false;
+      }
+    }
+
+    els.loadBtn.addEventListener('click', () => loadExisting(false));
+    els.phone.addEventListener('blur', () => {
+      const p = normPhone(els.phone.value);
+      if (validPhone(p) && p !== loadedPhone) loadExisting(true);
+    });
+    els.form.addEventListener('change', (e) => {
+      if (e.target.name === 'mode' || e.target.name === 'contribution') toggle();
+    });
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = normPhone(els.phone.value);
+      const name = els.name.value.trim();
+      const mode = radioVal('mode') || 'later';
+      const contribution = mode === 'join' ? radioVal('contribution') : '';
+
+      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err'), els.phone.focus();
+      if (!name) return setMsg(els.saveMsg, 'חסר שם מלא.', 'err'), els.name.focus();
+      if (mode === 'join' && !contribution) return setMsg(els.saveMsg, 'בחרו אם תכינו מנה או תעבירו תשלום.', 'err');
+      if (contribution === 'cook' && !els.dish.value.trim()) return setMsg(els.saveMsg, 'כתבו מה תכינו.', 'err'), els.dish.focus();
+
+      els.saveBtn.disabled = true;
+      setMsg(els.saveMsg, 'שומרים…');
+      try {
+        const res = await jsonp({
+          action: 'save', phone, name, mode, contribution,
+          dish: contribution === 'cook' ? els.dish.value.trim() : '',
+          notes: els.notes.value.trim()
+        });
+        if (!res.ok) throw new Error(res.error);
+        try { localStorage.setItem('dinner_phone', phone); } catch {}
+        loadedPhone = phone;
+        els.saveBtn.textContent = 'עדכון ההרשמה';
+        const extra = contribution === 'pay' ? ` את התשלום מעבירים ל${PAY_TO} (${PAY_PHONE}).` : '';
+        setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
+          extra + ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
+        loadBoard();
+      } catch (err) {
+        setMsg(els.saveMsg, 'השמירה נכשלה: ' + (err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.' : err.message), 'err');
+      } finally {
+        els.saveBtn.disabled = false;
+      }
+    });
+
+    // ---------- init ----------
+    toggle();
+    loadBoard();
+    try {
+      const saved = localStorage.getItem('dinner_phone');
+      if (saved) { els.phone.value = saved; loadExisting(true); }
+    } catch {}
+  </script>
+</body>
+</html>
