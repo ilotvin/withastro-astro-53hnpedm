@@ -85,6 +85,9 @@
     .modes label { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; font-weight: 400; }
     .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
     .modes input { margin-top: 6px; accent-color: var(--sage); }
+    .modes.inline { grid-template-columns: repeat(3, 1fr); }
+    .modes.inline label { justify-content: center; align-items: center; }
+    .modes.inline input { margin-top: 0; }
     .modes small { display: block; color: var(--muted); font-size: 15px; }
 
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
@@ -181,6 +184,19 @@
             <p id="payInfo" class="paybox" hidden></p>
           </div>
 
+          <fieldset>
+            <legend>תרצו להשתתף בפעילות חברתית שמטרתה להכיר את האורחים האחרים?</legend>
+            <div class="modes inline">
+              <label><input type="radio" name="social" value="yes" /><span>כן</span></label>
+              <label><input type="radio" name="social" value="no" /><span>לא</span></label>
+              <label><input type="radio" name="social" value="maybe" /><span>אולי</span></label>
+            </div>
+            <div id="socialField" class="field" style="margin:12px 0 0" hidden>
+              <label for="socialDepends">במה זה תלוי?</label>
+              <input id="socialDepends" name="socialDepends" type="text" maxlength="200" />
+            </div>
+          </fieldset>
+
           <div class="field">
             <label for="notes">הערות <span class="muted">(לא חובה)</span></label>
             <textarea id="notes" name="notes" maxlength="300" placeholder="צמחוני, טבעוני, אלרגיות, הגעה מאוחרת…"></textarea>
@@ -226,7 +242,8 @@
       form: $('form'), phone: $('phone'), loadBtn: $('loadBtn'), loadMsg: $('loadMsg'),
       name: $('name'), dish: $('dish'), notes: $('notes'),
       joinGroup: $('joinGroup'), dishField: $('dishField'), payInfo: $('payInfo'),
-      saveBtn: $('saveBtn'), saveMsg: $('saveMsg')
+      saveBtn: $('saveBtn'), saveMsg: $('saveMsg'),
+      socialField: $('socialField'), socialDepends: $('socialDepends')
     };
     let loadedPhone = '';
 
@@ -320,6 +337,7 @@
       els.joinGroup.hidden = mode !== 'join';
       els.dishField.hidden = !(mode === 'join' && contribution === 'cook');
       els.payInfo.hidden = !(mode === 'join' && contribution === 'pay');
+      els.socialField.hidden = radioVal('social') !== 'maybe';
     }
 
     function setRadio(name, value) {
@@ -332,6 +350,8 @@
       setRadio('contribution', r.contribution || '');
       els.dish.value = r.dish || '';
       els.notes.value = r.notes || '';
+      setRadio('social', r.social || '');
+      els.socialDepends.value = r.social_depends || '';
       toggle();
     }
 
@@ -365,7 +385,7 @@
       if (validPhone(p) && p !== loadedPhone) loadExisting(true);
     });
     els.form.addEventListener('change', (e) => {
-      if (e.target.name === 'mode' || e.target.name === 'contribution') toggle();
+      if (['mode', 'contribution', 'social'].includes(e.target.name)) toggle();
     });
 
     els.form.addEventListener('submit', async (e) => {
@@ -386,7 +406,9 @@
         const res = await jsonp({
           action: 'save', phone, name, mode, contribution,
           dish: contribution === 'cook' ? els.dish.value.trim() : '',
-          notes: els.notes.value.trim()
+          notes: els.notes.value.trim(),
+          social: radioVal('social'),
+          social_depends: radioVal('social') === 'maybe' ? els.socialDepends.value.trim() : ''
         });
         if (!res.ok) throw new Error(res.error);
         try { localStorage.setItem('dinner_phone', phone); } catch {}
