@@ -79,13 +79,6 @@
     .table li.later .what { color: var(--muted); font-style: italic; }
     .empty { grid-column: 1 / -1 !important; text-align: center; margin: 0 !important; }
 
-    .quotes { margin-top: 48px; padding-top: 40px; border-top: 1px solid var(--line); text-align: center; }
-    .quote { margin: 0 auto 20px; max-width: 30em; min-height: 9.5em; display: flex; flex-direction: column; justify-content: center; transition: opacity .4s ease; }
-    .quote.fading { opacity: 0; }
-    .quote blockquote { margin: 0; font-size: clamp(22px, 5vw, 28px); line-height: 1.5; font-weight: 500; }
-    .quote blockquote::before { content: "״"; display: block; font-family: "Karantina", sans-serif; font-size: 72px; line-height: .6; color: var(--gold); margin-bottom: 8px; }
-    .quote figcaption { margin-top: 12px; color: var(--muted); font-size: 16px; }
-    @media (prefers-reduced-motion: reduce) { .quote { transition: none; } }
     .jam { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 14px; }
 
     .join { padding-top: 40px; border-top: 1px solid var(--line); }
@@ -248,14 +241,6 @@
           <h3>מגיעים רק לג'אם</h3>
           <ul id="jam" class="jam"></ul>
         </div>
-      </section>
-
-      <section class="quotes" aria-label="משפטי השראה">
-        <figure class="quote">
-          <blockquote id="quoteText"></blockquote>
-          <figcaption id="quoteBy"></figcaption>
-        </figure>
-        <button type="button" id="nextQuote" class="btn">משפט נוסף</button>
       </section>
     </main>
   </div>
@@ -490,54 +475,6 @@
         els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
       }
     });
-
-    // ---------- משפטי השראה ----------
-    const QUOTES = [
-      ['אם אין אני לי, מי לי? וכשאני לעצמי, מה אני? ואם לא עכשיו, אימתי?', 'הלל הזקן'],
-      ['לא עליך המלאכה לגמור, ולא אתה בן חורין להיבטל ממנה.', 'רבי טרפון'],
-      ['איזהו חכם? הלומד מכל אדם.', 'בן זומא'],
-      ['איזהו עשיר? השמח בחלקו.', 'בן זומא'],
-      ['כל העולם כולו גשר צר מאוד, והעיקר לא לפחד כלל.', 'רבי נחמן מברסלב'],
-      ['מסע של אלף מילין מתחיל בצעד אחד.', 'לאו דזה'],
-      ['חיים שאינם נבחנים אינם ראויים לחיותם.', 'סוקרטס'],
-      ['אי אפשר להיכנס פעמיים לאותו נהר.', 'הרקליטוס'],
-      ['בזמן שאנחנו דוחים את החיים, הם חולפים.', 'סנקה'],
-      ['לא הדברים עצמם מטרידים אותנו, אלא הדעות שלנו עליהם.', 'אפיקטטוס'],
-      ['חיינו הם מה שמחשבותינו עושות מהם.', 'מרקוס אורליוס'],
-      ['את החיים אפשר להבין רק לאחור, אבל צריך לחיות אותם קדימה.', 'סרן קירקגור'],
-      ['מי שיש לו ״למה״ לחיות, יכול לשאת כמעט כל ״איך״.', 'פרידריך ניטשה'],
-      ['בלי מוזיקה, החיים היו טעות.', 'פרידריך ניטשה'],
-      ['החיים הם כמו רכיבה על אופניים: כדי לשמור על שיווי משקל, צריך להמשיך לנוע.', 'אלברט איינשטיין'],
-      ['החיים הם הרפתקה נועזת, או שאין הם כלום.', 'הלן קלר'],
-      ['עליך לעשות את הדבר שאתה חושב שאינך מסוגל לעשות.', 'אלינור רוזוולט'],
-      ['כשאיננו יכולים עוד לשנות מצב, אנו נדרשים לשנות את עצמנו.', 'ויקטור פרנקל'],
-      ['בעומק החורף גיליתי שיש בתוכי קיץ בלתי מנוצח.', 'אלבר קאמי'],
-      ['רק בלב רואים היטב. הדבר החשוב סמוי מן העין.', 'אנטואן דה סנט־אכזופרי']
-    ];
-    const QUOTE_SECONDS = 9;
-    const quoteBox = document.querySelector('.quote');
-    const quoteText = $('quoteText');
-    const quoteBy = $('quoteBy');
-    let quoteIndex = Math.floor(Math.random() * QUOTES.length);
-    let quoteTimer;
-
-    function renderQuote() {
-      const [t, by] = QUOTES[quoteIndex];
-      quoteText.textContent = t;
-      quoteBy.textContent = by;
-    }
-    function nextQuote() {
-      quoteIndex = (quoteIndex + 1) % QUOTES.length;
-      quoteBox.classList.add('fading');
-      setTimeout(() => { renderQuote(); quoteBox.classList.remove('fading'); }, 400);
-    }
-    function startQuoteTimer() {
-      clearInterval(quoteTimer);
-      quoteTimer = setInterval(nextQuote, QUOTE_SECONDS * 1000);
-    }
-    $('nextQuote').addEventListener('click', () => { nextQuote(); startQuoteTimer(); });
-    renderQuote();
-    startQuoteTimer();
 
     // ---------- init ----------
     toggle();
