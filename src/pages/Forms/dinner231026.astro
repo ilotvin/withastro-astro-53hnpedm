@@ -57,8 +57,15 @@
     :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
     .board { padding: 40px 0 8px; border-top: 1px solid var(--line); margin-top: 40px; }
-    .stats { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-wrap: wrap; gap: 8px; }
-    .stats li { font-size: 15px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+    .stats { margin: 16px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); max-width: 22em; }
+    .stats:empty { display: none; }
+    .stat { display: flex; justify-content: space-between; gap: 16px; font-size: 16px; padding: 3px 0; }
+    .stat b { font-variant-numeric: tabular-nums; }
+    .stat.main { font-weight: 700; }
+    .stat-group { margin-bottom: 8px; }
+    .stat-group .sub { margin-inline-start: 8px; padding-inline-start: 14px; border-inline-start: 2px solid var(--sage); color: var(--muted); font-size: 15px; }
+    .stat-group .sub b { color: var(--ink); font-weight: 500; }
+    .stat-group + .stat { border-top: 1px solid var(--line); padding-top: 8px; }
 
     .fund { margin: 0 0 20px; padding: 16px; border: 1px solid var(--gold); border-radius: 12px; background: var(--surface); }
 
@@ -72,6 +79,13 @@
     .table li.later .what { color: var(--muted); font-style: italic; }
     .empty { grid-column: 1 / -1 !important; text-align: center; margin: 0 !important; }
 
+    .quotes { margin-top: 48px; padding-top: 40px; border-top: 1px solid var(--line); text-align: center; }
+    .quote { margin: 0 auto 20px; max-width: 30em; min-height: 9.5em; display: flex; flex-direction: column; justify-content: center; transition: opacity .4s ease; }
+    .quote.fading { opacity: 0; }
+    .quote blockquote { margin: 0; font-size: clamp(22px, 5vw, 28px); line-height: 1.5; font-weight: 500; }
+    .quote blockquote::before { content: "״"; display: block; font-family: "Karantina", sans-serif; font-size: 72px; line-height: .6; color: var(--gold); margin-bottom: 8px; }
+    .quote figcaption { margin-top: 12px; color: var(--muted); font-size: 16px; }
+    @media (prefers-reduced-motion: reduce) { .quote { transition: none; } }
     .jam { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 14px; }
 
     .join { padding-top: 40px; border-top: 1px solid var(--line); }
@@ -225,15 +239,23 @@
 
       <section id="board" class="board" aria-labelledby="board-title">
         <h2 id="board-title">מי סביב השולחן</h2>
-        <ul id="stats" class="stats" aria-label="סיכום הרשמות"></ul>
+        <div id="stats" class="stats" aria-label="סיכום הרשמות"></div>
         <div id="fund" class="fund" hidden></div>
         <ol id="table" class="table" aria-live="polite">
           <li class="empty muted">טוענים את רשימת המשתתפים…</li>
         </ol>
         <div id="jamWrap" hidden>
-          <h3>מגיעים לג'אם</h3>
+          <h3>מגיעים רק לג'אם</h3>
           <ul id="jam" class="jam"></ul>
         </div>
+      </section>
+
+      <section class="quotes" aria-label="משפטי השראה">
+        <figure class="quote">
+          <blockquote id="quoteText"></blockquote>
+          <figcaption id="quoteBy"></figcaption>
+        </figure>
+        <button type="button" id="nextQuote" class="btn">משפט נוסף</button>
       </section>
     </main>
   </div>
@@ -294,14 +316,18 @@
       const payers = joined.filter((p) => p.contribution === 'pay').length;
       const later = people.filter((p) => p.mode === 'later').length;
 
-      const stats = [
-        ['מצטרפים לארוחה', joined.length],
-        ['מכינים מנה', cooks],
-        ['משתתפים בתשלום', payers],
-        ['יעדכנו בהמשך', later],
-        ["מגיעים לג'אם", jamOnly.length]
-      ].filter(([, n]) => n > 0);
-      els.stats.innerHTML = stats.map(([l, n]) => `<li>${l}: ${n}</li>`).join('');
+      const row = (label, n, cls = '') => `<div class="stat ${cls}"><span>${label}:</span><b>${n}</b></div>`;
+      let statsHtml = '';
+      if (joined.length) {
+        statsHtml += `<div class="stat-group">
+          ${row('מצטרפים לארוחה', joined.length, 'main')}
+          ${row('מכינים מנה', cooks, 'sub')}
+          ${row('משתתפים בתשלום', payers, 'sub')}
+        </div>`;
+      }
+      if (later) statsHtml += row('יעדכנו בהמשך', later);
+      if (jamOnly.length) statsHtml += row("מגיעים רק לג'אם", jamOnly.length);
+      els.stats.innerHTML = statsHtml;
 
       if (payers || data.fundDish) {
         els.fund.hidden = false;
@@ -464,6 +490,54 @@
         els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
       }
     });
+
+    // ---------- משפטי השראה ----------
+    const QUOTES = [
+      ['אם אין אני לי, מי לי? וכשאני לעצמי, מה אני? ואם לא עכשיו, אימתי?', 'הלל הזקן'],
+      ['לא עליך המלאכה לגמור, ולא אתה בן חורין להיבטל ממנה.', 'רבי טרפון'],
+      ['איזהו חכם? הלומד מכל אדם.', 'בן זומא'],
+      ['איזהו עשיר? השמח בחלקו.', 'בן זומא'],
+      ['כל העולם כולו גשר צר מאוד, והעיקר לא לפחד כלל.', 'רבי נחמן מברסלב'],
+      ['מסע של אלף מילין מתחיל בצעד אחד.', 'לאו דזה'],
+      ['חיים שאינם נבחנים אינם ראויים לחיותם.', 'סוקרטס'],
+      ['אי אפשר להיכנס פעמיים לאותו נהר.', 'הרקליטוס'],
+      ['בזמן שאנחנו דוחים את החיים, הם חולפים.', 'סנקה'],
+      ['לא הדברים עצמם מטרידים אותנו, אלא הדעות שלנו עליהם.', 'אפיקטטוס'],
+      ['חיינו הם מה שמחשבותינו עושות מהם.', 'מרקוס אורליוס'],
+      ['את החיים אפשר להבין רק לאחור, אבל צריך לחיות אותם קדימה.', 'סרן קירקגור'],
+      ['מי שיש לו ״למה״ לחיות, יכול לשאת כמעט כל ״איך״.', 'פרידריך ניטשה'],
+      ['בלי מוזיקה, החיים היו טעות.', 'פרידריך ניטשה'],
+      ['החיים הם כמו רכיבה על אופניים: כדי לשמור על שיווי משקל, צריך להמשיך לנוע.', 'אלברט איינשטיין'],
+      ['החיים הם הרפתקה נועזת, או שאין הם כלום.', 'הלן קלר'],
+      ['עליך לעשות את הדבר שאתה חושב שאינך מסוגל לעשות.', 'אלינור רוזוולט'],
+      ['כשאיננו יכולים עוד לשנות מצב, אנו נדרשים לשנות את עצמנו.', 'ויקטור פרנקל'],
+      ['בעומק החורף גיליתי שיש בתוכי קיץ בלתי מנוצח.', 'אלבר קאמי'],
+      ['רק בלב רואים היטב. הדבר החשוב סמוי מן העין.', 'אנטואן דה סנט־אכזופרי']
+    ];
+    const QUOTE_SECONDS = 9;
+    const quoteBox = document.querySelector('.quote');
+    const quoteText = $('quoteText');
+    const quoteBy = $('quoteBy');
+    let quoteIndex = Math.floor(Math.random() * QUOTES.length);
+    let quoteTimer;
+
+    function renderQuote() {
+      const [t, by] = QUOTES[quoteIndex];
+      quoteText.textContent = t;
+      quoteBy.textContent = by;
+    }
+    function nextQuote() {
+      quoteIndex = (quoteIndex + 1) % QUOTES.length;
+      quoteBox.classList.add('fading');
+      setTimeout(() => { renderQuote(); quoteBox.classList.remove('fading'); }, 400);
+    }
+    function startQuoteTimer() {
+      clearInterval(quoteTimer);
+      quoteTimer = setInterval(nextQuote, QUOTE_SECONDS * 1000);
+    }
+    $('nextQuote').addEventListener('click', () => { nextQuote(); startQuoteTimer(); });
+    renderQuote();
+    startQuoteTimer();
 
     // ---------- init ----------
     toggle();
