@@ -89,7 +89,8 @@
     .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
-    .drinks { margin: 18px 0 0; font-size: 16px; }
+    .price-line { margin-bottom: 8px !important; }
+    .drinks { margin: 0 0 16px; font-size: 16px; }
     .drinks small, .done-info .resp { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 
     .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
@@ -262,14 +263,15 @@
 
           <fieldset class="group">
             <legend>תשלום</legend>
-            <p class="group-intro">עלות הערב הינה 80 ₪ (40 ₪ ללא אלכוהול).</p>
+            <p class="group-intro price-line">עלות הערב הינה 80 ₪ (40 ₪ ללא אלכוהול).</p>
+            <p class="drinks">במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small>נא לשתות באחריות</small></p>
             <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">איך תרצו לשלם?</span>
             <div class="modes inline three">
               <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
               <label><input type="radio" name="payment" value="פייבוקס" /><span>פייבוקס</span></label>
               <label><input type="radio" name="payment" value="מזומן" /><span>מזומן</span></label>
             </div>
-            <p class="hint" style="margin-top:10px">עדיף להעביר תשלום עבור שניכם ולרשום את השמות.</p>
+            <p class="hint" style="margin-top:10px">בקשו מהאורח שלכם לציין בתשלום שהוא מגיע יחד איתכם.</p>
           </fieldset>
 
           <div class="info">
@@ -281,7 +283,6 @@
             <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
           </div>
           <p id="saveMsg" class="msg" role="status"></p>
-          <p class="drinks">במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small>נא לשתות באחריות</small></p>
         </form>
 
         <div class="community">
@@ -334,7 +335,7 @@
       </div>
       <p class="done-ontime">חשוב להגיע בזמן</p>
       <p class="done-price">עלות הערב: <b>80 ₪</b> (40 ₪ ללא אלכוהול)</p>
-      <p class="done-pay">אפשר לשלם בביט, פייבוקס או מזומן. עדיף להעביר תשלום עבור שניכם ולרשום את השמות.</p>
+      <p class="done-pay">אפשר לשלם בביט, פייבוקס או מזומן. בקשו מהאורח שלכם לציין בתשלום שהוא מגיע יחד איתכם.</p>
     </div>
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
