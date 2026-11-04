@@ -100,6 +100,10 @@
     .done p { margin: 0 0 18px; font-size: 17px; }
     .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
     .done-info p { font-size: 15px; color: var(--muted); margin: 0 0 6px; }
+    .done-date { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .done-date b { display: block; font-size: 26px; color: var(--sage); font-variant-numeric: tabular-nums; }
+    .done-date span { display: block; font-size: 15px; color: var(--muted); }
+    .done-info .done-food { color: var(--ink); font-size: 15px; margin: 8px 0 0; }
     .done-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 10px; }
     .done-times div { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
     .done-times span { display: block; font-size: 13px; color: var(--muted); }
@@ -339,15 +343,13 @@
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
     <p>אצור קשר.</p>
     <div class="done-info">
-      <p>במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small class="resp">נא לשתות באחריות</small></p>
-      <p>כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
+      <div class="done-date"><b>6.11.26</b><span>ערב שישי</span></div>
       <div class="done-times">
         <div><span>שעת הגעה</span><b>20:00</b></div>
         <div><span>התחלת הפעילות</span><b>20:30</b></div>
       </div>
       <p class="done-ontime">חשוב להגיע בזמן</p>
-      <p class="done-price">עלות הערב: <b>80 ₪</b> (40 ₪ ללא אלכוהול)</p>
-      <p class="done-pay">אפשר לשלם בביט, פייבוקס או מזומן. בקשו מה‑+1 שלכם לציין שהוא מגיע יחד איתכם (אפשר גם לשלם עבור שניכם ולציין את השמות).</p>
+      <p class="done-food">מומלץ לא להגיע רעבים.</p>
     </div>
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
