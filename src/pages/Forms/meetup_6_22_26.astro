@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#1C1528" />
+  <meta name="theme-color" content="#0A7090" />
   <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
   <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
@@ -13,8 +13,8 @@
 
   <style is:global>
     :root {
-      --bg: #1C1528; --surface: #271E36; --ink: #EFEAF5; --muted: #A99FB8; --line: #3B3050;
-      --sage: #7FB89E; --sage-ink: #14231C; --gold: #E2C25B; --gold-soft: #3A3020; --danger: #E58A8A;
+      --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
+      --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --gold-soft: #0B5770; --danger: #FFB4B4;
       --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
       color-scheme: dark;
     }
@@ -50,20 +50,6 @@
     .btn:disabled { opacity: .55; cursor: progress; }
     :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
-    .board { padding: 40px 0 8px; border-top: 1px solid var(--line); margin-top: 40px; }
-    .stats { margin: 16px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); max-width: 22em; }
-    .stats:empty { display: none; }
-    .stat { display: flex; justify-content: space-between; gap: 16px; font-size: 16px; padding: 3px 0; }
-    .stat b { font-variant-numeric: tabular-nums; }
-    .stat.main { font-weight: 700; }
-
-    .table { list-style: none; margin: 8px 0 0; padding: 12px 0; position: relative; display: grid; grid-template-columns: 1fr 22px 1fr; row-gap: 10px; }
-    .table::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 22px; transform: translateX(-50%); background: var(--sage); border-radius: 11px; }
-    .table li { grid-column: 1; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-inline-end: 8px; }
-    .table li:nth-child(even) { grid-column: 3; margin-inline: 8px 0; }
-    .table .who { font-weight: 700; display: block; }
-    .table .what { font-size: 15px; display: block; color: var(--muted); }
-    .empty { grid-column: 1 / -1 !important; text-align: center; margin: 0 !important; }
 
     .join { padding-top: 40px; border-top: 1px solid var(--line); }
     .join > p { margin: 8px 0 20px; }
@@ -100,13 +86,6 @@
 
     @media (max-width: 420px) {
       .split { grid-template-columns: 1fr; }
-      .table { grid-template-columns: 14px 1fr; }
-      .table::before { left: auto; right: 0; transform: none; width: 14px; }
-      .table li, .table li:nth-child(even) { grid-column: 2; margin-inline: 10px 0; }
-    }
-    @media (prefers-reduced-motion: no-preference) {
-      .table li { animation: seat .35s ease-out both; }
-      @keyframes seat { from { opacity: 0; transform: translateY(6px); } }
     }
   </style>
 </head>
@@ -123,7 +102,6 @@
       </div>
       <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).</p>
       <p class="fine"><b>*</b> בכל עת אפשר לחזור לטופס ולעדכן או לשנות את התשובות שלכם.</p>
-      <a class="btn" href="#board">מי כבר נרשם</a>
     </header>
 
     <main>
@@ -242,13 +220,6 @@
         </div>
       </section>
 
-      <section id="board" class="board" aria-labelledby="board-title">
-        <h2 id="board-title">מי כבר נרשם</h2>
-        <div id="stats" class="stats" aria-label="סיכום הרשמות"></div>
-        <ol id="table" class="table" aria-live="polite">
-          <li class="empty muted">טוענים את רשימת הנרשמים…</li>
-        </ol>
-      </section>
     </main>
   </div>
 
@@ -275,7 +246,6 @@
 
     const $ = (id) => document.getElementById(id);
     const els = {
-      stats: $('stats'), table: $('table'),
       form: $('form'), phone: $('phone'), loadBtn: $('loadBtn'), loadMsg: $('loadMsg'),
       storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn')
     };
@@ -323,29 +293,6 @@
     const radioVal = (name) => els.form.querySelector(`input[name=${name}]:checked`)?.value || '';
     const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
       : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
-
-    // ---------- board ----------
-    function renderBoard(data) {
-      const people = data.people || [];
-      const row = (label, n, cls = '') => `<div class="stat ${cls}"><span>${label}:</span><b>${n}</b></div>`;
-      els.stats.innerHTML = people.length
-        ? row('הרשמות', people.length, 'main') + row('משתתפים כולל +1', people.length * 2)
-        : '';
-
-      els.table.innerHTML = people.length
-        ? people.map((p) => `<li><span class="who">${esc(p.name)}</span><span class="what">מגיעים עם ${esc(p.guest_name)}</span></li>`).join('')
-        : '<li class="empty muted">עדיין אין נרשמים. אפשר להיות הראשונים.</li>';
-    }
-
-    async function loadBoard() {
-      try {
-        const data = await jsonp({ action: 'list' });
-        if (!data.ok) throw new Error(data.error);
-        renderBoard(data);
-      } catch (e) {
-        els.table.innerHTML = '<li class="empty muted">לא הצלחנו לטעון את הרשימה. רעננו את הדף בעוד רגע.</li>';
-      }
-    }
 
     // ---------- form ----------
     function toggle() { els.storyField.hidden = radioVal('share_story') !== 'yes'; }
@@ -423,7 +370,6 @@
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
-        loadBoard();
       } catch (err) {
         setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
       } finally {
@@ -451,7 +397,6 @@
         setMsg(els.saveMsg, res.status === 'deleted'
           ? 'ההרשמה נמחקה. אם תשנו את דעתכם, אפשר להירשם מחדש בכל זמן.'
           : 'לא נמצאה הרשמה עם המספר הזה.', 'ok');
-        loadBoard();
       } catch (err) {
         setMsg(els.saveMsg, 'המחיקה נכשלה: ' + errText(err), 'err');
       } finally {
@@ -461,7 +406,6 @@
 
     // ---------- init ----------
     toggle();
-    loadBoard();
     try {
       const saved = localStorage.getItem('meetup_6_22_26_phone');
       if (saved) { els.phone.value = saved; loadExisting(true); }
