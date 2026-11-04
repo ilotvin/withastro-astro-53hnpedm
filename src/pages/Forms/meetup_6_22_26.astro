@@ -15,6 +15,7 @@
     :root {
       --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
       --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --gold-soft: #0B5770; --danger: #FFB4B4;
+      --field: #13809F;
       --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
       color-scheme: dark;
     }
@@ -55,10 +56,11 @@
     .join > p { margin: 8px 0 20px; }
     .field { margin-bottom: 18px; }
     .field label, legend { display: block; font-weight: 700; margin-bottom: 6px; }
-    input[type=text], input[type=tel], input[type=number], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    input[type=text], input[type=tel], input[type=number], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
     input[dir=ltr] { text-align: left; }
     input[type=number] { max-width: 8em; }
     textarea { min-height: 80px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
     .row { display: flex; gap: 10px; align-items: stretch; }
     .row input { flex: 1; }
     .hint { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
@@ -74,7 +76,11 @@
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
     .group > legend, .group-title { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
     .group-intro { font-size: 16px; color: var(--muted); margin: 0 0 16px; }
-    .group input[type=text], .group input[type=number], .group textarea { background: var(--bg); }
+
+    .info { margin: 8px 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 16px; }
+    .info p { margin: 0 0 6px; }
+    .info p:last-child { margin-bottom: 0; }
+    .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
     .msg.ok { color: var(--sage); }
@@ -202,6 +208,12 @@
           <div class="field">
             <label for="open_question">שאלה פתוחה <span class="muted">(לא חובה)</span></label>
             <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
+          </div>
+
+          <div class="info">
+            <p><b>*</b> הערב בעלות של 50 ₪ לכיסוי הוצאות.</p>
+            <p><b>*</b> כל משתתף יביא משהו טעים לשולחן משותף.</p>
+            <p><b>*</b> בערב יהיה יין, בירה, וויסקי, ג'ין ושתייה קלה.</p>
           </div>
 
           <div class="actions">
