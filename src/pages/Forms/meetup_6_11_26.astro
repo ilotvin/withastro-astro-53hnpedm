@@ -6,6 +6,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0A7090" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet" />
   <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
   <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
@@ -95,8 +98,12 @@
 
     .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
     .done::backdrop { background: rgba(4, 30, 40, .7); }
-    .done-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: var(--sage); color: var(--sage-ink); display: grid; place-items: center; font-size: 30px; font-weight: 700; }
-    .done h2 { font-size: 26px; margin: 0 0 10px; }
+    .done-head { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
+    .done-logo { font-family: "Frank Ruhl Libre", serif; color: var(--sage); text-align: center; line-height: 1.05; }
+    .done-logo .l1 { display: block; font-size: 20px; font-weight: 500; letter-spacing: .06em; }
+    .done-logo .l2 { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; font-weight: 400; letter-spacing: .3em; margin-top: 3px; }
+    .done-logo .l2::before, .done-logo .l2::after { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
+    .done h2 { font-size: 26px; margin: 0 0 18px; }
     .done p { margin: 0 0 18px; font-size: 17px; }
     .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
     .done-info p { font-size: 15px; color: var(--muted); margin: 0 0 6px; }
@@ -339,9 +346,13 @@
   </div>
 
   <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
-    <div class="done-icon" aria-hidden="true">✓</div>
+    <div class="done-head">
+      <div class="done-logo" aria-label="מנגנים שרים ביחד">
+        <span class="l1">מנגנים שרים</span>
+        <span class="l2">ביחד</span>
+      </div>
+    </div>
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
-    <p>אצור קשר.</p>
     <div class="done-info">
       <div class="done-date"><b>6.11.26</b><span>ערב שישי</span></div>
       <div class="done-times">
@@ -349,7 +360,7 @@
         <div><span>התחלת הפעילות</span><b>20:30</b></div>
       </div>
       <p class="done-ontime">חשוב להגיע בזמן</p>
-      <p class="done-food">מומלץ לא להגיע רעבים.</p>
+      <p class="done-food">להביא משהו טעים.</p>
     </div>
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
@@ -569,7 +580,7 @@
     // ---------- popup ----------
     const doneDialog = $('doneDialog');
     function showDone(updated) {
-      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו. אצור קשר.');
+      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
     }
     $('doneClose').addEventListener('click', () => doneDialog.close());
     doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
