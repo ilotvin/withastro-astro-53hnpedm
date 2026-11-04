@@ -285,7 +285,7 @@
       </section>
 
       <section class="about" aria-label="קצת עליי">
-        <details>
+        <details id="open1">
           <summary>
             <span class="about-title">קצת עליי</span>
             <span class="about-first">7 שנים של עבודה כרו"ח בתחום המיסוי האמריקאי.</span>
@@ -295,7 +295,7 @@
             <p>גרתי 3 שנים באיים הקריביים, הייתי נשוי, ובגיל 36 עשיתי הסבת מקצוע.</p>
             <p>במקביל להסבת המקצוע גיליתי שאני גם ממש אוהב לארח. ומפה גם יוצא לי לארגן ריטרטים ואירועים כיפיים שמשלבים המון מוסיקה.</p>
             <p>במקביל למוסיקה, שיחות טובות יוצרות אצלי זכרונות חזקים לא פחות ממוסיקה.<br />לפעמים שיחה זה כל מה שאני זוכר, וזה מה שאני מחפש לייצר הערב.</p>
-            <details class="more">
+            <details class="more" id="open2">
               <summary>
                 <span class="more-title">מחשבות נוספות</span>
                 <span class="about-hint"><span class="when-closed">לחצו לפתיחה</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
@@ -349,6 +349,7 @@
       storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn')
     };
     let loadedPhone = '';
+    let isRegistered = false; // האם המספר הנוכחי כבר רשום בגיליון
 
     // ---------- JSONP (קריאה ומחיקה) ----------
     function jsonp(params) {
@@ -413,8 +414,10 @@
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
         loadedPhone = phone;
+        isRegistered = !!res.found;
         if (res.found) {
           fillForm(res.record);
+          syncOpened();
           els.saveBtn.textContent = 'עדכון ההרשמה';
           els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
@@ -446,6 +449,8 @@
       FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
+      data.open_1 = opened.open1 ? 'TRUE' : 'FALSE';
+      data.open_2 = opened.open2 ? 'TRUE' : 'FALSE';
 
       for (const [k, msg] of REQUIRED) {
         if (!data[k]) return setMsg(els.saveMsg, msg, 'err'), $(k).focus();
@@ -464,6 +469,7 @@
         if (!res.ok) throw new Error(res.error);
         try { localStorage.setItem('meetup_6_11_26_phone', phone); } catch {}
         loadedPhone = phone;
+        isRegistered = true;
         els.saveBtn.textContent = 'עדכון ההרשמה';
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
@@ -488,6 +494,7 @@
         if (!res.ok) throw new Error(res.error);
         els.form.reset();
         loadedPhone = '';
+        isRegistered = false;
         try { localStorage.removeItem('meetup_6_11_26_phone'); } catch {}
         els.saveBtn.textContent = 'שמירת ההרשמה';
         els.deleteBtn.hidden = true;
@@ -501,6 +508,32 @@
       } finally {
         els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
       }
+    });
+
+    // ---------- מעקב פתיחת "קצת עליי" / "מחשבות נוספות" ----------
+    // אם המבקר כבר רשום, כל פתיחה נשלחת מיד לגיליון – בלי ללחוץ על עדכון.
+    // אם עדיין לא נרשם, הפתיחה נזכרת ונשלחת יחד עם ההרשמה.
+    const opened = { open1: false, open2: false };
+    const sent = { open1: false, open2: false };
+    const FIELD_OF = { open1: 'open_1', open2: 'open_2' };
+
+    function track(id) {
+      if (!isRegistered || !loadedPhone || sent[id]) return;
+      sent[id] = true;
+      jsonp({ action: 'track', phone: loadedPhone, field: FIELD_OF[id] })
+        .then((res) => { if (!res.ok) sent[id] = false; })
+        .catch(() => { sent[id] = false; });
+    }
+    function syncOpened() {
+      Object.keys(opened).forEach((id) => { if (opened[id]) track(id); });
+    }
+
+    ['open1', 'open2'].forEach((id) => {
+      $(id).addEventListener('toggle', () => {
+        if (!$(id).open) return;
+        opened[id] = true;
+        track(id);
+      });
     });
 
     // ---------- popup ----------
