@@ -73,6 +73,7 @@
     .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
     .modes input { margin: 0; accent-color: var(--sage); }
     .modes.inline { grid-template-columns: repeat(2, 1fr); max-width: 18em; }
+    .modes.inline.three { grid-template-columns: repeat(3, 1fr); max-width: 26em; }
 
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
     .group > legend, .group-title { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
@@ -97,6 +98,9 @@
     .done-times span { display: block; font-size: 13px; color: var(--muted); }
     .done-times b { display: block; font-size: 24px; color: var(--sage); font-variant-numeric: tabular-nums; }
     .done-info .done-ontime { color: var(--gold); font-weight: 700; margin: 0; }
+    .done-info .done-price { color: var(--ink); font-size: 16px; margin: 12px 0 0; }
+    .done-price b { color: var(--sage); }
+    .done-info .done-pay { font-size: 14px; margin: 4px 0 0; }
     .msg.ok { color: var(--sage); }
     .msg.err { color: var(--danger); }
     .community { margin-top: 28px; font-size: 0.85em; color: var(--muted); }
@@ -223,8 +227,19 @@
             <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
           </div>
 
+          <fieldset class="group">
+            <legend>תשלום</legend>
+            <p class="group-intro">עלות הערב הינה 80 ₪ (40 ₪ ללא אלכוהול).</p>
+            <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">איך תרצו לשלם?</span>
+            <div class="modes inline three">
+              <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
+              <label><input type="radio" name="payment" value="פייבוקס" /><span>פייבוקס</span></label>
+              <label><input type="radio" name="payment" value="מזומן" /><span>מזומן</span></label>
+            </div>
+            <p class="hint" style="margin-top:10px">עדיף להעביר תשלום עבור שניכם ולרשום את השמות.</p>
+          </fieldset>
+
           <div class="info">
-            <p><b>*</b> הערב בעלות של 50 ₪ לכיסוי הוצאות.</p>
             <p><b>*</b> כל משתתף יביא משהו טעים לשולחן משותף.</p>
             <p><b>*</b> בערב יהיה יין, בירה, וויסקי, ג'ין ושתייה קלה.</p>
           </div>
@@ -260,6 +275,8 @@
         <div><span>התחלת הפעילות</span><b>20:30</b></div>
       </div>
       <p class="done-ontime">חשוב להגיע בזמן</p>
+      <p class="done-price">עלות הערב: <b>80 ₪</b> (40 ₪ ללא אלכוהול)</p>
+      <p class="done-pay">אפשר לשלם בביט, פייבוקס או מזומן. עדיף להעביר תשלום עבור שניכם ולרשום את השמות.</p>
     </div>
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
@@ -335,6 +352,7 @@
     function fillForm(r) {
       FIELDS.forEach((k) => { $(k).value = r[k] ?? ''; });
       setRadio('share_story', r.share_story || '');
+      setRadio('payment', r.payment || '');
       toggle();
     }
 
@@ -378,6 +396,7 @@
       const data = {};
       FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
       data.share_story = radioVal('share_story');
+      data.payment = radioVal('payment');
 
       for (const [k, msg] of REQUIRED) {
         if (!data[k]) return setMsg(els.saveMsg, msg, 'err'), $(k).focus();
