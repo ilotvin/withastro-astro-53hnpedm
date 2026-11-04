@@ -1,5 +1,5 @@
 ---
-// ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון + לוח נרשמים
+// ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 ---
 <html lang="he" dir="rtl">
 <head>
@@ -38,10 +38,8 @@
     .fine b { color: var(--gold); }
     .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
     .cover img { width: 100%; height: auto; display: block; }
-    .cover.is-empty { aspect-ratio: 16 / 9; }
-    .cover.is-empty { display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
+    .cover.is-empty { aspect-ratio: 16 / 9; display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
     .cover.is-empty::after { content: "כאן תופיע תמונה"; color: var(--muted); font-size: 16px; }
-    .hero .btn { margin-top: 20px; }
     .note { margin: 20px 0 0; padding: 14px 16px; border-inline-start: 3px solid var(--gold); background: var(--gold-soft); font-size: 16px; }
     .note b { color: var(--gold); }
 
@@ -293,8 +291,6 @@
     }
 
     // ---------- helpers ----------
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     function normPhone(v) {
       let d = String(v || '').replace(/\D/g, '');
       if (d.startsWith('972')) d = '0' + d.slice(3);
@@ -393,7 +389,7 @@
     els.deleteBtn.addEventListener('click', async () => {
       const phone = normPhone(els.phone.value);
       if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
-      if (!confirm('למחוק את ההרשמה שלכם? הפרטים יימחקו ולא תופיעו ברשימת הנרשמים.')) return;
+      if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
 
       els.deleteBtn.disabled = true; els.saveBtn.disabled = true;
       setMsg(els.saveMsg, 'מוחקים…');
