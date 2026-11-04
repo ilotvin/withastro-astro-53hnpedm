@@ -254,7 +254,7 @@
 
   <script is:inline>
     // ===== הגדרות – לעדכן אחרי פריסת ה-Apps Script החדש =====
-    const SCRIPT_URL = 'PASTE_NEW_WEB_APP_URL_HERE';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUs1CeQC5EK_sE06ygSjVak_QrAqAr9QsVLibTdSRk-FKJF5J8iiC7VeQbeEhVvag/exec';
     // ==========================================================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'why_join',
