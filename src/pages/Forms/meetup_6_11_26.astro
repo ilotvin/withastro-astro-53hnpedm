@@ -123,6 +123,10 @@
     .about-body { padding: 0 18px 18px; font-size: 16px; }
     .about-body p { margin: 0 0 12px; }
     .about-body p:last-child { margin-bottom: 0; }
+    .thought { position: relative; margin: 18px 0 0; padding: 16px 18px 16px 18px; padding-inline-start: 46px; background: var(--bg); border-inline-start: 3px solid var(--gold); border-start-start-radius: 0; border-end-start-radius: 0; border-start-end-radius: 10px; border-end-end-radius: 10px; font-size: 17px; }
+    .thought::before { content: "״"; position: absolute; inset-inline-start: 12px; top: 2px; font-size: 48px; line-height: 1; color: var(--gold); font-weight: 700; }
+    .thought p { margin: 0 0 8px; }
+    .thought p:last-child { margin: 0; }
 
     @media (max-width: 420px) {
       .split { grid-template-columns: 1fr; }
@@ -286,6 +290,11 @@
           <div class="about-body">
             <p>גרתי 3 שנים באיים הקריביים, הייתי נשוי, ובגיל 36 עשיתי הסבת מקצוע.</p>
             <p>במקביל להסבת המקצוע גיליתי שאני גם ממש אוהב לארח. ומפה גם יוצא לי לארגן ריטרטים ואירועים כיפיים שמשלבים המון מוסיקה.</p>
+            <p>במקביל למוסיקה, שיחות טובות יוצרות אצלי זכרונות חזקים לא פחות ממוסיקה.<br />לפעמים שיחה זה כל מה שאני זוכר, וזה מה שאני מחפש לייצר הערב.</p>
+            <blockquote class="thought">
+              <p>לכולנו יש סיפור, תהליך גדילה שעברנו, משברים שיצאנו מהם מחוזקים, טעויות שלמדנו או שלא.</p>
+              <p>כולנו לפעמים צריכים הכוונה, השראה, הקשבה, חיזוק...</p>
+            </blockquote>
           </div>
         </details>
       </section>
