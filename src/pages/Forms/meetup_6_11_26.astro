@@ -201,6 +201,10 @@
               <label for="hobby">תחביב</label>
               <input id="hobby" type="text" maxlength="100" />
             </div>
+            <div class="field">
+              <label for="surprising_fact">עובדה מפתיעה על עצמכם</label>
+              <input id="surprising_fact" type="text" maxlength="300" />
+            </div>
             <div class="field" style="margin-bottom:0">
               <label for="why_join">למה תרצו להצטרף לערב? <span class="req">*</span></label>
               <textarea id="why_join" maxlength="500" required></textarea>
@@ -340,7 +344,7 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUs1CeQC5EK_sE06ygSjVak_QrAqAr9QsVLibTdSRk-FKJF5J8iiC7VeQbeEhVvag/exec';
     // ==========================================================
 
-    const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'why_join',
+    const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
       'guest_name', 'guest_age', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
     const REQUIRED = [
       ['name', 'חסר שם מלא.'],
