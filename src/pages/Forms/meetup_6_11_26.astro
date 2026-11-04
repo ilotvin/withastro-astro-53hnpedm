@@ -35,6 +35,8 @@
 
     .hero { padding: 48px 0 32px; }
     .hero h1, .hero .subtitle { text-align: center; }
+    .event-date { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0 0; font-family: "Frank Ruhl Libre", serif; font-size: 18px; letter-spacing: .12em; color: var(--muted); }
+    .event-date .sep { width: 28px; height: 1px; background: var(--sage); opacity: .8; }
     .subtitle { font-weight: 700; font-size: clamp(21px, 5vw, 28px); line-height: 1.25; margin: 10px 0 0; color: var(--sage); }
     .subtitle + .cover { margin: 20px auto 0; }
     .intro { font-size: 18px; margin: 24px auto 0; max-width: 32em; text-align: center; }
@@ -163,6 +165,7 @@
   <div class="wrap">
     <header class="hero">
       <h1>מנגנים שרים ביחד</h1>
+      <p class="event-date"><span>6.11.26</span><span class="sep" aria-hidden="true"></span><span dir="ltr">Friday evening</span></p>
       <p class="subtitle">ערב משחקים, חיבורים ומוסיקה</p>
       <figure class="cover">
         <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
