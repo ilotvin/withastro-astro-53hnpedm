@@ -62,6 +62,7 @@
     .field label, legend { display: block; font-weight: 700; margin-bottom: 6px; }
     input[type=text], input[type=tel], input[type=number], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
     input[dir=ltr] { text-align: left; }
+    input[dir=ltr]:placeholder-shown { direction: rtl; text-align: right; }
     input[type=number] { max-width: 8em; }
     textarea { min-height: 80px; resize: vertical; }
     input::placeholder, textarea::placeholder { color: var(--muted); }
@@ -179,8 +180,8 @@
               <input id="name" type="text" autocomplete="name" maxlength="80" required />
             </div>
             <div class="field">
-              <label for="name_en">שם מלא באנגלית</label>
-              <input id="name_en" type="text" dir="ltr" autocomplete="off" maxlength="80" placeholder="Full name" />
+              <label for="name_en">לינק לסושיאל</label>
+              <input id="name_en" type="text" dir="ltr" inputmode="url" autocomplete="off" maxlength="200" placeholder="מומלץ למלא סושיאל" />
             </div>
             <div class="split">
               <div class="field">
@@ -210,7 +211,7 @@
           <!-- +1 -->
           <fieldset class="group">
             <legend>את מי תזמינו איתכם?</legend>
-            <p class="group-intro">פרטי ה‑+1 שמגיע איתכם.</p>
+            <p class="group-intro">פרטי ה‑+1 שמגיע איתכם (ממגדר שאינו שלכם, למקרה שפספסתם 😉)</p>
 
             <div class="split">
               <div class="field">
@@ -461,7 +462,6 @@
       }
       if (!/[\u0590-\u05FF]/.test(data.name)) return setMsg(els.saveMsg, 'כתבו את השם המלא בעברית.', 'err'), $('name').focus();
       if (data.name.split(/\s+/).length < 2) return setMsg(els.saveMsg, 'כתבו שם פרטי ושם משפחה.', 'err'), $('name').focus();
-      if (data.name_en && !/[A-Za-z]/.test(data.name_en)) return setMsg(els.saveMsg, 'כתבו את השם באותיות באנגלית.', 'err'), $('name_en').focus();
       if (!validAge(data.age)) return setMsg(els.saveMsg, 'הגיל צריך להיות בין 18 ל‑99.', 'err'), $('age').focus();
       if (data.guest_age && !validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
       if (data.share_story !== 'yes') data.story_details = '';
