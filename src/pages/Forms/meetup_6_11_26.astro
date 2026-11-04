@@ -115,7 +115,7 @@
     .community strong { color: var(--ink); }
     .community a { color: var(--sage); font-weight: 700; }
 
-    .about { margin-top: 32px; }
+    .about { margin: 8px 0 18px; }
     .about > details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
     .about summary { list-style: none; cursor: pointer; display: block; }
     .about > details > summary { padding: 18px 18px 14px; }
@@ -238,24 +238,6 @@
             </div>
           </fieldset>
 
-          <!-- פינת השראה -->
-          <fieldset class="group">
-            <legend>פינת השראה</legend>
-            <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
-
-            <div class="field" style="margin-bottom:0">
-              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
-              <div class="modes inline">
-                <label><input type="radio" name="share_story" value="yes" /><span>כן</span></label>
-                <label><input type="radio" name="share_story" value="no" /><span>לא</span></label>
-              </div>
-            </div>
-            <div id="storyField" class="field" style="margin:14px 0 0" hidden>
-              <label for="story_details">ספרו לנו קצת על הסיפור</label>
-              <textarea id="story_details" maxlength="800"></textarea>
-            </div>
-          </fieldset>
-
           <div class="field">
             <label for="open_question">שאלה פתוחה</label>
             <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
@@ -278,6 +260,49 @@
             <p><b>*</b> כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
           </div>
 
+          <section class="about" aria-label="קצת עליי">
+            <details id="open1">
+              <summary>
+                <span class="about-title">קצת עליי</span>
+                <span class="about-first">7 שנים של עבודה כרו"ח בתחום המיסוי האמריקאי.</span>
+                <span class="about-hint"><span class="when-closed">לחצו לקריאת ההמשך</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
+              </summary>
+              <div class="about-body">
+                <p>גרתי 3 שנים באיים הקריביים, הייתי נשוי, ובגיל 36 עשיתי הסבת מקצוע.</p>
+                <p>במקביל להסבת המקצוע גיליתי שאני גם ממש אוהב לארח. ומפה גם יוצא לי לארגן ריטרטים ואירועים כיפיים שמשלבים המון מוסיקה.</p>
+                <p>במקביל למוסיקה, שיחות טובות יוצרות אצלי זכרונות חזקים לא פחות ממוסיקה.<br />לפעמים שיחה זה כל מה שאני זוכר, וזה מה שאני מחפש לייצר הערב.</p>
+                <details class="more" id="open2">
+                  <summary>
+                    <span class="more-title">מחשבות נוספות</span>
+                    <span class="about-hint"><span class="when-closed">לחצו לפתיחה</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
+                  </summary>
+                  <blockquote class="thought">
+                    <p>לכולנו יש סיפור, תהליך גדילה שעברנו, משברים שיצאנו מהם מחוזקים, טעויות שלמדנו או שלא.</p>
+                    <p>כולנו לפעמים צריכים הכוונה, השראה, הקשבה, חיזוק...</p>
+                  </blockquote>
+                </details>
+              </div>
+            </details>
+          </section>
+
+          <!-- פינת השראה -->
+          <fieldset class="group">
+            <legend>פינת השראה</legend>
+            <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
+
+            <div class="field" style="margin-bottom:0">
+              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="share_story" value="yes" /><span>כן</span></label>
+                <label><input type="radio" name="share_story" value="no" /><span>לא</span></label>
+              </div>
+            </div>
+            <div id="storyField" class="field" style="margin:14px 0 0" hidden>
+              <label for="story_details">ספרו לנו קצת על הסיפור</label>
+              <textarea id="story_details" maxlength="800"></textarea>
+            </div>
+          </fieldset>
+
           <div class="actions">
             <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
             <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
@@ -292,31 +317,6 @@
           <p>כדי לראות אירועים קודמים, אפשר להציץ באינסטגרם שלי:
             <a href="https://www.instagram.com/ilan_lotvin" target="_blank" rel="noopener">ilan_lotvin@</a></p>
         </div>
-      </section>
-
-      <section class="about" aria-label="קצת עליי">
-        <details id="open1">
-          <summary>
-            <span class="about-title">קצת עליי</span>
-            <span class="about-first">7 שנים של עבודה כרו"ח בתחום המיסוי האמריקאי.</span>
-            <span class="about-hint"><span class="when-closed">לחצו לקריאת ההמשך</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
-          </summary>
-          <div class="about-body">
-            <p>גרתי 3 שנים באיים הקריביים, הייתי נשוי, ובגיל 36 עשיתי הסבת מקצוע.</p>
-            <p>במקביל להסבת המקצוע גיליתי שאני גם ממש אוהב לארח. ומפה גם יוצא לי לארגן ריטרטים ואירועים כיפיים שמשלבים המון מוסיקה.</p>
-            <p>במקביל למוסיקה, שיחות טובות יוצרות אצלי זכרונות חזקים לא פחות ממוסיקה.<br />לפעמים שיחה זה כל מה שאני זוכר, וזה מה שאני מחפש לייצר הערב.</p>
-            <details class="more" id="open2">
-              <summary>
-                <span class="more-title">מחשבות נוספות</span>
-                <span class="about-hint"><span class="when-closed">לחצו לפתיחה</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
-              </summary>
-              <blockquote class="thought">
-                <p>לכולנו יש סיפור, תהליך גדילה שעברנו, משברים שיצאנו מהם מחוזקים, טעויות שלמדנו או שלא.</p>
-                <p>כולנו לפעמים צריכים הכוונה, השראה, הקשבה, חיזוק...</p>
-              </blockquote>
-            </details>
-          </div>
-        </details>
       </section>
 
     </main>
