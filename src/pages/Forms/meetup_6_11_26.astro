@@ -30,13 +30,14 @@
     .muted { color: var(--muted); }
 
     .hero { padding: 48px 0 32px; }
+    .hero h1, .hero .subtitle { text-align: center; }
     .subtitle { font-weight: 700; font-size: clamp(21px, 5vw, 28px); line-height: 1.25; margin: 10px 0 0; color: var(--sage); }
-    .subtitle + .cover { margin: 20px 0 0; }
-    .intro { font-size: 18px; margin: 24px 0 0; max-width: 32em; }
+    .subtitle + .cover { margin: 20px auto 0; }
+    .intro { font-size: 18px; margin: 24px auto 0; max-width: 32em; text-align: center; }
     .intro p { margin: 0 0 10px; }
     .fine { font-size: 15px; color: var(--muted); margin: 14px 0 0; max-width: 34em; }
     .fine b { color: var(--gold); }
-    .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
+    .cover { width: 70%; margin: 0 auto 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
     .cover img { width: 100%; aspect-ratio: 5 / 6; object-fit: cover; object-position: center; display: block; }
     .cover.is-empty { aspect-ratio: 16 / 9; display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
     .cover.is-empty::after { content: "כאן תופיע תמונה"; color: var(--muted); font-size: 16px; }
@@ -103,7 +104,7 @@
         <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <div class="intro">
-        <p>הערב מוקדש לחיבורים חדשים ולמשחקים חווייתיים שיגרמו לנו לשכוח מה השעה.</p>
+        <p>ערב שמוקדש למוסיקה, משחקים קבוצתיים, מעגלי השראה ועוד.</p>
       </div>
       <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).</p>
       <p class="fine"><b>*</b> בכל עת אפשר לחזור לטופס ולעדכן או לשנות את התשובות שלכם.</p>
