@@ -6,6 +6,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0A7090" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet" />
   <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
   <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
@@ -108,6 +111,23 @@
     .community strong { color: var(--ink); }
     .community a { color: var(--sage); font-weight: 700; }
 
+    .about { margin-top: 32px; }
+    .about details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+    .about summary { list-style: none; cursor: pointer; padding: 18px 18px 14px; display: block; }
+    .about summary::-webkit-details-marker { display: none; }
+    .about-title { display: block; font-size: 22px; font-weight: 700; color: var(--sage); }
+    .about-first { display: block; font-size: 17px; margin-top: 6px; }
+    .about-hint { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--gold); border-bottom: 1px dashed var(--gold); }
+    .about .arrow { display: inline-block; transition: transform .2s; }
+    .about details[open] .arrow { transform: rotate(180deg); }
+    .about .when-open { display: none; }
+    .about details[open] .when-open { display: inline; }
+    .about details[open] .when-closed { display: none; }
+    .about-body { padding: 0 18px 18px; font-size: 16px; }
+    .about-body p { margin: 0 0 12px; }
+    .about-body p:last-child { margin-bottom: 0; }
+    .about-sub { font-family: "Amatic SC", var(--font); font-weight: 700; font-size: 34px; line-height: 1.1; color: var(--sage); margin: 22px 0 8px; }
+
     @media (max-width: 420px) {
       .split { grid-template-columns: 1fr; }
     }
@@ -124,7 +144,7 @@
       <div class="intro">
         <p>ערב שמוקדש לניתוק מהמסך וחיבור לאנשים.</p>
         <p>נעשה ביחד פעילות קבוצתית שתשלב משחקיות, תנועה, שיח והקשבה.</p>
-        <p>לאחר הפעילות נמשיך לערב ג'אם (בסגנון של לשבת מסביב למדורה ולבחור שירים).</p>
+        <p>לאחר הפעילות נמשיך לערב ג'אם.</p>
       </div>
       <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).</p>
       <p class="fine"><b>*</b> בכל עת אפשר לחזור לטופס ולעדכן או לשנות את התשובות שלכם.</p>
@@ -241,7 +261,7 @@
 
           <div class="info">
             <p><b>*</b> כל משתתף יביא משהו טעים לשולחן משותף.</p>
-            <p><b>*</b> בערב יהיה יין, בירה, וויסקי, ג'ין ושתייה קלה.</p>
+            <p><b>*</b> אלכוהול ושתייה חופשית במהלך הערב.</p>
           </div>
 
           <div class="actions">
@@ -260,6 +280,24 @@
         </div>
       </section>
 
+      <section class="about" aria-label="קצת עליי">
+        <details>
+          <summary>
+            <span class="about-title">קצת עליי</span>
+            <span class="about-first">אילן, בן 42 אוטוטו.</span>
+            <span class="about-hint"><span class="when-closed">לחצו לקריאת ההמשך</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
+          </summary>
+          <div class="about-body">
+            <p>בעברי רו"ח. גרתי 3.5 שנים באיים הקריביים עם גרושתי, ושם עבדתי כרו"ח. בחרתי במהלך הדרך לעשות הסבת מקצוע, וכיום אני עוסק בעולם אוטומציות המרקטינג.</p>
+            <p>כחלק מהמסע והאתגרים שעברתי בחיי, גיליתי את עולם הריטרטים. מאז יצא לי להפיק 6 ריטרטים, ובין היתר אני לוקח חלק כאיש צוות ומנחה בריטרטים שונים.</p>
+            <p>גיליתי לפני כמה שנים את החיבה שלי לריטרטים, והבנתי שאני רוצה עוד מהכיף של להכיר אנשים חדשים וליהנות משיחות עומק, רציניות או מצחיקות, כאלה שיוצאים מהן עם תובנות ביום שלמחרת. אני אוהב לקבל השראה ולתת השראה.</p>
+            <h3 class="about-sub">מה זה ריטריט ואיך זה קשור לערב?</h3>
+            <p>המילה ריטריט מייצגת בשבילי את החיבור לטבע ולעצמנו, אבל גם את המקום שמאפשר חיבור לאנשים חדשים.</p>
+            <p>הערב הזה הוא הזדמנות לכולנו לחוות חוויה שלרוב צריך לנסוע מאוד רחוק בשביל לזכות בה.</p>
+          </div>
+        </details>
+      </section>
+
     </main>
   </div>
 
@@ -268,7 +306,7 @@
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
     <p>אצור קשר.</p>
     <div class="done-info">
-      <p>בערב יהיה אלכוהול (יין, בירות, וויסקי, ג'ין) ושתייה קלה.</p>
+      <p>אלכוהול ושתייה חופשית במהלך הערב.</p>
       <p>המשתתפים יביאו משהו טעים לשולחן משותף.</p>
       <div class="done-times">
         <div><span>שעת הגעה</span><b>20:00</b></div>
