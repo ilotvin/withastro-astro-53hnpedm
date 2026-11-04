@@ -88,6 +88,8 @@
     .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
+    .drinks { margin: 18px 0 0; font-size: 16px; }
+    .drinks small, .done-info .resp { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 
     .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
     .done::backdrop { background: rgba(4, 30, 40, .7); }
@@ -266,8 +268,7 @@
           </fieldset>
 
           <div class="info">
-            <p><b>*</b> כל משתתף יביא משהו טעים לשולחן משותף.</p>
-            <p><b>*</b> אלכוהול ושתייה חופשית במהלך הערב.</p>
+            <p><b>*</b> כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
           </div>
 
           <div class="actions">
@@ -275,6 +276,7 @@
             <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
           </div>
           <p id="saveMsg" class="msg" role="status"></p>
+          <p class="drinks">במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small>נא לשתות באחריות</small></p>
         </form>
 
         <div class="community">
@@ -319,8 +321,8 @@
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
     <p>אצור קשר.</p>
     <div class="done-info">
-      <p>אלכוהול ושתייה חופשית במהלך הערב.</p>
-      <p>המשתתפים יביאו משהו טעים לשולחן משותף.</p>
+      <p>במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small class="resp">נא לשתות באחריות</small></p>
+      <p>כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
       <div class="done-times">
         <div><span>שעת הגעה</span><b>20:00</b></div>
         <div><span>התחלת הפעילות</span><b>20:30</b></div>
