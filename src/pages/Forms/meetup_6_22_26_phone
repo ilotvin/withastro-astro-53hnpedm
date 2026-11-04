@@ -1,0 +1,170 @@
+// ===== ערב משחקים, חיבורים ומוסיקה – Backend =====
+const SHEET_ID = '1ZZk_uYbh2F0ltt7Yy9oaIvOfGffOlmkxOYsg783ZtYw';
+const SHEET_NAME = 'הרשמות';
+
+// [מפתח בקוד, כותרת בגיליון, אורך מקסימלי]
+const COLUMNS = [
+  ['created',        'נרשם בתאריך',        0],
+  ['updated',        'עודכן בתאריך',       0],
+  ['phone',          'טלפון',              12],
+  ['name',           'שם מלא',             80],
+  ['name_en',        'שם באנגלית',         80],
+  ['age',            'גיל',                3],
+  ['city',           'עיר',                60],
+  ['occupation',     'עיסוק',              100],
+  ['hobby',          'תחביב',              100],
+  ['why_join',       'למה להצטרף',         500],
+  ['guest_name',     '+1 שם',              80],
+  ['guest_age',      '+1 גיל',             3],
+  ['guest_how_know', 'מאיפה מכירים',       200],
+  ['guest_why',      'למה ה-+1 ייהנה',     400],
+  ['share_story',    'לשתף סיפור',         3],
+  ['story_details',  'פירוט הסיפור',       800],
+  ['open_question',  'שאלה פתוחה',         800]
+];
+const KEYS = COLUMNS.map((c) => c[0]);
+const COL = Object.fromEntries(KEYS.map((k, i) => [k, i]));
+const REQUIRED = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'why_join',
+  'guest_name', 'guest_age', 'guest_how_know', 'guest_why', 'share_story'];
+
+// ---------- entry points ----------
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  return out_(route_(p.action, p), p.callback);
+}
+
+function doPost(e) {
+  let p = {};
+  try { p = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, error: 'bad request' }); }
+  return out_(route_(p.action, p));
+}
+
+function route_(action, p) {
+  try {
+    if (action === 'list') return list_();
+    if (action === 'get') return get_(p);
+    if (action === 'save') return withLock_(() => save_(p));
+    if (action === 'delete') return withLock_(() => remove_(p));
+    return { ok: false, error: 'unknown action' };
+  } catch (err) {
+    return { ok: false, error: String(err.message || err) };
+  }
+}
+
+// ---------- actions ----------
+function list_() {
+  const rows = rows_();
+  // רק שמות לתצוגה הציבורית – בלי טלפון, גיל או פרטים אישיים
+  const people = rows.map((r) => ({ name: r[COL.name], guest_name: r[COL.guest_name] }));
+  return { ok: true, people };
+}
+
+function get_(p) {
+  const phone = normPhone_(p.phone);
+  if (!validPhone_(phone)) return { ok: false, error: 'מספר טלפון לא תקין' };
+  const hit = find_(phone);
+  if (!hit) return { ok: true, found: false };
+  const record = {};
+  KEYS.forEach((k, i) => { if (k !== 'created' && k !== 'updated') record[k] = String(hit.row[i] ?? ''); });
+  return { ok: true, found: true, record };
+}
+
+function save_(p) {
+  const phone = normPhone_(p.phone);
+  if (!validPhone_(phone)) return { ok: false, error: 'מספר טלפון לא תקין' };
+
+  const clean = {};
+  COLUMNS.forEach(([k, , max]) => { if (max) clean[k] = clean_(p[k], max); });
+  clean.phone = phone;
+  if (clean.share_story !== 'yes') clean.story_details = '';
+
+  for (const k of REQUIRED) if (!clean[k]) return { ok: false, error: 'חסר שדה: ' + k };
+  if (!['yes', 'no'].includes(clean.share_story)) return { ok: false, error: 'ערך לא תקין בשאלת הסיפור' };
+  for (const k of ['age', 'guest_age']) {
+    const n = Number(clean[k]);
+    if (!Number.isInteger(n) || n < 18 || n > 99) return { ok: false, error: 'גיל לא תקין' };
+  }
+
+  const sh = sheet_();
+  const hit = find_(phone);
+  const now = new Date();
+  const values = KEYS.map((k) => {
+    if (k === 'created') return hit ? hit.row[COL.created] : now;
+    if (k === 'updated') return now;
+    return clean[k];
+  });
+
+  if (hit) {
+    sh.getRange(hit.rowNum, 1, 1, values.length).setValues([values]);
+    return { ok: true, status: 'updated' };
+  }
+  sh.appendRow(values);
+  return { ok: true, status: 'created' };
+}
+
+function remove_(p) {
+  const phone = normPhone_(p.phone);
+  if (!validPhone_(phone)) return { ok: false, error: 'מספר טלפון לא תקין' };
+  const hit = find_(phone);
+  if (!hit) return { ok: true, status: 'not_found' };
+  sheet_().deleteRow(hit.rowNum);
+  return { ok: true, status: 'deleted' };
+}
+
+// ---------- sheet helpers ----------
+function sheet_() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  let sh = ss.getSheetByName(SHEET_NAME);
+  if (!sh) sh = ss.insertSheet(SHEET_NAME);
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(COLUMNS.map((c) => c[1]));
+    sh.setFrozenRows(1);
+    sh.setRightToLeft(true);
+    sh.getRange(1, COL.phone + 1, sh.getMaxRows(), 1).setNumberFormat('@'); // שומר את ה-0 בהתחלה
+  }
+  return sh;
+}
+
+function rows_() {
+  const sh = sheet_();
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  return sh.getRange(2, 1, last - 1, KEYS.length).getValues();
+}
+
+function find_(phone) {
+  const rows = rows_();
+  for (let i = 0; i < rows.length; i++) {
+    if (normPhone_(rows[i][COL.phone]) === phone) return { row: rows[i], rowNum: i + 2 };
+  }
+  return null;
+}
+
+function withLock_(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+
+// ---------- utils ----------
+function normPhone_(v) {
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.startsWith('972')) d = '0' + d.slice(3);
+  if (/^[1-9]\d{7,8}$/.test(d)) d = '0' + d; // אם הגיליון הוריד את ה-0
+  return d;
+}
+function validPhone_(d) { return /^0\d{8,9}$/.test(d); }
+
+function clean_(v, max) {
+  let s = String(v == null ? '' : v).trim().slice(0, max);
+  if (/^[=+\-@]/.test(s)) s = "'" + s; // מונע הזרקת נוסחאות לגיליון
+  return s;
+}
+
+function out_(obj, cb) {
+  const json = JSON.stringify(obj);
+  if (cb && /^[A-Za-z_$][\w$]*$/.test(cb)) {
+    return ContentService.createTextOutput(cb + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
