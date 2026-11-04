@@ -9,7 +9,7 @@
   <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
   <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
-  <meta property="og:image" content="https://atroproject1.vercel.app/images/dinner231026.jpg" />
+  <meta property="og:image" content="https://atroproject1.vercel.app/images/meetup_6_11_26.jpeg" />
 
   <style is:global>
     :root {
@@ -36,8 +36,9 @@
     .intro p { margin: 0 0 10px; }
     .fine { font-size: 15px; color: var(--muted); margin: 14px 0 0; max-width: 34em; }
     .fine b { color: var(--gold); }
-    .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--surface); }
-    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cover { margin: 0 0 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
+    .cover img { width: 100%; height: auto; display: block; }
+    .cover.is-empty { aspect-ratio: 16 / 9; }
     .cover.is-empty { display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
     .cover.is-empty::after { content: "כאן תופיע תמונה"; color: var(--muted); font-size: 16px; }
     .hero .btn { margin-top: 20px; }
@@ -101,7 +102,7 @@
       <h1>מנגנים שרים ביחד</h1>
       <p class="subtitle">ערב משחקים, חיבורים ומוסיקה</p>
       <figure class="cover">
-        <img src="/images/dinner231026.jpg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+        <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <div class="intro">
         <p>הערב מוקדש לחיבורים חדשים ולמשחקים חווייתיים שיגרמו לנו לשכוח מה השעה.</p>
@@ -376,7 +377,7 @@
       try {
         const res = await post({ action: 'save', phone, ...data });
         if (!res.ok) throw new Error(res.error);
-        try { localStorage.setItem('meetup_6_22_26_phone', phone); } catch {}
+        try { localStorage.setItem('meetup_6_11_26_phone', phone); } catch {}
         loadedPhone = phone;
         els.saveBtn.textContent = 'עדכון ההרשמה';
         els.deleteBtn.hidden = false;
@@ -401,7 +402,7 @@
         if (!res.ok) throw new Error(res.error);
         els.form.reset();
         loadedPhone = '';
-        try { localStorage.removeItem('meetup_6_22_26_phone'); } catch {}
+        try { localStorage.removeItem('meetup_6_11_26_phone'); } catch {}
         els.saveBtn.textContent = 'שמירת ההרשמה';
         els.deleteBtn.hidden = true;
         setMsg(els.loadMsg, '');
@@ -419,7 +420,7 @@
     // ---------- init ----------
     toggle();
     try {
-      const saved = localStorage.getItem('meetup_6_22_26_phone');
+      const saved = localStorage.getItem('meetup_6_11_26_phone');
       if (saved) { els.phone.value = saved; loadExisting(true); }
     } catch {}
   </script>
