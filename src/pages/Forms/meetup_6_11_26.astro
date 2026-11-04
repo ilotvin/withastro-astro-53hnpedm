@@ -116,6 +116,7 @@
     .community a { color: var(--sage); font-weight: 700; }
 
     .about { margin-top: 32px; }
+    .inspiration { margin-top: 24px; }
     .about > details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
     .about summary { list-style: none; cursor: pointer; display: block; }
     .about > details > summary { padding: 18px 18px 14px; }
@@ -238,24 +239,6 @@
             </div>
           </fieldset>
 
-          <!-- פינת השראה -->
-          <fieldset class="group">
-            <legend>פינת השראה</legend>
-            <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
-
-            <div class="field" style="margin-bottom:0">
-              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
-              <div class="modes inline">
-                <label><input type="radio" name="share_story" value="yes" /><span>כן</span></label>
-                <label><input type="radio" name="share_story" value="no" /><span>לא</span></label>
-              </div>
-            </div>
-            <div id="storyField" class="field" style="margin:14px 0 0" hidden>
-              <label for="story_details">ספרו לנו קצת על הסיפור</label>
-              <textarea id="story_details" maxlength="800"></textarea>
-            </div>
-          </fieldset>
-
           <div class="field">
             <label for="open_question">שאלה פתוחה</label>
             <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
@@ -319,6 +302,30 @@
         </details>
       </section>
 
+      <!-- פינת השראה – בסוף הדף, מחוברת לטופס דרך form="form" -->
+      <section class="inspiration" aria-labelledby="insp-title">
+        <fieldset class="group" form="form">
+          <legend id="insp-title">פינת השראה</legend>
+          <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
+
+          <div class="field" style="margin-bottom:0">
+            <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
+            <div class="modes inline">
+              <label><input type="radio" name="share_story" value="yes" form="form" /><span>כן</span></label>
+              <label><input type="radio" name="share_story" value="no" form="form" /><span>לא</span></label>
+            </div>
+          </div>
+          <div id="storyField" class="field" style="margin:14px 0 0" hidden>
+            <label for="story_details">ספרו לנו קצת על הסיפור</label>
+            <textarea id="story_details" maxlength="800" form="form"></textarea>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="submit" form="form" id="saveBtn2" class="btn btn-primary">שמירת ההרשמה</button>
+        </div>
+        <p id="saveMsg2" class="msg" role="status"></p>
+      </section>
+
     </main>
   </div>
 
@@ -356,7 +363,8 @@
     const $ = (id) => document.getElementById(id);
     const els = {
       form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'),
-      storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn')
+      storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'),
+      saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
     };
     let loadedPhone = '';
     let isRegistered = false; // האם המספר הנוכחי כבר רשום בגיליון
@@ -397,8 +405,14 @@
     }
     const validPhone = (d) => /^0\d{8,9}$/.test(d);
     const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
-    function setMsg(el, text, kind) { el.textContent = text; el.className = el.id === 'saveMsg' ? 'msg ' + (kind || '') : 'hint'; }
-    const radioVal = (name) => els.form.querySelector(`input[name=${name}]:checked`)?.value || '';
+    function setMsg(el, text, kind) {
+      const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2] : [el];
+      targets.forEach((t) => { t.textContent = text; t.className = t === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); });
+    }
+    // שני כפתורי השמירה (באמצע ובסוף הדף) תמיד באותו מצב
+    function setSaveText(text) { els.saveBtn.textContent = text; els.saveBtn2.textContent = text; }
+    function setSaveDisabled(v) { els.saveBtn.disabled = v; els.saveBtn2.disabled = v; }
+    const radioVal = (name) => document.querySelector(`input[name=${name}]:checked`)?.value || '';
     const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
       : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
 
@@ -406,7 +420,7 @@
     function toggle() { els.storyField.hidden = radioVal('share_story') !== 'yes'; }
 
     function setRadio(name, value) {
-      els.form.querySelectorAll(`input[name=${name}]`).forEach((r) => { r.checked = r.value === value; });
+      document.querySelectorAll(`input[name=${name}]`).forEach((r) => { r.checked = r.value === value; });
     }
 
     function fillForm(r) {
@@ -428,11 +442,11 @@
         if (res.found) {
           fillForm(res.record);
           syncOpened();
-          els.saveBtn.textContent = 'עדכון ההרשמה';
+          setSaveText('עדכון ההרשמה');
           els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
         } else {
-          els.saveBtn.textContent = 'שמירת ההרשמה';
+          setSaveText('שמירת ההרשמה');
           els.deleteBtn.hidden = true;
           setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
         }
@@ -448,7 +462,7 @@
     els.phone.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); }
     });
-    els.form.addEventListener('change', (e) => { if (e.target.name === 'share_story') toggle(); });
+    document.addEventListener('change', (e) => { if (e.target.name === 'share_story') toggle(); });
 
     els.form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -471,7 +485,7 @@
       if (data.guest_age && !validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
       if (data.share_story !== 'yes') data.story_details = '';
 
-      els.saveBtn.disabled = true;
+      setSaveDisabled(true);
       setMsg(els.saveMsg, 'שומרים…');
       try {
         const res = await post({ action: 'save', phone, ...data });
@@ -479,7 +493,7 @@
         try { localStorage.setItem('meetup_6_11_26_phone', phone); } catch {}
         loadedPhone = phone;
         isRegistered = true;
-        els.saveBtn.textContent = 'עדכון ההרשמה';
+        setSaveText('עדכון ההרשמה');
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
@@ -487,7 +501,7 @@
       } catch (err) {
         setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
       } finally {
-        els.saveBtn.disabled = false;
+        setSaveDisabled(false);
       }
     });
 
@@ -496,7 +510,7 @@
       if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
       if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
 
-      els.deleteBtn.disabled = true; els.saveBtn.disabled = true;
+      els.deleteBtn.disabled = true; setSaveDisabled(true);
       setMsg(els.saveMsg, 'מוחקים…');
       try {
         const res = await jsonp({ action: 'delete', phone });
@@ -505,7 +519,7 @@
         loadedPhone = '';
         isRegistered = false;
         try { localStorage.removeItem('meetup_6_11_26_phone'); } catch {}
-        els.saveBtn.textContent = 'שמירת ההרשמה';
+        setSaveText('שמירת ההרשמה');
         els.deleteBtn.hidden = true;
         setMsg(els.loadMsg, '');
         toggle();
@@ -515,7 +529,7 @@
       } catch (err) {
         setMsg(els.saveMsg, 'המחיקה נכשלה: ' + errText(err), 'err');
       } finally {
-        els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
+        els.deleteBtn.disabled = false; setSaveDisabled(false);
       }
     });
 
