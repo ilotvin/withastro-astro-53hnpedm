@@ -89,7 +89,14 @@
     .done::backdrop { background: rgba(4, 30, 40, .7); }
     .done-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: var(--sage); color: var(--sage-ink); display: grid; place-items: center; font-size: 30px; font-weight: 700; }
     .done h2 { font-size: 26px; margin: 0 0 10px; }
-    .done p { margin: 0 0 22px; font-size: 17px; }
+    .done p { margin: 0 0 18px; font-size: 17px; }
+    .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
+    .done-info p { font-size: 15px; color: var(--muted); margin: 0 0 6px; }
+    .done-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 10px; }
+    .done-times div { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+    .done-times span { display: block; font-size: 13px; color: var(--muted); }
+    .done-times b { display: block; font-size: 24px; color: var(--sage); font-variant-numeric: tabular-nums; }
+    .done-info .done-ontime { color: var(--gold); font-weight: 700; margin: 0; }
     .msg.ok { color: var(--sage); }
     .msg.err { color: var(--danger); }
     .community { margin-top: 28px; font-size: 0.85em; color: var(--muted); }
@@ -111,7 +118,9 @@
         <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <div class="intro">
-        <p>ערב שמוקדש למוסיקה, משחקים קבוצתיים, מעגלי השראה ועוד.</p>
+        <p>ערב שמוקדש לניתוק מהמסך וחיבור לאנשים.</p>
+        <p>נעשה ביחד פעילות קבוצתית שתשלב משחקיות, תנועה, שיח והקשבה.</p>
+        <p>לאחר הפעילות נמשיך לערב ג'אם (בסגנון של לשבת מסביב למדורה ולבחור שירים).</p>
       </div>
       <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).</p>
       <p class="fine"><b>*</b> בכל עת אפשר לחזור לטופס ולעדכן או לשנות את התשובות שלכם.</p>
@@ -241,8 +250,17 @@
 
   <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
     <div class="done-icon" aria-hidden="true">✓</div>
-    <h2 id="doneTitle">ההרשמה נשלחה!</h2>
-    <p>תודה! אצור קשר לאחר שאעבור על הפרטים ואוודא התאמה לאופי הערב.</p>
+    <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
+    <p>אצור קשר.</p>
+    <div class="done-info">
+      <p>בערב יהיה אלכוהול (יין, בירות, וויסקי, ג'ין) ושתייה קלה.</p>
+      <p>המשתתפים יביאו משהו טעים לשולחן משותף.</p>
+      <div class="done-times">
+        <div><span>שעת הגעה</span><b>20:00</b></div>
+        <div><span>התחלת הפעילות</span><b>20:30</b></div>
+      </div>
+      <p class="done-ontime">חשוב להגיע בזמן</p>
+    </div>
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
 
@@ -420,8 +438,7 @@
     // ---------- popup ----------
     const doneDialog = $('doneDialog');
     function showDone(updated) {
-      $('doneTitle').textContent = updated ? 'ההרשמה עודכנה!' : 'ההרשמה נשלחה!';
-      if (doneDialog.showModal) doneDialog.showModal(); else alert($('doneTitle').textContent);
+      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו. אצור קשר.');
     }
     $('doneClose').addEventListener('click', () => doneDialog.close());
     doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
