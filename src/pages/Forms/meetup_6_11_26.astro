@@ -28,6 +28,7 @@
     h2 { font-size: 30px; }
     h3 { font-size: 19px; margin: 28px 0 8px; }
     .muted { color: var(--muted); }
+    .req { color: var(--gold); font-weight: 700; }
 
     .hero { padding: 48px 0 32px; }
     .hero h1, .hero .subtitle { text-align: center; }
@@ -83,6 +84,12 @@
     .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
+
+    .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
+    .done::backdrop { background: rgba(4, 30, 40, .7); }
+    .done-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: var(--sage); color: var(--sage-ink); display: grid; place-items: center; font-size: 30px; font-weight: 700; }
+    .done h2 { font-size: 26px; margin: 0 0 10px; }
+    .done p { margin: 0 0 22px; font-size: 17px; }
     .msg.ok { color: var(--sage); }
     .msg.err { color: var(--danger); }
     .community { margin-top: 28px; font-size: 0.85em; color: var(--muted); }
@@ -113,15 +120,12 @@
     <main>
       <section id="join" class="join" aria-labelledby="join-title">
         <h2 id="join-title">הרשמה ועדכון</h2>
-        <p class="muted">מספר הטלפון הוא המזהה שלכם. נרשמתם כבר? הזינו אותו וטענו את הפרטים כדי לעדכן.</p>
+        <p class="muted">מספר הטלפון הוא המזהה שלכם. נרשמתם כבר? הזינו אותו, והפרטים שלכם ייטענו אוטומטית לעדכון.<br />שדות עם <span class="req">*</span> הם חובה, כל השאר לפי רצונכם.</p>
 
         <form id="form" novalidate>
           <div class="field">
-            <label for="phone">מספר טלפון</label>
-            <div class="row">
-              <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" required />
-              <button type="button" id="loadBtn" class="btn">טעינת פרטים</button>
-            </div>
+            <label for="phone">מספר טלפון <span class="req">*</span></label>
+            <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" required />
             <p id="loadMsg" class="hint"></p>
           </div>
 
@@ -131,33 +135,33 @@
             <p class="group-intro">כמה מילים עליכם, כדי שנכיר.</p>
 
             <div class="field">
-              <label for="name">שם מלא</label>
+              <label for="name">שם מלא בעברית <span class="req">*</span></label>
               <input id="name" type="text" autocomplete="name" maxlength="80" required />
             </div>
             <div class="field">
               <label for="name_en">שם מלא באנגלית</label>
-              <input id="name_en" type="text" dir="ltr" autocomplete="off" maxlength="80" placeholder="Full name" required />
+              <input id="name_en" type="text" dir="ltr" autocomplete="off" maxlength="80" placeholder="Full name" />
             </div>
             <div class="split">
               <div class="field">
-                <label for="age">גיל</label>
+                <label for="age">גיל <span class="req">*</span></label>
                 <input id="age" type="number" inputmode="numeric" min="18" max="99" required />
               </div>
               <div class="field">
                 <label for="city">עיר</label>
-                <input id="city" type="text" autocomplete="address-level2" maxlength="60" required />
+                <input id="city" type="text" autocomplete="address-level2" maxlength="60" />
               </div>
             </div>
             <div class="field">
               <label for="occupation">עיסוק בחיים</label>
-              <input id="occupation" type="text" maxlength="100" required />
+              <input id="occupation" type="text" maxlength="100" />
             </div>
             <div class="field">
               <label for="hobby">תחביב</label>
-              <input id="hobby" type="text" maxlength="100" required />
+              <input id="hobby" type="text" maxlength="100" />
             </div>
             <div class="field" style="margin-bottom:0">
-              <label for="why_join">למה תרצו להצטרף לערב?</label>
+              <label for="why_join">למה תרצו להצטרף לערב? <span class="req">*</span></label>
               <textarea id="why_join" maxlength="500" required></textarea>
             </div>
           </fieldset>
@@ -170,20 +174,20 @@
             <div class="split">
               <div class="field">
                 <label for="guest_name">שם מלא</label>
-                <input id="guest_name" type="text" maxlength="80" required />
+                <input id="guest_name" type="text" maxlength="80" />
               </div>
               <div class="field">
                 <label for="guest_age">גיל</label>
-                <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" required />
+                <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" />
               </div>
             </div>
             <div class="field">
               <label for="guest_how_know">מאיפה אתם מכירים?</label>
-              <input id="guest_how_know" type="text" maxlength="200" required />
+              <input id="guest_how_know" type="text" maxlength="200" />
             </div>
             <div class="field" style="margin-bottom:0">
               <label for="guest_why">למה לדעתכם הוא/היא ייהנו בערב שלנו?</label>
-              <textarea id="guest_why" maxlength="400" required></textarea>
+              <textarea id="guest_why" maxlength="400"></textarea>
             </div>
           </fieldset>
 
@@ -206,7 +210,7 @@
           </fieldset>
 
           <div class="field">
-            <label for="open_question">שאלה פתוחה <span class="muted">(לא חובה)</span></label>
+            <label for="open_question">שאלה פתוחה</label>
             <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
           </div>
 
@@ -235,6 +239,13 @@
     </main>
   </div>
 
+  <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
+    <div class="done-icon" aria-hidden="true">✓</div>
+    <h2 id="doneTitle">ההרשמה נשלחה!</h2>
+    <p>תודה! אצור קשר לאחר שאעבור על הפרטים ואוודא התאמה לאופי הערב.</p>
+    <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
+  </dialog>
+
   <script is:inline>
     // ===== הגדרות – לעדכן אחרי פריסת ה-Apps Script החדש =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUs1CeQC5EK_sE06ygSjVak_QrAqAr9QsVLibTdSRk-FKJF5J8iiC7VeQbeEhVvag/exec';
@@ -244,21 +255,13 @@
       'guest_name', 'guest_age', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
     const REQUIRED = [
       ['name', 'חסר שם מלא.'],
-      ['name_en', 'חסר שם מלא באנגלית.'],
       ['age', 'חסר גיל.'],
-      ['city', 'חסרה עיר.'],
-      ['occupation', 'חסר עיסוק.'],
-      ['hobby', 'חסר תחביב.'],
-      ['why_join', 'ספרו למה תרצו להצטרף.'],
-      ['guest_name', 'חסר שם ה‑+1.'],
-      ['guest_age', 'חסר גיל ה‑+1.'],
-      ['guest_how_know', 'ספרו מאיפה אתם מכירים.'],
-      ['guest_why', 'ספרו למה ה‑+1 ייהנה בערב.']
+      ['why_join', 'ספרו למה תרצו להצטרף לערב.']
     ];
 
     const $ = (id) => document.getElementById(id);
     const els = {
-      form: $('form'), phone: $('phone'), loadBtn: $('loadBtn'), loadMsg: $('loadMsg'),
+      form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'),
       storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn')
     };
     let loadedPhone = '';
@@ -320,7 +323,6 @@
     async function loadExisting(silent) {
       const phone = normPhone(els.phone.value);
       if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
-      els.loadBtn.disabled = true;
       setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
       try {
         const res = await jsonp({ action: 'get', phone });
@@ -338,15 +340,15 @@
         }
       } catch (e) {
         setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
-      } finally {
-        els.loadBtn.disabled = false;
       }
     }
 
-    els.loadBtn.addEventListener('click', () => loadExisting(false));
     els.phone.addEventListener('blur', () => {
       const p = normPhone(els.phone.value);
       if (validPhone(p) && p !== loadedPhone) loadExisting(true);
+    });
+    els.phone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); }
     });
     els.form.addEventListener('change', (e) => { if (e.target.name === 'share_story') toggle(); });
 
@@ -362,12 +364,12 @@
       for (const [k, msg] of REQUIRED) {
         if (!data[k]) return setMsg(els.saveMsg, msg, 'err'), $(k).focus();
       }
-      if (!/[A-Za-z]/.test(data.name_en)) return setMsg(els.saveMsg, 'כתבו את השם באותיות באנגלית.', 'err'), $('name_en').focus();
+      if (!/[\u0590-\u05FF]/.test(data.name)) return setMsg(els.saveMsg, 'כתבו את השם המלא בעברית.', 'err'), $('name').focus();
+      if (data.name.split(/\s+/).length < 2) return setMsg(els.saveMsg, 'כתבו שם פרטי ושם משפחה.', 'err'), $('name').focus();
+      if (data.name_en && !/[A-Za-z]/.test(data.name_en)) return setMsg(els.saveMsg, 'כתבו את השם באותיות באנגלית.', 'err'), $('name_en').focus();
       if (!validAge(data.age)) return setMsg(els.saveMsg, 'הגיל צריך להיות בין 18 ל‑99.', 'err'), $('age').focus();
-      if (!validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
-      if (!data.share_story) return setMsg(els.saveMsg, 'בחרו אם תרצו לשתף סיפור.', 'err');
-      if (data.share_story === 'yes' && !data.story_details) return setMsg(els.saveMsg, 'ספרו לנו קצת על הסיפור.', 'err'), $('story_details').focus();
-      if (data.share_story === 'no') data.story_details = '';
+      if (data.guest_age && !validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
+      if (data.share_story !== 'yes') data.story_details = '';
 
       els.saveBtn.disabled = true;
       setMsg(els.saveMsg, 'שומרים…');
@@ -380,6 +382,7 @@
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
+        showDone(res.status === 'updated');
       } catch (err) {
         setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
       } finally {
@@ -413,6 +416,15 @@
         els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
       }
     });
+
+    // ---------- popup ----------
+    const doneDialog = $('doneDialog');
+    function showDone(updated) {
+      $('doneTitle').textContent = updated ? 'ההרשמה עודכנה!' : 'ההרשמה נשלחה!';
+      if (doneDialog.showModal) doneDialog.showModal(); else alert($('doneTitle').textContent);
+    }
+    $('doneClose').addEventListener('click', () => doneDialog.close());
+    doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
 
     // ---------- init ----------
     toggle();
