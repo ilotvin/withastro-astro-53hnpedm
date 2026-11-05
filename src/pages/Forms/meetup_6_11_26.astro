@@ -2,7 +2,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V6';
+const VERSION = 'V7';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -153,6 +153,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     .about { margin-top: 32px; }
     .inspiration { margin-top: 24px; }
+    .home-note { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: center; font-size: 17px; line-height: 1.7; }
+    .home-note p { margin: 0 0 10px; }
+    .home-note p:last-child { margin: 0; }
     .about > details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
     .about summary { list-style: none; cursor: pointer; display: block; }
     .about > details > summary { padding: 18px 18px 14px; }
@@ -356,28 +359,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         </div>
       </section>
 
-      <section class="about" aria-label="קצת עליי">
-        <details id="open1">
-          <summary>
-            <span class="about-title">קצת עליי</span>
-            <span class="about-first">7 שנים של עבודה כרו"ח בתחום המיסוי האמריקאי.</span>
-            <span class="about-hint"><span class="when-closed">לחצו לקריאת ההמשך</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
-          </summary>
-          <div class="about-body">
-            <p>גרתי 3 שנים באיים הקריביים, הייתי נשוי, ובגיל 36 עשיתי הסבת מקצוע.</p>
-            <p>במקביל להסבה גיליתי תחביבים בתחומים שונים. ריקוד, בישול, צילום, עריכת וידאו, גלישת סקייטבורד ולארגן אירועים וריטרטים. הכיף שלי זה לחבר את כל התחביבים שלי באירועים השונים. אבל המכנה המשותף זה שאנחנו תמיד מנגנים ושרים ביחד.</p>
-            <p><br />לפעמים שיחה טובה דרינק ביד פלוס כמה שירים ביחד זה כל מה שצריך.</p>
-            <details class="more" id="open2">
-              <summary>
-                <span class="more-title">מחשבות נוספות</span>
-                <span class="about-hint"><span class="when-closed">לחצו לפתיחה</span><span class="when-open">לחצו לסגירה</span> <span class="arrow" aria-hidden="true">▾</span></span>
-              </summary>
-              <blockquote class="thought">
-                <p>כולנו לפעמים צריכים הכוונה, השראה, הקשבה או חיזוק.</p>
-              </blockquote>
-            </details>
-          </div>
-        </details>
+      <section class="home-note">
+        <p>הערב הזה הוא חלק מעשרות ערבים שאירחתי ב‑3 השנים האחרונות בבית שלי.</p>
+        <p>אין כמו ערב באווירה ביתית, להיזרק על כריות, לשיר, לנגן…<br />ברגוע.</p>
       </section>
 
       <!-- פינת השראה – בסוף הדף, מחוברת לטופס דרך form="form" -->
@@ -531,7 +515,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         isRegistered = !!res.found;
         if (res.found) {
           fillForm(res.record);
-          syncOpened();
           setSaveText('עדכון ההרשמה');
           els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
@@ -568,8 +551,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       data.guest_track = radioVal('guest_track');
       data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
       data.guest_drinks = radioVal('guest_drinks');
-      data.open_1 = opened.open1 ? 'TRUE' : 'FALSE';
-      data.open_2 = opened.open2 ? 'TRUE' : 'FALSE';
 
       for (const [k, msg] of REQUIRED) {
         if (!data[k]) return setMsg(els.saveMsg, msg, 'err'), $(k).focus();
@@ -627,32 +608,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       } finally {
         els.deleteBtn.disabled = false; setSaveDisabled(false);
       }
-    });
-
-    // ---------- מעקב פתיחת "קצת עליי" / "מחשבות נוספות" ----------
-    // אם המבקר כבר רשום, כל פתיחה נשלחת מיד לגיליון – בלי ללחוץ על עדכון.
-    // אם עדיין לא נרשם, הפתיחה נזכרת ונשלחת יחד עם ההרשמה.
-    const opened = { open1: false, open2: false };
-    const sent = { open1: false, open2: false };
-    const FIELD_OF = { open1: 'open_1', open2: 'open_2' };
-
-    function track(id) {
-      if (!isRegistered || !loadedPhone || sent[id]) return;
-      sent[id] = true;
-      jsonp({ action: 'track', phone: loadedPhone, field: FIELD_OF[id] })
-        .then((res) => { if (!res.ok) sent[id] = false; })
-        .catch(() => { sent[id] = false; });
-    }
-    function syncOpened() {
-      Object.keys(opened).forEach((id) => { if (opened[id]) track(id); });
-    }
-
-    ['open1', 'open2'].forEach((id) => {
-      $(id).addEventListener('toggle', () => {
-        if (!$(id).open) return;
-        opened[id] = true;
-        track(id);
-      });
     });
 
     // ---------- popup ----------
