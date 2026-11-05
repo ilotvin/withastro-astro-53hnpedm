@@ -2,7 +2,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V2';
+const VERSION = 'V4';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -95,6 +95,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
     .modes input { margin: 0; accent-color: var(--sage); }
     .modes.inline { grid-template-columns: repeat(2, 1fr); max-width: 18em; }
+    .modes.tracks label { justify-content: flex-start; text-align: right; }
+    .modes.tracks .t-name { flex: 1; }
+    .modes.tracks .t-name small { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+    .modes.tracks .t-price { flex: none; color: var(--sage); font-size: 17px; white-space: nowrap; }
     .modes.inline.three { grid-template-columns: repeat(3, 1fr); max-width: 26em; }
 
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
@@ -287,6 +291,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
                 </div>
               </div>
               <div class="field">
+                <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">העדפת אלכוהול של ה‑+1</span>
+                <div class="modes tracks">
+                  <label><input type="radio" name="guest_track" value="שתייה חריפה" /><span class="t-name">מסלול שתייה חריפה<small>וויסקי, ג'ין, קמפרי</small></span><b class="t-price">100 ₪</b></label>
+                  <label><input type="radio" name="guest_track" value="יין ובירות" /><span class="t-name">מסלול יין ובירות<small>לבן חצי יבש, לבן יבש (אני חזק בשרדונה), אדום</small></span><b class="t-price">50 ₪</b></label>
+                  <label><input type="radio" name="guest_track" value="ללא אלכוהול" /><span class="t-name">השתתפות ללא אלכוהול</span><b class="t-price">30 ₪</b></label>
+                </div>
+              </div>
+              <div class="field">
                 <label for="guest_how_know">מאיפה אתם מכירים?</label>
                 <input id="guest_how_know" type="text" maxlength="200" />
               </div>
@@ -304,8 +316,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
           <fieldset class="group">
             <legend>תשלום</legend>
-            <p class="group-intro price-line">עלות הערב הינה 80 ₪ (40 ₪ ללא אלכוהול).</p>
-            <p class="drinks">במהלך הערב אדאג ליין, בירות, וויסקי, ג'ין ושתייה קלה.<small>נא לשתות באחריות</small></p>
+            <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">בחרו מסלול השתתפות</span>
+            <div class="modes tracks">
+              <label><input type="radio" name="drink_track" value="שתייה חריפה" /><span class="t-name">מסלול שתייה חריפה<small>וויסקי, ג'ין, קמפרי</small></span><b class="t-price">100 ₪</b></label>
+              <label><input type="radio" name="drink_track" value="יין ובירות" /><span class="t-name">מסלול יין ובירות<small>לבן חצי יבש, לבן יבש (אני חזק בשרדונה), אדום</small></span><b class="t-price">50 ₪</b></label>
+              <label><input type="radio" name="drink_track" value="ללא אלכוהול" /><span class="t-name">השתתפות ללא אלכוהול</span><b class="t-price">30 ₪</b></label>
+            </div>
+            <p class="hint" style="margin:8px 0 18px">נא לשתות באחריות</p>
             <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">איך תרצו לשלם? <span class="muted" style="font-weight:400;font-size:15px">(בקשת תשלום תישלח בנפרד)</span></span>
             <div class="modes inline three">
               <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
@@ -493,6 +510,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       setRadio('share_story', r.share_story || '');
       setRadio('payment', r.payment || '');
       setRadio('gender', r.gender || '');
+      setRadio('drink_track', r.drink_track || '');
+      setRadio('guest_track', r.guest_track || '');
       $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
       setRadio('guest_drinks', r.guest_drinks || '');
       toggle();
@@ -542,6 +561,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
       data.gender = radioVal('gender');
+      data.drink_track = radioVal('drink_track');
+      data.guest_track = radioVal('guest_track');
       data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
       data.guest_drinks = radioVal('guest_drinks');
       data.open_1 = opened.open1 ? 'TRUE' : 'FALSE';
