@@ -2,7 +2,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V1';
+const VERSION = 'V2';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -100,6 +100,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
     .group > legend, .group-title { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
     .group-intro { font-size: 16px; color: var(--muted); margin: 0 0 16px; }
+    .check-opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-weight: 400; }
+    .check-opt:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+    .check-opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--sage); }
 
     .info { margin: 8px 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 16px; }
     .info p { margin: 0 0 6px; }
@@ -189,7 +192,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         <p class="tagline">ערב שמוקדש לניתוק מהמסך<br /><span>וחיבור לבני אדם.</span></p>
         <p class="activity">נקיים פעילות קבוצתית קלילה לשבירת הקרח. נשלב תנועה, משחק ותחרות קבוצתית. נכיר בפעילות חווייתית את המשתתפים, ובהמשך הערב נזרום לג'אם כיפי.</p>
       </div>
-      <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).</p>
+      <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).<br /><b>*</b> האירוע מוגבל בכמות המשתתפים, ומילוי השאלון אינו מהווה אישור השתתפות.</p>
     </header>
 
     <main>
@@ -227,6 +230,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
               </div>
             </div>
             <div class="field">
+              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">מי אני?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="gender" value="גבר" /><span>גבר</span></label>
+                <label><input type="radio" name="gender" value="אישה" /><span>אישה</span></label>
+              </div>
+            </div>
+            <div class="field">
               <label for="occupation">עיסוק בחיים</label>
               <input id="occupation" type="text" maxlength="100" />
             </div>
@@ -251,35 +261,39 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
             <legend>את מי תזמינו איתכם?</legend>
             <p class="group-intro">פרטי ה‑+1 שמגיע איתכם (ממגדר שאינו שלכם, למקרה שפספסתם 😉)</p>
 
-            <div class="split">
-              <div class="field">
-                <label for="guest_name">שם מלא</label>
-                <input id="guest_name" type="text" maxlength="80" />
+            <label class="check-opt"><input type="checkbox" id="no_plus" /><span>אין לי +1 ואשמח לחיבור</span></label>
+
+            <div id="guestFields">
+              <div class="split">
+                <div class="field">
+                  <label for="guest_name">שם מלא</label>
+                  <input id="guest_name" type="text" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="guest_age">גיל</label>
+                  <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" />
+                </div>
               </div>
               <div class="field">
-                <label for="guest_age">גיל</label>
-                <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" />
+                <label for="guest_phone">מספר טלפון</label>
+                <input id="guest_phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="050-0000000" maxlength="20" />
               </div>
-            </div>
-            <div class="field">
-              <label for="guest_phone">מספר טלפון</label>
-              <input id="guest_phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="050-0000000" maxlength="20" />
-            </div>
-            <div class="field">
-              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">ה‑+1 שותה אלכוהול?</span>
-              <div class="modes inline three">
-                <label><input type="radio" name="guest_drinks" value="כן" /><span>כן</span></label>
-                <label><input type="radio" name="guest_drinks" value="לא" /><span>לא</span></label>
-                <label><input type="radio" name="guest_drinks" value="אולי" /><span>אולי</span></label>
+              <div class="field">
+                <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">ה‑+1 שותה אלכוהול?</span>
+                <div class="modes inline three">
+                  <label><input type="radio" name="guest_drinks" value="כן" /><span>כן</span></label>
+                  <label><input type="radio" name="guest_drinks" value="לא" /><span>לא</span></label>
+                  <label><input type="radio" name="guest_drinks" value="אולי" /><span>אולי</span></label>
+                </div>
               </div>
-            </div>
-            <div class="field">
-              <label for="guest_how_know">מאיפה אתם מכירים?</label>
-              <input id="guest_how_know" type="text" maxlength="200" />
-            </div>
-            <div class="field" style="margin-bottom:0">
-              <label for="guest_why">למה לדעתכם הוא/היא ייהנו בערב שלנו?</label>
-              <textarea id="guest_why" maxlength="400"></textarea>
+              <div class="field">
+                <label for="guest_how_know">מאיפה אתם מכירים?</label>
+                <input id="guest_how_know" type="text" maxlength="200" />
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label for="guest_why">למה לדעתכם הוא/היא ייהנו בערב שלנו?</label>
+                <textarea id="guest_why" maxlength="400"></textarea>
+              </div>
             </div>
           </fieldset>
 
@@ -465,7 +479,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
 
     // ---------- form ----------
-    function toggle() { els.storyField.hidden = radioVal('share_story') !== 'yes'; }
+    function toggle() {
+      els.storyField.hidden = radioVal('share_story') !== 'yes';
+      $('guestFields').hidden = $('no_plus').checked; // בלי +1 – מסתירים את פרטי ה-+1
+    }
 
     function setRadio(name, value) {
       document.querySelectorAll(`input[name=${name}]`).forEach((r) => { r.checked = r.value === value; });
@@ -475,6 +492,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       FIELDS.forEach((k) => { $(k).value = r[k] ?? ''; });
       setRadio('share_story', r.share_story || '');
       setRadio('payment', r.payment || '');
+      setRadio('gender', r.gender || '');
+      $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
       setRadio('guest_drinks', r.guest_drinks || '');
       toggle();
     }
@@ -511,7 +530,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     els.phone.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); }
     });
-    document.addEventListener('change', (e) => { if (e.target.name === 'share_story') toggle(); });
+    document.addEventListener('change', (e) => { if (e.target.name === 'share_story' || e.target.id === 'no_plus') toggle(); });
 
     els.form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -522,6 +541,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
+      data.gender = radioVal('gender');
+      data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
       data.guest_drinks = radioVal('guest_drinks');
       data.open_1 = opened.open1 ? 'TRUE' : 'FALSE';
       data.open_2 = opened.open2 ? 'TRUE' : 'FALSE';
