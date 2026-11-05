@@ -1,5 +1,15 @@
 ---
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
+
+// ===== גרסה – להעלות ב-1 בכל עדכון =====
+const VERSION = 'V1';
+// =========================================
+
+// תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
 ---
 <html lang="he" dir="rtl">
 <head>
@@ -25,7 +35,8 @@
 
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
-    .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
+    .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
     h1, h2 { font-family: var(--font); font-weight: 700; line-height: 1.1; margin: 0; }
     h1 { font-size: clamp(38px, 10vw, 60px); letter-spacing: -0.01em; }
     h2 { font-size: 30px; }
@@ -166,6 +177,7 @@
 </head>
 <body>
   <div class="wrap">
+    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
     <header class="hero">
       <h1>מנגנים שרים ביחד</h1>
       <p class="event-date"><span>6.11.26</span><span class="sep" aria-hidden="true"></span><span dir="ltr">Friday evening</span></p>
@@ -247,6 +259,18 @@
               <div class="field">
                 <label for="guest_age">גיל</label>
                 <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="guest_phone">מספר טלפון</label>
+              <input id="guest_phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="050-0000000" maxlength="20" />
+            </div>
+            <div class="field">
+              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">ה‑+1 שותה אלכוהול?</span>
+              <div class="modes inline three">
+                <label><input type="radio" name="guest_drinks" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="guest_drinks" value="לא" /><span>לא</span></label>
+                <label><input type="radio" name="guest_drinks" value="אולי" /><span>אולי</span></label>
               </div>
             </div>
             <div class="field">
@@ -377,7 +401,7 @@
     // ==========================================================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
-      'guest_name', 'guest_age', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
+      'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
     const REQUIRED = [
       ['name', 'חסר שם מלא.'],
       ['age', 'חסר גיל.'],
@@ -451,6 +475,7 @@
       FIELDS.forEach((k) => { $(k).value = r[k] ?? ''; });
       setRadio('share_story', r.share_story || '');
       setRadio('payment', r.payment || '');
+      setRadio('guest_drinks', r.guest_drinks || '');
       toggle();
     }
 
@@ -497,6 +522,7 @@
       FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
+      data.guest_drinks = radioVal('guest_drinks');
       data.open_1 = opened.open1 ? 'TRUE' : 'FALSE';
       data.open_2 = opened.open2 ? 'TRUE' : 'FALSE';
 
@@ -506,6 +532,7 @@
       if (!/[\u0590-\u05FF]/.test(data.name)) return setMsg(els.saveMsg, 'כתבו את השם המלא בעברית.', 'err'), $('name').focus();
       if (data.name.split(/\s+/).length < 2) return setMsg(els.saveMsg, 'כתבו שם פרטי ושם משפחה.', 'err'), $('name').focus();
       if (!validAge(data.age)) return setMsg(els.saveMsg, 'הגיל צריך להיות בין 18 ל‑99.', 'err'), $('age').focus();
+      if (data.guest_phone && !validPhone(normPhone(data.guest_phone))) return setMsg(els.saveMsg, 'מספר הטלפון של ה‑+1 לא תקין.', 'err'), $('guest_phone').focus();
       if (data.guest_age && !validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
       if (data.share_story !== 'yes') data.story_details = '';
 
