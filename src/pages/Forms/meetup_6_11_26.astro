@@ -2,7 +2,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V7';
+const VERSION = 'V8';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -412,8 +412,21 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
 
+  <dialog id="fullDialog" class="done" aria-labelledby="fullTitle">
+    <div class="done-head">
+      <div class="done-logo" aria-label="מנגנים שרים ביחד">
+        <span class="l1">מנגנים שרים</span>
+        <span class="l2">ביחד</span>
+      </div>
+    </div>
+    <h2 id="fullTitle">הקבוצה לערב התמלאה</h2>
+    <p class="done-note">ניתן להשאיר פרטים במידה ויהיו ביטולים.</p>
+    <button type="button" id="fullClose" class="btn btn-primary">הבנתי</button>
+  </dialog>
+
   <script is:inline>
     // ===== הגדרות – לעדכן אחרי פריסת ה-Apps Script החדש =====
+    const EVENT_FULL = true; // true = מציג בכניסה הודעה שהקבוצה התמלאה. false = מבטל את ההודעה
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUs1CeQC5EK_sE06ygSjVak_QrAqAr9QsVLibTdSRk-FKJF5J8iiC7VeQbeEhVvag/exec';
     // ==========================================================
 
@@ -617,6 +630,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
     $('doneClose').addEventListener('click', () => doneDialog.close());
     doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
+
+    // ---------- הודעת "הקבוצה התמלאה" בכניסה לדף ----------
+    const fullDialog = $('fullDialog');
+    $('fullClose').addEventListener('click', () => fullDialog.close());
+    fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
+    if (EVENT_FULL && fullDialog.showModal) fullDialog.showModal();
 
     // ---------- init ----------
     toggle();
