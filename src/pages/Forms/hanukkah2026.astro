@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V8';
+const VERSION = 'V9';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -402,6 +402,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
               <tbody><tr><td>תוספת: מסלול יין</td><td class="num">90 ₪</td></tr></tbody>
             </table>
             <p class="hint">המחיר כולל ארוחות בוקר, צהריים וערב.</p>
+            <p class="hint"><b>הרשמה מוקדמת עד 26.11.</b> לאחר מכן יהיו קפיצות מחיר: ב-27.11 וב-3.12.</p>
             <p id="total" class="total pending"></p>
             <p id="nextPrice" class="hint"></p>
           </fieldset>
@@ -488,7 +489,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const FOOD = { full: 200, one: 100 };
     const WINE = 90;
     const STAGE2 = new Date(2026, 10, 27), STAGE3 = new Date(2026, 11, 3);
-    const STAGE_LABEL = ['הרשמה מוקדמת עד 26.11', 'שלב שני עד 2.12', 'שלב אחרון'];
+    const STAGE_LABEL = ['הרשמה מוקדמת עד 26.11, לאחר מכן המחיר עולה', 'שלב שני עד 2.12', 'שלב אחרון'];
     const stageFor = (d) => d < STAGE2 ? 0 : d < STAGE3 ? 1 : 2;
 
     const TEXT = ['name', 'email', 'age', 'why', 'prev_feedback', 'social', 'area', 'baking',
