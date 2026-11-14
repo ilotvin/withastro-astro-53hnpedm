@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V2';
+const VERSION = 'V3';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -267,6 +267,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
               <label><input type="checkbox" name="wine" value="כן" /><span>מעוניין/ת להשתתף במסלול יין</span><b class="t-price">90 ₪</b></label>
             </div>
             <div class="info">
+              <p><b>הסופ"ש כולל ארוחות בוקר, צהריים וערב.</b></p>
               <p>במתחם מטבח גדול ומאובזר, וניתן להכין בו מה שרוצים (לא בזמני הארוחות).</p>
               <p>במטבח יש פינת קפה וחלב חופשי.</p>
             </div>
@@ -388,12 +389,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <fieldset class="group summary">
             <legend>סיכום עלות</legend>
             <table class="ptable">
-              <thead><tr><th>מחירי השלב הנוכחי</th><th>עם לינה</th><th>לינה עצמאית</th></tr></thead>
+              <thead id="phead"></thead>
               <tbody id="ptab"></tbody>
             </table>
             <table class="ptable">
               <tbody><tr><td>תוספת: מסלול יין</td><td class="num">90 ₪</td></tr></tbody>
             </table>
+            <p class="hint">המחיר כולל ארוחות בוקר, צהריים וערב.</p>
             <p id="total" class="total pending"></p>
             <p id="nextPrice" class="hint"></p>
           </fieldset>
@@ -551,9 +553,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     function renderPrices() {
       const st = currentStage();
       $('stageTag').textContent = createdAt ? 'המחיר שלך נשמר לפי תאריך ההרשמה' : STAGE_LABEL[st];
-      const cell = (l, k) => `<td class="num">${fmt(PRICES[l][k][st] + FOOD[k])}</td>`;
-      $('ptab').innerHTML = `<tr><td>סופ"ש מלא</td>${cell('y', 'full')}${cell('n', 'full')}</tr>` +
-        `<tr><td>לילה אחד</td>${cell('y', 'one')}${cell('n', 'one')}</tr>`;
+      // מציגים רק את מה שרלוונטי לבחירה: סוג הלינה שנבחר (ברירת מחדל: במתחם) ומספר הלילות שנבחר
+      const a = radioVal('attendance'), l = radioVal('lodging');
+      const lod = l ? (l.includes('במתחם') ? 'y' : 'n') : 'y';
+      const kinds = a ? [a.startsWith('סופ"ש מלא') ? 'full' : 'one'] : ['full', 'one'];
+      const kindName = { full: 'סופ"ש מלא (2 לילות)', one: 'לילה אחד' };
+      $('phead').innerHTML = `<tr><th>${createdAt ? 'המחיר שלך' : 'מחירי השלב הנוכחי'}</th><th>${lod === 'y' ? 'לינה במתחם' : 'לינה עצמאית'}</th></tr>`;
+      $('ptab').innerHTML = kinds.map((k) => `<tr><td>${kindName[k]}</td><td class="num">${fmt(PRICES[lod][k][st] + FOOD[k])}</td></tr>`).join('');
+
       const t = totalFor(st), c = choice();
       if (t == null) {
         $('total').className = 'total pending';
@@ -563,8 +570,15 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
       $('total').className = 'total';
       $('total').textContent = 'סה"כ: ' + fmt(t);
-      $('nextPrice').textContent = !createdAt && st < 2
-        ? `המחיר עולה ל-${fmt(PRICES[c.lod][c.kind][st + 1] + FOOD[c.kind])} ב-${st === 0 ? '27.11' : '3.12'}` : '';
+      if (!createdAt && st < 2) {
+        const now = PRICES[c.lod][c.kind][st] + FOOD[c.kind];
+        const next = PRICES[c.lod][c.kind][st + 1] + FOOD[c.kind];
+        const label = c.kind === 'full' ? 'הסופ"ש' : 'הלילה האחד';
+        const wineNote = checkVals('wine') ? ' (לא כולל יין)' : '';
+        $('nextPrice').textContent = `מ-${st === 0 ? '27.11' : '3.12'} המחיר של ${label}${wineNote} יעלה מ-${fmt(now)} ל-${fmt(next)}.`;
+      } else {
+        $('nextPrice').textContent = '';
+      }
     }
 
     // ---------- טופס ----------
