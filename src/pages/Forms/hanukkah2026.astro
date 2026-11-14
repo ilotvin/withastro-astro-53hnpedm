@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V1';
+const VERSION = 'V2';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -15,7 +15,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0A7090" />
+  <meta name="theme-color" content="#A35A32" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet" />
@@ -26,14 +26,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
   <style is:global>
     :root {
-      --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
-      --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --gold-soft: #0B5770; --danger: #FFB4B4;
-      --field: #13809F;
+      --bg: #8A4B2A; --surface: #6E3A1F; --ink: #FFFFFF; --muted: #F3D9BF; --line: #A9683F;
+      --sage: #F6C453; --sage-ink: #2A1A00; --gold: #FFB38A; --gold-soft: #5E3018; --danger: #FFD0C8;
+      --field: #9A5733;
       --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
       color-scheme: dark;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
     .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
     .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
     h1, h2 { font-family: var(--font); font-weight: 700; line-height: 1.1; margin: 0; }
@@ -124,7 +124,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .msg.err { color: var(--danger); }
 
     .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
-    .done::backdrop { background: rgba(4, 30, 40, .7); }
+    .done::backdrop { background: rgba(40, 18, 6, .7); }
     .done-logo { font-family: "Frank Ruhl Libre", serif; color: var(--sage); line-height: 1.05; margin-bottom: 16px; }
     .done-logo .l1 { display: block; font-size: 20px; font-weight: 500; letter-spacing: .06em; }
     .done-logo .l2 { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; letter-spacing: .3em; margin-top: 3px; }
