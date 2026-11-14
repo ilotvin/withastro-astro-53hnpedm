@@ -1,0 +1,765 @@
+---
+// ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
+
+// ===== גרסה – להעלות ב-1 בכל עדכון =====
+const VERSION = 'V1';
+// =========================================
+
+// תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
+---
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0A7090" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet" />
+  <title>מנגנים שרים ביחד – ריטריט חנוכה במצפה רמון</title>
+  <meta property="og:title" content="מנגנים שרים ביחד – ריטריט חנוכה במצפה רמון" />
+  <meta property="og:description" content="10–12 לדצמבר 26 · שלושה ימים של ג'אמים, סדנאות ומדורה מול המכתש. נרשמים ומעדכנים מתי שרוצים." />
+  <meta property="og:image" content="https://atroproject1.vercel.app/images/hanukkah2026.jpg" />
+
+  <style is:global>
+    :root {
+      --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
+      --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --gold-soft: #0B5770; --danger: #FFB4B4;
+      --field: #13809F;
+      --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
+    .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+    h1, h2 { font-family: var(--font); font-weight: 700; line-height: 1.1; margin: 0; }
+    h1 { font-size: clamp(38px, 10vw, 60px); letter-spacing: -0.01em; }
+    h2 { font-size: 30px; }
+    .muted { color: var(--muted); }
+    .req { color: var(--gold); font-weight: 700; }
+
+    .hero { padding: 48px 0 32px; text-align: center; }
+    .subtitle { font-weight: 700; font-size: clamp(21px, 5vw, 28px); line-height: 1.25; margin: 10px 0 0; color: var(--sage); }
+    .event-date { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0 0; font-family: "Frank Ruhl Libre", serif; font-size: 18px; letter-spacing: .12em; color: var(--muted); }
+    .event-date .sep { width: 28px; height: 1px; background: var(--sage); opacity: .8; }
+    .event-place { margin: 6px 0 0; font-size: 16px; }
+    .stage { display: inline-block; margin-top: 16px; padding: 6px 16px; border-radius: 999px; background: var(--sage); color: var(--sage-ink); font-weight: 700; font-size: 15px; }
+    .cover { width: 80%; margin: 20px auto 0; border-radius: 14px; overflow: hidden; background: var(--surface); }
+    .cover img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+    .cover.is-empty { aspect-ratio: 16 / 9; display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
+    .cover.is-empty::after { content: "כאן תופיע תמונה"; color: var(--muted); font-size: 16px; }
+
+    .btn { display: inline-block; font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 2px solid var(--sage); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
+    .btn-primary { background: var(--sage); color: var(--sage-ink); }
+    .btn-danger { border-color: var(--danger); color: var(--danger); }
+    .btn-small { padding: 8px 16px; font-size: 15px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn:disabled { opacity: .55; cursor: progress; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+    .join { padding-top: 40px; border-top: 1px solid var(--line); }
+    .join > p { margin: 8px 0 20px; }
+    .field { margin-bottom: 18px; }
+    .field > label, .q { display: block; font-weight: 700; margin-bottom: 6px; }
+    input[type=text], input[type=tel], input[type=number], input[type=email], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    input[dir=ltr] { text-align: left; }
+    input[dir=ltr]:placeholder-shown { direction: rtl; text-align: right; }
+    input[type=number] { max-width: 8em; }
+    textarea { min-height: 80px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    .hint { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+    .err-line { font-size: 14px; color: var(--danger); margin: 4px 0 0; min-height: 0; }
+    .err-line:empty { display: none; }
+
+    fieldset { border: 0; padding: 0; margin: 0; }
+    .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
+    .group > legend { font-size: 19px; font-weight: 700; margin: 0 0 10px; float: right; width: 100%; }
+    .group > legend + * { clear: both; }
+    .group-intro { font-size: 16px; color: var(--muted); margin: 0 0 16px; }
+
+    .modes { display: grid; gap: 8px; }
+    .modes label { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-weight: 400; }
+    .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+    .modes input { margin: 0; accent-color: var(--sage); flex: none; width: 18px; height: 18px; }
+    .modes.inline { grid-template-columns: repeat(2, 1fr); max-width: 18em; }
+    .modes.inline.three { grid-template-columns: repeat(3, 1fr); max-width: 26em; }
+    .modes.inline label { justify-content: center; }
+    .modes.chips { display: flex; flex-wrap: wrap; }
+    .modes.chips label { padding: 8px 12px; font-size: 16px; }
+    .role span small { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+    .role { align-items: flex-start !important; }
+    .role input { margin-top: 3px; }
+    .t-price { margin-inline-start: auto; color: var(--sage); white-space: nowrap; font-weight: 700; }
+
+    .info { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); font-size: 16px; }
+    .info p { margin: 0 0 4px; }
+    .info p:last-child { margin: 0; }
+    .star { font-size: 15px; color: var(--muted); margin: 10px 0 0; }
+    .star b { color: var(--gold); }
+
+    .summary { border: 2px solid var(--sage); }
+    .ptable { width: 100%; border-collapse: collapse; font-size: 16px; margin-bottom: 10px; }
+    .ptable th, .ptable td { padding: 8px 4px; border-bottom: 1px solid var(--line); text-align: right; font-weight: 400; }
+    .ptable th { color: var(--muted); font-size: 14px; }
+    .ptable td.num { color: var(--sage); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .total { font-size: 26px; font-weight: 700; margin: 12px 0 2px; font-variant-numeric: tabular-nums; }
+    .total.pending { font-size: 16px; font-weight: 400; color: var(--muted); }
+
+    .buy { border: 2px dashed var(--sage); }
+    .buy-card { padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+    .buy-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 0 12px; }
+    .upload { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; cursor: pointer; color: var(--muted); }
+    .upload input { display: none; }
+    .buy-list { list-style: none; padding: 0; margin: 14px 0 0; }
+    .buy-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+    .buy-list .amt { color: var(--sage); font-weight: 700; white-space: nowrap; }
+    .buy-total { font-weight: 700; margin-top: 10px; }
+
+    .msg { margin: 12px 0 0; min-height: 1.6em; }
+    .msg.ok { color: var(--sage); }
+    .msg.err { color: var(--danger); }
+
+    .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
+    .done::backdrop { background: rgba(4, 30, 40, .7); }
+    .done-logo { font-family: "Frank Ruhl Libre", serif; color: var(--sage); line-height: 1.05; margin-bottom: 16px; }
+    .done-logo .l1 { display: block; font-size: 20px; font-weight: 500; letter-spacing: .06em; }
+    .done-logo .l2 { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; letter-spacing: .3em; margin-top: 3px; }
+    .done-logo .l2::before, .done-logo .l2::after { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
+    .done h2 { font-size: 26px; margin: 0 0 6px; }
+    .done-note { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+    .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
+    .done-date { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .done-date b { display: block; font-size: 24px; color: var(--sage); }
+    .done-date span { display: block; font-size: 15px; color: var(--muted); }
+    .done-price { font-size: 17px; margin: 14px 0 0; }
+    .done-price b { color: var(--sage); }
+    .done-pay { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
+
+    .about { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; font-size: 16px; line-height: 1.7; }
+    .about h3 { margin: 0 0 6px; font-size: 20px; color: var(--sage); }
+    .about p { margin: 0 0 10px; }
+    .community { margin-top: 20px; font-size: 0.9em; color: var(--muted); }
+    .community p { margin: 0 0 10px; }
+    .community a { color: var(--sage); font-weight: 700; }
+
+    @media (max-width: 600px) { .cover { width: 100%; } }
+    @media (max-width: 420px) { .buy-grid { grid-template-columns: 1fr; } .modes.inline.three { grid-template-columns: 1fr 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+    <header class="hero">
+      <h1>מנגנים שרים ביחד</h1>
+      <p class="subtitle">ריטריט חנוכה</p>
+      <p class="event-date"><span>10–12 לדצמבר 26</span><span class="sep" aria-hidden="true"></span><span>חמישי–שבת</span></p>
+      <p class="event-place">מתחם פעימה, מצפה רמון</p>
+      <figure class="cover">
+        <img src="/images/hanukkah2026.jpg" alt="ריטריט חנוכה במצפה רמון" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+      </figure>
+      <span class="stage" id="stageTag"></span>
+    </header>
+
+    <main>
+      <section class="join" aria-labelledby="join-title">
+        <h2 id="join-title">הרשמה ועדכון</h2>
+        <p class="muted">מספר הטלפון הוא המזהה שלכם. נרשמתם כבר? הזינו אותו, והפרטים שלכם ייטענו אוטומטית לעדכון.<br />שדות עם <span class="req">*</span> הם חובה, כל השאר לפי רצונכם.</p>
+
+        <form id="form" novalidate>
+          <!-- 1. פרטים -->
+          <fieldset class="group">
+            <legend>פרטים</legend>
+            <div class="field">
+              <label for="phone">מספר טלפון <span class="req">*</span></label>
+              <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" />
+              <p id="loadMsg" class="hint"></p>
+            </div>
+            <div class="field">
+              <label for="name">שם מלא בעברית <span class="req">*</span></label>
+              <input id="name" type="text" autocomplete="name" maxlength="80" />
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label for="email">כתובת מייל</label>
+              <input id="email" type="email" dir="ltr" autocomplete="email" maxlength="120" placeholder="name@gmail.com" />
+            </div>
+          </fieldset>
+
+          <!-- 2. מתי מגיעים -->
+          <fieldset class="group">
+            <legend>מתי מגיעים? <span class="req">*</span></legend>
+            <div class="modes">
+              <label><input type="radio" name="attendance" value='סופ"ש מלא (חמישי–שבת)' /><span>סופ"ש מלא (חמישי–שבת)</span></label>
+              <label><input type="radio" name="attendance" value="שישי–שבת" /><span>שישי–שבת</span></label>
+              <label><input type="radio" name="attendance" value="חמישי–שישי" /><span>חמישי–שישי</span></label>
+            </div>
+            <div class="field" style="margin:16px 0">
+              <span class="q">האם תתעניינו להישאר עוד לילה (שבת–ראשון)?</span>
+              <div class="modes inline three">
+                <label><input type="radio" name="extra_night" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="extra_night" value="אולי" /><span>אולי</span></label>
+                <label><input type="radio" name="extra_night" value="לא" /><span>לא</span></label>
+              </div>
+            </div>
+            <span class="q">לינה <span class="req">*</span></span>
+            <div class="modes">
+              <label><input type="radio" name="lodging" value="לינה במתחם (מזרנים על פרקט)" /><span>לינה במתחם (מזרנים על פרקט)</span></label>
+              <label><input type="radio" name="lodging" value="לינה עצמאית (מלון / B&B)" /><span>לינה עצמאית (מלון / B&amp;B)</span></label>
+            </div>
+          </fieldset>
+
+          <!-- 3. קצת עליכם -->
+          <fieldset class="group">
+            <legend>קצת עליכם</legend>
+            <div class="field">
+              <label for="age">גיל <span class="req">*</span></label>
+              <input id="age" type="number" inputmode="numeric" min="18" max="99" />
+            </div>
+            <div class="field">
+              <span class="q">מי אני?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="gender" value="גבר" /><span>גבר</span></label>
+                <label><input type="radio" name="gender" value="אישה" /><span>אישה</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="why">למה את/ה רוצה להצטרף לריטריט? <span class="req">*</span></label>
+              <textarea id="why" maxlength="600"></textarea>
+            </div>
+            <div class="field">
+              <span class="q">האם יצא לך להיות בריטריטים בעבר?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="prev_retreats" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="prev_retreats" value="לא" /><span>לא</span></label>
+              </div>
+            </div>
+            <div class="field" id="prevBox" hidden>
+              <label for="prev_feedback">מה אהבת ומה פחות התחברת?</label>
+              <textarea id="prev_feedback" maxlength="600"></textarea>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label for="social">קישור לרשת חברתית (מומלץ)</label>
+              <input id="social" type="text" dir="ltr" inputmode="url" maxlength="200" placeholder="מומלץ למלא סושיאל" />
+            </div>
+          </fieldset>
+
+          <!-- 4. הגעה -->
+          <fieldset class="group">
+            <legend>הגעה <span class="muted" style="font-weight:400;font-size:15px">(ניתן לעדכן בהמשך)</span></legend>
+            <div class="modes">
+              <label><input type="radio" name="car" value="נוהג" /><span>נוהג</span></label>
+              <label><input type="radio" name="car" value="נוהג, יכול לקחת טרמפ" /><span>נוהג, יכול לקחת טרמפ</span></label>
+              <label><input type="radio" name="car" value="מחפש טרמפ" /><span>מחפש טרמפ</span></label>
+            </div>
+            <div class="field" style="margin:16px 0 0">
+              <label for="area">מאיזה אזור יוצאים?</label>
+              <input id="area" type="text" maxlength="60" placeholder="תל אביב" />
+            </div>
+          </fieldset>
+
+          <!-- 5. אוכל ושתייה -->
+          <fieldset class="group">
+            <legend>אוכל ושתייה</legend>
+            <div class="modes">
+              <label><input type="checkbox" name="wine" value="כן" /><span>מעוניין/ת להשתתף במסלול יין</span><b class="t-price">90 ₪</b></label>
+            </div>
+            <div class="info">
+              <p>במתחם מטבח גדול ומאובזר, וניתן להכין בו מה שרוצים (לא בזמני הארוחות).</p>
+              <p>במטבח יש פינת קפה וחלב חופשי.</p>
+            </div>
+            <div class="field" style="margin:16px 0 0">
+              <label for="baking">רוצים להוביל אפייה? הציעו רעיונות ומצרכים</label>
+              <textarea id="baking" maxlength="500" placeholder="סופגניות, לביבות, עוגת שמרים..."></textarea>
+            </div>
+          </fieldset>
+
+          <!-- 6. תוכן -->
+          <fieldset class="group">
+            <legend>תוכן</legend>
+            <div class="field">
+              <label for="two_facts">שתפו שתי עובדות מעניינות על עצמכם</label>
+              <textarea id="two_facts" maxlength="500"></textarea>
+            </div>
+            <div class="field">
+              <span class="q">באילו פעילויות תרצו להשתתף? <span class="muted" style="font-weight:400;font-size:15px">(בחירה מרובה)</span></span>
+              <div class="modes chips">
+                <label><input type="checkbox" name="activities" value="שיעור ריקוד" /><span>שיעור ריקוד (למידת טכניקה)</span></label>
+                <label><input type="checkbox" name="activities" value="יוגה" /><span>תרגול יוגה</span></label>
+                <label><input type="checkbox" name="activities" value="אקרו-יוגה" /><span>אקרו-יוגה</span></label>
+                <label><input type="checkbox" name="activities" value="ציור" /><span>שיעור ציור</span></label>
+                <label><input type="checkbox" name="activities" value="יצירה" /><span>שיעור יצירה</span></label>
+                <label><input type="checkbox" name="activities" value="הרצאת סייבר" /><span>הרצאה בנושא סייבר</span></label>
+                <label><input type="checkbox" name="activities" value="תזונה ואורח חיים" /><span>תזונה ואורח חיים בריא</span></label>
+                <label><input type="checkbox" name="activities" value="דיבור מול קהל" /><span>סדנת דיבור מול קהל</span></label>
+                <label><input type="checkbox" name="activities" value="אימפרוביזציה" /><span>סדנת אימפרוביזציה</span></label>
+                <label><input type="checkbox" name="activities" value="מסלול הליכה" /><span>מסלול הליכה</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="connect_ideas">יש לכם רעיונות לפעילויות מחברות? נשמח לשמוע</label>
+              <textarea id="connect_ideas" maxlength="500" placeholder="משחק היכרות, מעגל שיתוף, ערב משחקי קופסה..."></textarea>
+            </div>
+            <div class="field">
+              <span class="q">רוצים להעביר סדנה?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="workshop" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="workshop" value="לא" /><span>לא</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="q">פינת השראה: רוצים לשתף סיפור?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="story" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="story" value="לא" /><span>לא</span></label>
+              </div>
+            </div>
+            <div class="field" id="detailsBox" style="margin-bottom:0" hidden>
+              <label for="content_details">ספרו לנו על הסדנה או הסיפור (נושא, משך וכל פרט רלוונטי)</label>
+              <textarea id="content_details" maxlength="800"></textarea>
+            </div>
+          </fieldset>
+
+          <!-- 7. העדפות תזונה -->
+          <fieldset class="group">
+            <legend>העדפות תזונה</legend>
+            <div class="field">
+              <div class="modes inline three">
+                <label><input type="radio" name="diet" value="אוכל הכול" /><span>אוכל הכול</span></label>
+                <label><input type="radio" name="diet" value="צמחוני" /><span>צמחוני</span></label>
+                <label><input type="radio" name="diet" value="טבעוני" /><span>טבעוני</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="q">נמנע מגלוטן</span>
+              <div class="modes inline">
+                <label><input type="radio" name="gluten" value="כן" /><span>כן</span></label>
+                <label><input type="radio" name="gluten" value="לא" /><span>לא</span></label>
+              </div>
+              <p class="hint">כדי להקל על ההתארגנות, משתתפים שנמנעים מגלוטן מתבקשים לדאוג לעצמם למזון ללא גלוטן.</p>
+            </div>
+            <div class="field">
+              <label for="allergies">אלרגיות</label>
+              <input id="allergies" type="text" maxlength="200" />
+            </div>
+            <div class="field">
+              <label for="kashrut">מגבלות כשרות</label>
+              <input id="kashrut" type="text" maxlength="200" placeholder="לא מערבב בשר וחלב, רק בשר כשר..." />
+              <p class="hint">ציינו כדי שנוכל להתחשב איפה שניתן. נעדכן אתכם במידת הצורך.</p>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <span class="q">העדפת חלב</span>
+              <div class="modes chips">
+                <label><input type="radio" name="milk" value="הכול" /><span>הכול</span></label>
+                <label><input type="radio" name="milk" value="רגיל" /><span>רגיל</span></label>
+                <label><input type="radio" name="milk" value="שקדים" /><span>שקדים</span></label>
+                <label><input type="radio" name="milk" value="סויה" /><span>סויה</span></label>
+                <label><input type="radio" name="milk" value="שיבולת שועל" /><span>שיבולת שועל</span></label>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 8. הלפרים -->
+          <fieldset class="group">
+            <legend>הלפרים <span class="req">*</span></legend>
+            <div class="modes">
+              <label class="role"><input type="checkbox" name="helper_roles" value="מנהל מטבח + שף" /><span>מנהל מטבח + שף<small>אחריות על הובלת הבישולים, ניהול התורנים, כמויות ומעקב אחר מצרכים. הכול בהובלה נעימה ורגישה.</small></span></label>
+              <label class="role"><input type="checkbox" name="helper_roles" value="קניות" /><span>קניות<small>אחריות על הקניות (פיזי או אונליין): לוודא שלא יחסר כלום, מעקב אחר המלאי ותמיכה במנהל המטבח במהלך הריטריט.</small></span></label>
+              <label class="role"><input type="checkbox" name="helper_roles" value="בשרים, יינות ומנגל" /><span>אחראי בשרים, יינות והובלת המנגל<small>מבין בעל האש: יודע למצוא בשר איכותי בעלויות טובות, וליד המנגל מפקח ומוודא שהבשר יוצא טעים ולא שרוף.</small></span></label>
+            </div>
+            <p class="star"><b>*</b> כמות ההלפרים תיקבע בהמשך בהתאם לצפי הצורך.</p>
+            <p class="star"><b>*</b> כל משתתפי הריטריט ישובצו למשמרות בצוות הבישול, או לעזרה בשטיפת כלים, ניקיון ותמיכה במבשלים (בעיקר פינוי וארגון של כלים יבשים חזרה למקומם).</p>
+          </fieldset>
+
+          <!-- 9. תשלום -->
+          <fieldset class="group">
+            <legend>תשלום</legend>
+            <span class="q">כיצד תרצו לשלם? <span class="muted" style="font-weight:400;font-size:15px">(בקשת תשלום תישלח בנפרד)</span></span>
+            <div class="modes inline three">
+              <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
+              <label><input type="radio" name="payment" value="פייבוקס" /><span>פייבוקס</span></label>
+              <label><input type="radio" name="payment" value="מזומן" /><span>מזומן</span></label>
+            </div>
+          </fieldset>
+
+          <!-- סיכום עלות -->
+          <fieldset class="group summary">
+            <legend>סיכום עלות</legend>
+            <table class="ptable">
+              <thead><tr><th>מחירי השלב הנוכחי</th><th>עם לינה</th><th>לינה עצמאית</th></tr></thead>
+              <tbody id="ptab"></tbody>
+            </table>
+            <table class="ptable">
+              <tbody><tr><td>תוספת: מסלול יין</td><td class="num">90 ₪</td></tr></tbody>
+            </table>
+            <p id="total" class="total pending"></p>
+            <p id="nextPrice" class="hint"></p>
+          </fieldset>
+
+          <div class="actions">
+            <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
+          </div>
+          <p id="saveMsg" class="msg" role="status"></p>
+        </form>
+
+        <!-- 10. דיווח קניות – מוצג רק למי שסומן buyer=כן בגיליון -->
+        <section id="buySec" class="group buy" hidden aria-labelledby="buy-title">
+          <h2 id="buy-title" style="font-size:19px;margin:0 0 6px">דיווח קניות</h2>
+          <p class="group-intro">החלק הזה פתוח רק לצוות הקניות. דווחו על כל קנייה בנפרד וצרפו קבלה, כדי שנוכל להחזיר לכם את הכסף.</p>
+          <div class="buy-card">
+            <div class="buy-grid">
+              <div class="field">
+                <label for="b_amount">סכום (₪) <span class="req">*</span></label>
+                <input id="b_amount" type="text" inputmode="decimal" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="b_store">איפה נקנה</label>
+                <input id="b_store" type="text" maxlength="80" placeholder="שופרסל מצפה רמון" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="b_details">פירוט (כמה שניתן)</label>
+              <textarea id="b_details" maxlength="800" placeholder="ירקות לסלט, 3 חבילות פסטה, גבינות..."></textarea>
+            </div>
+            <label class="upload"><span aria-hidden="true">📷</span><span id="b_fileName">צילום או העלאת קבלה</span><input id="b_file" type="file" accept="image/*,application/pdf" /></label>
+            <div class="actions" style="margin-top:12px">
+              <button type="button" id="buyBtn" class="btn btn-primary btn-small">שמירת הקנייה</button>
+            </div>
+            <p id="buyMsg" class="msg" role="status"></p>
+          </div>
+          <ul id="buyList" class="buy-list"></ul>
+          <p id="buyTotal" class="buy-total"></p>
+        </section>
+
+        <div class="about">
+          <h3>קצת עליי, אילן</h3>
+          <p>רואה חשבון לשעבר, שחי כשלוש שנים בקריביים. בגיל 36 עברתי לעולם אוטומציית השיווק, ובמקביל גיליתי כמה אני אוהב לארח. מאז הפקתי כשישה ריטריטים (חאן גמליה, מצפה רמון, מושב אודם, כפר הנוקדים), ובשלוש השנים האחרונות אירחתי בבית עשרות ערבי שירה וג'אם.</p>
+        </div>
+
+        <div class="community">
+          <p>כדי לראות אירועים קודמים, אפשר להציץ באינסטגרם שלי:
+            <a href="https://www.instagram.com/ilan_lotvin" target="_blank" rel="noopener">ilan_lotvin@</a></p>
+          <p>מכירים את מנגנים שרים ביחד? אם לא, אפשר להצטרף:
+            <a href="https://chat.whatsapp.com/ImcpNyO1goH1zLorpNDaBA" target="_blank" rel="noopener">לקבוצת הוואטסאפ</a></p>
+          <p>קטעים נוספים ביוטיוב:
+            <a href="https://www.youtube.com/playlist?list=PLGklmqorxzOw" target="_blank" rel="noopener">לפלייליסט</a></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
+    <div class="done-logo" aria-label="מנגנים שרים ביחד">
+      <span class="l1">מנגנים שרים</span>
+      <span class="l2">ביחד</span>
+    </div>
+    <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
+    <p class="done-note">הרשמה אינה מהווה אישור השתתפות.</p>
+    <div class="done-info">
+      <div class="done-date"><b>10–12 לדצמבר 26</b><span>מתחם פעימה, מצפה רמון</span></div>
+      <p class="done-price" id="donePrice"></p>
+      <p class="done-pay">המחיר נשמר לפי תאריך ההרשמה. בקשת תשלום תישלח בנפרד.</p>
+    </div>
+    <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
+  </dialog>
+
+  <script is:inline>
+    // ===== הגדרות – להדביק את כתובת ה-Web App אחרי פריסת ה-Apps Script =====
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
+    const LS_KEY = 'hanukkah2026_phone';
+    // =======================================================================
+
+    // תמחור (חייב להתאים ל-Code_hanukkah2026.gs)
+    const PRICES = { y: { full: [350, 400, 450], one: [290, 340, 390] }, n: { full: [200, 250, 300], one: [140, 190, 240] } };
+    const FOOD = { full: 200, one: 100 };
+    const WINE = 90;
+    const STAGE2 = new Date(2026, 10, 27), STAGE3 = new Date(2026, 11, 3);
+    const STAGE_LABEL = ['הרשמה מוקדמת עד 26.11', 'שלב שני עד 2.12', 'שלב אחרון'];
+    const stageFor = (d) => d < STAGE2 ? 0 : d < STAGE3 ? 1 : 2;
+
+    const TEXT = ['name', 'email', 'age', 'why', 'prev_feedback', 'social', 'area', 'baking',
+      'two_facts', 'connect_ideas', 'content_details', 'allergies', 'kashrut'];
+    const RADIOS = ['attendance', 'extra_night', 'lodging', 'gender', 'prev_retreats', 'car',
+      'workshop', 'story', 'diet', 'gluten', 'milk', 'payment'];
+    const CHECKS = ['wine', 'activities', 'helper_roles'];
+
+    const $ = (id) => document.getElementById(id);
+    const els = { form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), saveBtn: $('saveBtn'),
+      saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn') };
+    let loadedPhone = '';
+    let createdAt = null; // תאריך ההרשמה המקורי – קובע את שלב המחיר
+
+    // ---------- JSONP (קריאה ומחיקה) ----------
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+        document.head.appendChild(s);
+      });
+    }
+
+    // ---------- POST (שמירה וקבלות) ----------
+    async function post(payload, ms = 20000) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      try {
+        const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
+        return await r.json();
+      } catch (e) {
+        throw new Error(e.name === 'AbortError' ? 'timeout' : 'network');
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    // ---------- helpers ----------
+    function normPhone(v) {
+      let d = String(v || '').replace(/\D/g, '');
+      if (d.startsWith('972')) d = '0' + d.slice(3);
+      return d;
+    }
+    const validPhone = (d) => /^0\d{8,9}$/.test(d);
+    const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
+    const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    const radioVal = (n) => document.querySelector(`input[name="${n}"]:checked`)?.value || '';
+    const checkVals = (n) => [...document.querySelectorAll(`input[name="${n}"]:checked`)].map((i) => i.value).join(', ');
+    function setMsg(el, text, kind) { el.textContent = text; el.className = el === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); }
+    const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
+      : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
+    const fmt = (n) => Number(n).toLocaleString('he-IL') + ' ₪';
+
+    // ---------- תמחור ----------
+    function choice() {
+      const a = radioVal('attendance'), l = radioVal('lodging');
+      if (!a || !l) return null;
+      return { kind: a.startsWith('סופ"ש מלא') ? 'full' : 'one', lod: l.includes('במתחם') ? 'y' : 'n' };
+    }
+    function currentStage() { return stageFor(createdAt || new Date()); }
+    function totalFor(st) {
+      const c = choice();
+      if (!c) return null;
+      return PRICES[c.lod][c.kind][st] + FOOD[c.kind] + (checkVals('wine') ? WINE : 0);
+    }
+    function renderPrices() {
+      const st = currentStage();
+      $('stageTag').textContent = createdAt ? 'המחיר שלך נשמר לפי תאריך ההרשמה' : STAGE_LABEL[st];
+      const cell = (l, k) => `<td class="num">${fmt(PRICES[l][k][st] + FOOD[k])}</td>`;
+      $('ptab').innerHTML = `<tr><td>סופ"ש מלא</td>${cell('y', 'full')}${cell('n', 'full')}</tr>` +
+        `<tr><td>לילה אחד</td>${cell('y', 'one')}${cell('n', 'one')}</tr>`;
+      const t = totalFor(st), c = choice();
+      if (t == null) {
+        $('total').className = 'total pending';
+        $('total').textContent = 'בחרו מתי מגיעים ולינה כדי לראות את המחיר שלכם.';
+        $('nextPrice').textContent = '';
+        return;
+      }
+      $('total').className = 'total';
+      $('total').textContent = 'סה"כ: ' + fmt(t);
+      $('nextPrice').textContent = !createdAt && st < 2
+        ? `המחיר עולה ל-${fmt(PRICES[c.lod][c.kind][st + 1] + FOOD[c.kind])} ב-${st === 0 ? '27.11' : '3.12'}` : '';
+    }
+
+    // ---------- טופס ----------
+    function toggle() {
+      $('prevBox').hidden = radioVal('prev_retreats') !== 'כן';
+      $('detailsBox').hidden = radioVal('workshop') !== 'כן' && radioVal('story') !== 'כן';
+      renderPrices();
+    }
+    function fillForm(r) {
+      TEXT.forEach((k) => { $(k).value = r[k] ?? ''; });
+      RADIOS.forEach((k) => document.querySelectorAll(`input[name="${k}"]`).forEach((i) => { i.checked = i.value === String(r[k] ?? ''); }));
+      CHECKS.forEach((k) => {
+        const vals = String(r[k] ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+        document.querySelectorAll(`input[name="${k}"]`).forEach((i) => { i.checked = vals.includes(i.value); });
+      });
+      createdAt = r.created ? new Date(r.created) : null;
+      toggle();
+    }
+    function resetState() {
+      els.form.reset();
+      loadedPhone = ''; createdAt = null;
+      els.saveBtn.textContent = 'שמירת ההרשמה';
+      els.deleteBtn.hidden = true;
+      $('buySec').hidden = true;
+      toggle();
+    }
+
+    async function loadExisting(silent) {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
+      setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
+      try {
+        const res = await jsonp({ action: 'get', phone });
+        if (!res.ok) throw new Error(res.error);
+        loadedPhone = phone;
+        if (res.found) {
+          fillForm(res.data);
+          els.saveBtn.textContent = 'עדכון ההרשמה';
+          els.deleteBtn.hidden = false;
+          setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
+          $('buySec').hidden = !res.buyer;
+          if (res.buyer) renderPurchases(res.purchases || []);
+        } else {
+          createdAt = null;
+          els.saveBtn.textContent = 'שמירת ההרשמה';
+          els.deleteBtn.hidden = true;
+          $('buySec').hidden = true;
+          setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
+          toggle();
+        }
+      } catch (e) {
+        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
+      }
+    }
+
+    els.phone.addEventListener('blur', () => {
+      const p = normPhone(els.phone.value);
+      if (validPhone(p) && p !== loadedPhone) loadExisting(true);
+    });
+    els.phone.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); } });
+    els.form.addEventListener('change', toggle);
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = normPhone(els.phone.value);
+      const fail = (msg, el) => { setMsg(els.saveMsg, msg, 'err'); if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+      if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
+
+      const data = { phone };
+      TEXT.forEach((k) => { data[k] = $(k).value.trim(); });
+      RADIOS.forEach((k) => { data[k] = radioVal(k); });
+      CHECKS.forEach((k) => { data[k] = checkVals(k); });
+
+      if (!data.name) return fail('חסר שם מלא.', $('name'));
+      if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
+      if (data.name.split(/\s+/).length < 2) return fail('כתבו שם פרטי ושם משפחה.', $('name'));
+      if (data.email && !validEmail(data.email)) return fail('כתובת המייל לא תקינה.', $('email'));
+      if (!data.attendance) return fail('בחרו מתי מגיעים.', document.querySelector('input[name="attendance"]'));
+      if (!data.lodging) return fail('בחרו סוג לינה.', document.querySelector('input[name="lodging"]'));
+      if (!validAge(data.age)) return fail('הגיל צריך להיות בין 18 ל‑99.', $('age'));
+      if (!data.why) return fail('ספרו בקצרה למה תרצו להצטרף לריטריט.', $('why'));
+      if (data.prev_retreats !== 'כן') data.prev_feedback = '';
+      if (data.workshop !== 'כן' && data.story !== 'כן') data.content_details = '';
+
+      els.saveBtn.disabled = true;
+      setMsg(els.saveMsg, 'שומרים…');
+      try {
+        const res = await post({ action: 'save', data });
+        if (!res.ok) throw new Error(res.error);
+        try { localStorage.setItem(LS_KEY, phone); } catch {}
+        loadedPhone = phone;
+        createdAt = new Date(res.created);
+        renderPrices();
+        els.saveBtn.textContent = 'עדכון ההרשמה';
+        els.deleteBtn.hidden = false;
+        setMsg(els.saveMsg, (res.isNew ? 'ההרשמה נשמרה.' : 'ההרשמה עודכנה.') + ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
+        showDone(res.total);
+      } catch (err) {
+        setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
+      } finally {
+        els.saveBtn.disabled = false;
+      }
+    });
+
+    els.deleteBtn.addEventListener('click', async () => {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
+      if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
+      els.deleteBtn.disabled = true; els.saveBtn.disabled = true;
+      setMsg(els.saveMsg, 'מוחקים…');
+      try {
+        const res = await jsonp({ action: 'delete', phone });
+        if (!res.ok) throw new Error(res.error);
+        try { localStorage.removeItem(LS_KEY); } catch {}
+        resetState();
+        setMsg(els.loadMsg, '');
+        setMsg(els.saveMsg, res.status === 'deleted'
+          ? 'ההרשמה נמחקה. אם תשנו את דעתכם, אפשר להירשם מחדש בכל זמן.' : 'לא נמצאה הרשמה עם המספר הזה.', 'ok');
+      } catch (err) {
+        setMsg(els.saveMsg, 'המחיקה נכשלה: ' + errText(err), 'err');
+      } finally {
+        els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
+      }
+    });
+
+    // ---------- דיווח קניות ----------
+    function renderPurchases(list) {
+      const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      $('buyList').innerHTML = list.map((p) => {
+        const d = p.created ? new Date(p.created).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }) : '';
+        return `<li><span>${esc(d)} · ${esc(p.store || 'קנייה')}${p.details ? ' – ' + esc(p.details) : ''}${p.hasReceipt ? ' 🧾' : ''}</span><span class="amt">${fmt(p.amount)}</span></li>`;
+      }).join('');
+      const sum = list.reduce((s, p) => s + (+p.amount || 0), 0);
+      $('buyTotal').textContent = list.length ? 'סה"כ קניות שדווחו: ' + fmt(Math.round(sum * 100) / 100) : '';
+    }
+
+    async function fileToPayload(f) {
+      if (f.type.startsWith('image/')) {
+        try {
+          const img = await createImageBitmap(f);
+          const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          const url = c.toDataURL('image/jpeg', 0.75);
+          return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', mime: 'image/jpeg', b64: url.split(',')[1] };
+        } catch {}
+      }
+      if (f.size > 8 * 1024 * 1024) throw new Error('הקובץ גדול מדי (עד 8MB).');
+      const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
+      return { name: f.name, mime: f.type || 'application/octet-stream', b64: String(url).split(',')[1] };
+    }
+
+    $('b_file').addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      $('b_fileName').textContent = f ? 'קבלה צורפה: ' + f.name : 'צילום או העלאת קבלה';
+    });
+
+    $('buyBtn').addEventListener('click', async () => {
+      const phone = normPhone(els.phone.value);
+      const amount = parseFloat($('b_amount').value.replace(/[^\d.]/g, ''));
+      if (!(amount > 0)) { setMsg($('buyMsg'), 'הזינו סכום.', 'err'); $('b_amount').focus(); return; }
+      $('buyBtn').disabled = true;
+      setMsg($('buyMsg'), 'שומרים…');
+      try {
+        const f = $('b_file').files[0];
+        const file = f ? await fileToPayload(f) : null;
+        const res = await post({ action: 'purchase', phone, amount, store: $('b_store').value.trim(), details: $('b_details').value.trim(), file }, 60000);
+        if (!res.ok) throw new Error(res.error === 'not a buyer' ? 'החלק הזה פתוח רק לצוות הקניות.' : res.error);
+        renderPurchases(res.purchases || []);
+        ['b_amount', 'b_store', 'b_details', 'b_file'].forEach((id) => { $(id).value = ''; });
+        $('b_fileName').textContent = 'צילום או העלאת קבלה';
+        setMsg($('buyMsg'), 'הקנייה נשמרה. אפשר להוסיף קנייה נוספת.', 'ok');
+      } catch (err) {
+        setMsg($('buyMsg'), 'השמירה נכשלה: ' + errText(err), 'err');
+      } finally {
+        $('buyBtn').disabled = false;
+      }
+    });
+
+    // ---------- popup ----------
+    const doneDialog = $('doneDialog');
+    function showDone(total) {
+      $('donePrice').innerHTML = total ? 'סה"כ לתשלום: <b>' + fmt(total) + '</b>' : '';
+      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
+    }
+    $('doneClose').addEventListener('click', () => doneDialog.close());
+    doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
+
+    // ---------- init ----------
+    toggle();
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) { els.phone.value = saved; loadExisting(true); }
+    } catch {}
+  </script>
+</body>
+</html>
