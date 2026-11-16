@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V9';
+const VERSION = 'V10';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -38,6 +38,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       color-scheme: dark;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
     .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
     .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
@@ -410,6 +411,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <div class="actions">
             <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
             <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
+            <a id="statsBtn" class="btn" href="/Forms/hanukkah2026_dashboard" hidden>📊 אנליטיקה</a>
           </div>
           <p id="saveMsg" class="msg" role="status"></p>
         </form>
@@ -614,6 +616,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       els.saveBtn.textContent = 'שמירת ההרשמה';
       els.deleteBtn.hidden = true;
       $('buySec').hidden = true;
+      $('statsBtn').hidden = true;
       toggle();
     }
 
@@ -625,6 +628,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
         loadedPhone = phone;
+        $('statsBtn').hidden = !res.owner;
         if (res.found) {
           fillForm(res.data);
           els.saveBtn.textContent = 'עדכון ההרשמה';
