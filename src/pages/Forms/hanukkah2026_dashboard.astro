@@ -1,0 +1,204 @@
+---
+// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים בלבד, בלי פרטים אישיים)
+
+// ===== גרסה – להעלות ב-1 בכל עדכון =====
+const VERSION = 'V2';
+// =========================================
+
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
+---
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#A35A32" />
+  <title>דשבורד – ריטריט חנוכה 2026</title>
+  <style is:global>
+    :root {
+      --bg: #8A4B2A; --surface: #6E3A1F; --ink: #FFFFFF; --muted: #F3D9BF; --line: #A9683F;
+      --sage: #F6C453; --sage-ink: #2A1A00; --gold: #FFB38A; --danger: #FFD0C8; --track: #5A2F18;
+      --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    .gate { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+    .gate input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 12em; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 56px; position: relative; }
+    .version { position: absolute; top: 10px; left: 16px; font-size: 11px; color: var(--muted); opacity: .55; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    h1 { margin: 0; font-size: 28px; }
+    .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .btn { font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 999px; border: 0; background: var(--sage); color: var(--sage-ink); cursor: pointer; }
+    .btn:disabled { opacity: .6; cursor: progress; }
+    .msg { color: var(--danger); margin: 0 0 16px; }
+    .msg:empty { display: none; }
+
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+    .kpi span { display: block; font-size: 13px; color: var(--muted); }
+    .kpi b { display: block; font-size: 32px; line-height: 1.1; margin-top: 4px; color: var(--sage); font-variant-numeric: tabular-nums; }
+    .kpi small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+    .card.wide { grid-column: 1 / -1; }
+    .card h2 { margin: 0 0 12px; font-size: 17px; }
+    .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 3em; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+    .bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar .track { height: 12px; background: var(--track); border-radius: 999px; overflow: hidden; }
+    .bar .fill { height: 100%; background: var(--sage); border-radius: 999px; }
+    .bar .num { text-align: left; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .bar.zero .lbl, .bar.zero .num { color: var(--muted); font-weight: 400; }
+    .night { margin-bottom: 14px; }
+    .night:last-child { margin-bottom: 0; }
+    .night .top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+    .night .track { height: 14px; background: var(--track); border-radius: 999px; overflow: hidden; display: flex; }
+    .night .v { background: var(--sage); }
+    .night .s { background: var(--gold); }
+    .night.over .top b { color: var(--danger); }
+    .legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
+    .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+
+    @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+    <header>
+      <div>
+        <h1>דשבורד הרשמות</h1>
+        <p class="sub">ריטריט חנוכה · מצפה רמון · 10–12 לדצמבר 26 · <span id="stamp">טוען…</span></p>
+      </div>
+      <div style="display:flex;gap:8px"><a class="btn" href="/Forms/hanukkah2026" style="text-decoration:none;background:transparent;color:var(--ink);border:2px solid var(--sage)">לטופס</a><button class="btn" id="refresh" type="button">רענון</button></div>
+    </header>
+    <p class="msg" id="msg" role="status"></p>
+    <div class="gate" id="gate" hidden>
+      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון" />
+      <button class="btn" id="gateBtn" type="button">כניסה</button>
+    </div>
+
+    <section class="kpis" aria-label="מספרים עיקריים">
+      <div class="kpi"><span>נרשמים</span><b id="k_total">–</b></div>
+      <div class="kpi"><span>גברים</span><b id="k_male">–</b><small id="k_male_age"></small></div>
+      <div class="kpi"><span>נשים</span><b id="k_female">–</b><small id="k_female_age"></small></div>
+      <div class="kpi"><span>גיל ממוצע</span><b id="k_age">–</b><small id="k_unknown"></small></div>
+    </section>
+
+    <section class="grid">
+      <div class="card"><h2>מתי מגיעים</h2><div id="c_att"></div></div>
+      <div class="card">
+        <h2>תפוסה לפי לילה (מכסה: 25)</h2>
+        <div id="c_nights"></div>
+        <div class="legend"><span><i style="background:var(--sage)"></i>לינה במתחם</span><span><i style="background:var(--gold)"></i>לינה עצמאית</span></div>
+        <p class="note">המתחם גובה על כל משתתף מעל 25 בלילה, גם על מי שלא ישן בו.</p>
+      </div>
+      <div class="card wide"><h2>פעילויות מבוקשות</h2><div id="c_act"></div></div>
+      <div class="card"><h2>הלפרים לפי תפקיד</h2><div id="c_roles"></div></div>
+      <div class="card"><h2>עוד נתונים</h2><div id="c_more"></div></div>
+    </section>
+  </div>
+
+  <script is:inline>
+    // ===== הגדרות =====
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
+    const CAP = 25;
+    // הטלפון נלקח מהטופס (אותו דפדפן). הסקריפט בודק שהוא הטלפון המורשה.
+    const LS_KEY = 'hanukkah2026_phone';
+    let phone = '';
+    try { phone = localStorage.getItem(LS_KEY) || ''; } catch {}
+    // ==================
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 20000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+        document.head.appendChild(s);
+      });
+    }
+
+    function bars(el, items) {
+      const max = Math.max(1, ...items.map((i) => i.count));
+      $(el).innerHTML = items.map((i) =>
+        `<div class="bar${i.count ? '' : ' zero'}"><span class="lbl" title="${esc(i.label)}">${esc(i.label)}</span>` +
+        `<div class="track"><div class="fill" style="width:${(i.count / max) * 100}%"></div></div>` +
+        `<span class="num">${i.count}</span></div>`).join('');
+    }
+    const fromTally = (t, rename = {}) => Object.keys(t)
+      .filter((k) => k !== 'לא צוין' || t[k] > 0)
+      .map((k) => ({ label: rename[k] || k, count: t[k] }));
+
+    function nights(n) {
+      const row = (name, x) => {
+        const tot = x.venue + x.self, scale = Math.max(CAP, tot);
+        return `<div class="night${tot > CAP ? ' over' : ''}"><div class="top"><span>${name}</span><b>${tot} / ${CAP}</b></div>` +
+          `<div class="track"><div class="v" style="width:${x.venue / scale * 100}%"></div><div class="s" style="width:${x.self / scale * 100}%"></div></div></div>`;
+      };
+      $('c_nights').innerHTML = row('חמישי בלילה', n.thu) + row('שישי בלילה', n.fri);
+    }
+
+    function render(d) {
+      const g = d.gender, a = d.age;
+      $('k_total').textContent = d.total;
+      $('k_male').textContent = g['גבר'] || 0;
+      $('k_female').textContent = g['אישה'] || 0;
+      $('k_age').textContent = a.all ?? '–';
+      $('k_male_age').textContent = a.male != null ? 'גיל ממוצע ' + a.male : '';
+      $('k_female_age').textContent = a.female != null ? 'גיל ממוצע ' + a.female : '';
+      $('k_unknown').textContent = g['לא צוין'] ? g['לא צוין'] + ' בלי מגדר' : '';
+
+      bars('c_att', fromTally(d.attendance, { 'סופ"ש מלא (חמישי–שבת)': 'סופ"ש מלא' }));
+      nights(d.nights);
+      bars('c_act', d.activities);
+      bars('c_roles', d.roles);
+      bars('c_more', [
+        { label: 'לינה במתחם', count: d.lodging['לינה במתחם (מזרנים על פרקט)'] || 0 },
+        { label: 'לינה עצמאית', count: d.lodging['לינה עצמאית (מלון / B&B)'] || 0 },
+        { label: 'מסלול יין', count: d.wine },
+        { label: 'לילה נוסף: כן', count: d.extraNight['כן'] || 0 },
+        { label: 'לילה נוסף: אולי', count: d.extraNight['אולי'] || 0 }
+      ]);
+      $('stamp').textContent = 'עודכן ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function load() {
+      if (!phone) { $('gate').hidden = false; $('stamp').textContent = ''; return; }
+      $('refresh').disabled = true;
+      $('msg').textContent = '';
+      try {
+        const d = await jsonp({ action: 'stats', phone });
+        if (!d.ok) throw new Error(d.error === 'unauthorized' ? 'אין הרשאה לצפות בנתונים.' : d.error);
+        $('gate').hidden = true;
+        render(d);
+      } catch (e) {
+        $('stamp').textContent = '';
+        $('gate').hidden = false;
+        $('msg').textContent = e.message === 'timeout' || e.message === 'network' ? 'הטעינה נכשלה. נסו לרענן.' : e.message;
+      } finally {
+        $('refresh').disabled = false;
+      }
+    }
+    $('gateBtn').addEventListener('click', () => {
+      phone = String($('gatePhone').value).replace(/\D/g, '');
+      load();
+    });
+    $('refresh').addEventListener('click', load);
+    load();
+  </script>
+</body>
+</html>
