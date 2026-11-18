@@ -1,6 +1,6 @@
 ---
 // דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים וניהול משתתפים)
-const VERSION = 'V7';
+const VERSION = 'V8';
 
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -14,7 +14,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#A35A32" />
-  <title>דשבורד – ריטריט חנוכה 2026 (V7)</title>
+  <title>דשבורד – ריטריט חנוכה 2026 (V8)</title>
 
   <style is:global>
     :root {
@@ -68,7 +68,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
     .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
 
-    /* עיצוב רשימת משתתפים וסינון - גרסה V7 */
+    /* עיצוב רשימת משתתפים וסינון - V8 */
     .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
     .filter-btn { font: inherit; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; font-size: 14px; }
     .filter-btn.active { background: var(--sage); color: var(--sage-ink); font-weight: bold; border-color: var(--sage); }
@@ -102,7 +102,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
 <body>
   <div class="wrap">
-    <div class="version-badge" dir="ltr">גרסה V7 · {UPDATED}</div>
+    <div class="version-badge" dir="ltr">גרסה V8 · {UPDATED}</div>
 
     <header>
       <div>
@@ -118,7 +118,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <p class="msg" id="msg" role="status"></p>
 
     <div class="gate" id="gate" hidden>
-      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון מנהל" />
+      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון מנהל" value="0546655862" />
       <button class="btn" id="gateBtn" type="button">כניסה</button>
     </div>
 
@@ -130,11 +130,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div class="kpi"><span>גיל ממוצע</span><b id="k_age">–</b><small id="k_unknown"></small></div>
     </section>
 
-    <!-- רשימת משתתפים ופילטור לפי מגדר - V7 -->
+    <!-- רשימת משתתפים ופילטור לפי מגדר - V8 -->
     <section class="card wide participants-section" style="margin-bottom:16px;">
       <h2>
         <span>רשימת משתתפים ותצוגת פרטים</span>
-        <span style="font-size:12px;background:var(--bg);color:var(--sage);padding:3px 8px;border-radius:6px;border:1px solid var(--line);">גרסה V7</span>
+        <span style="font-size:12px;background:var(--bg);color:var(--sage);padding:3px 8px;border-radius:6px;border:1px solid var(--line);">גרסה V8</span>
       </h2>
       
       <div class="filter-bar">
@@ -239,10 +239,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         { label: 'לילה נוסף: כן', count: d.extraNight['כן'] || 0 },
         { label: 'לילה נוסף: אולי', count: d.extraNight['אולי'] || 0 }
       ]);
-      $('stamp').textContent = 'עודכן (גרסה V7) ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+      $('stamp').textContent = 'עודכן (גרסה V8) ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
     }
 
-    /* ---------- לוגיקת רשימת משתתפים ופילטור (V7) ---------- */
+    /* ---------- לוגיקת רשימת משתתפים ופילטור (V8) ---------- */
     async function loadParticipants() {
       try {
         const res = await jsonp({ action: 'participants', phone });
@@ -252,7 +252,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           renderParticipantsList();
         }
       } catch (e) {
-        $('namesList').innerHTML = `<p style="color:var(--danger)">שגיאה בטעינת משתתפים (V7)</p>`;
+        $('namesList').innerHTML = `<p style="color:var(--danger)">שגיאה בטעינת משתתפים (V8)</p>`;
       }
     }
 
@@ -376,6 +376,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     $('gateBtn').addEventListener('click', () => {
       phone = String($('gatePhone').value).replace(/\D/g, '');
+      try { localStorage.setItem(LS_KEY, phone); } catch {}
       load();
     });
 
