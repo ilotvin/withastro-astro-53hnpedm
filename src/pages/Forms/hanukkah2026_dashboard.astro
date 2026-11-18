@@ -1,22 +1,21 @@
 ---
-// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים בלבד, בלי פרטים אישיים)
-
-// ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V2';
-// =========================================
+// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים וניהול משתתפים)
+const VERSION = 'V7';
 
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
 }).format(new Date()).replace(',', '');
 ---
+
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#A35A32" />
-  <title>דשבורד – ריטריט חנוכה 2026</title>
+  <title>דשבורד – ריטריט חנוכה 2026 (V7)</title>
+
   <style is:global>
     :root {
       --bg: #8A4B2A; --surface: #6E3A1F; --ink: #FFFFFF; --muted: #F3D9BF; --line: #A9683F;
@@ -26,11 +25,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
-    .gate { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
-    .gate input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 12em; }
+    
     body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 56px; position: relative; }
-    .version { position: absolute; top: 10px; left: 16px; font-size: 11px; color: var(--muted); opacity: .55; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 32px 16px 56px; position: relative; }
+    .version-badge { position: absolute; top: 10px; left: 16px; font-size: 12px; font-weight: bold; background: var(--sage); color: var(--sage-ink); padding: 2px 8px; border-radius: 12px; }
+    
     header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
     h1 { margin: 0; font-size: 28px; }
     .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
@@ -38,53 +37,92 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .btn:disabled { opacity: .6; cursor: progress; }
     .msg { color: var(--danger); margin: 0 0 16px; }
     .msg:empty { display: none; }
-
+    
+    .gate { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+    .gate input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 12em; }
+    
     .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
     .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
     .kpi span { display: block; font-size: 13px; color: var(--muted); }
     .kpi b { display: block; font-size: 32px; line-height: 1.1; margin-top: 4px; color: var(--sage); font-variant-numeric: tabular-nums; }
     .kpi small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
-
+    
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
     .card.wide { grid-column: 1 / -1; }
-    .card h2 { margin: 0 0 12px; font-size: 17px; }
+    .card h2 { margin: 0 0 12px; font-size: 18px; color: var(--sage); display: flex; justify-content: space-between; align-items: center; }
+    
     .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 3em; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
     .bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bar .track { height: 12px; background: var(--track); border-radius: 999px; overflow: hidden; }
     .bar .fill { height: 100%; background: var(--sage); border-radius: 999px; }
     .bar .num { text-align: left; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .bar.zero .lbl, .bar.zero .num { color: var(--muted); font-weight: 400; }
+    
     .night { margin-bottom: 14px; }
     .night:last-child { margin-bottom: 0; }
     .night .top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
     .night .track { height: 14px; background: var(--track); border-radius: 999px; overflow: hidden; display: flex; }
     .night .v { background: var(--sage); }
     .night .s { background: var(--gold); }
-    .night.over .top b { color: var(--danger); }
     .legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 10px; }
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
     .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
 
-    @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } }
+    /* עיצוב רשימת משתתפים וסינון - גרסה V7 */
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+    .filter-btn { font: inherit; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; font-size: 14px; }
+    .filter-btn.active { background: var(--sage); color: var(--sage-ink); font-weight: bold; border-color: var(--sage); }
+    .search-input { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; font-size: 14px; width: 180px; margin-inline-start: auto; }
+
+    .split-view { display: grid; grid-template-columns: 260px 1fr; gap: 16px; min-height: 420px; }
+    .names-list { border-left: 1px solid var(--line); padding-left: 10px; overflow-y: auto; max-height: 520px; }
+    .name-item { padding: 10px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 6px; background: var(--bg); border: 1px solid transparent; transition: all 0.15s ease; }
+    .name-item:hover { border-color: var(--line); }
+    .name-item.selected { background: var(--sage); color: var(--sage-ink); font-weight: bold; }
+    .name-item.selected small { color: #5a3c00; }
+    
+    .participant-detail { background: var(--bg); padding: 18px; border-radius: 12px; border: 1px solid var(--line); overflow-y: auto; max-height: 520px; }
+    .placeholder-text { text-align: center; color: var(--muted); margin-top: 150px; font-size: 15px; }
+    .detail-header { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px; }
+    .detail-header h3 { margin: 0 0 4px; font-size: 22px; color: var(--sage); }
+    .detail-group { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+    .detail-group:last-child { border-bottom: 0; margin-bottom: 0; }
+    .detail-group h4 { color: var(--gold); margin: 0 0 6px; font-size: 15px; }
+    .detail-group p { margin: 3px 0; font-size: 14px; color: var(--ink); }
+
+    @media (max-width: 768px) {
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid { grid-template-columns: 1fr; }
+      .split-view { grid-template-columns: 1fr; }
+      .names-list { border-left: 0; border-bottom: 1px solid var(--line); padding-left: 0; padding-bottom: 12px; max-height: 250px; }
+      .search-input { width: 100%; margin-inline-start: 0; }
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+    <div class="version-badge" dir="ltr">גרסה V7 · {UPDATED}</div>
+
     <header>
       <div>
-        <h1>דשבורד הרשמות</h1>
+        <h1>דשבורד הרשמות וניהול משתתפים</h1>
         <p class="sub">ריטריט חנוכה · מצפה רמון · 10–12 לדצמבר 26 · <span id="stamp">טוען…</span></p>
       </div>
-      <div style="display:flex;gap:8px"><a class="btn" href="/Forms/hanukkah2026" style="text-decoration:none;background:transparent;color:var(--ink);border:2px solid var(--sage)">לטופס</a><button class="btn" id="refresh" type="button">רענון</button></div>
+      <div style="display:flex;gap:8px">
+        <a class="btn" href="/Forms/hanukkah2026" style="text-decoration:none;background:transparent;color:var(--ink);border:2px solid var(--sage)">לטופס</a>
+        <button class="btn" id="refresh" type="button">רענון</button>
+      </div>
     </header>
+
     <p class="msg" id="msg" role="status"></p>
+
     <div class="gate" id="gate" hidden>
-      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון" />
+      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון מנהל" />
       <button class="btn" id="gateBtn" type="button">כניסה</button>
     </div>
 
+    <!-- KPI -->
     <section class="kpis" aria-label="מספרים עיקריים">
       <div class="kpi"><span>נרשמים</span><b id="k_total">–</b></div>
       <div class="kpi"><span>גברים</span><b id="k_male">–</b><small id="k_male_age"></small></div>
@@ -92,6 +130,31 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div class="kpi"><span>גיל ממוצע</span><b id="k_age">–</b><small id="k_unknown"></small></div>
     </section>
 
+    <!-- רשימת משתתפים ופילטור לפי מגדר - V7 -->
+    <section class="card wide participants-section" style="margin-bottom:16px;">
+      <h2>
+        <span>רשימת משתתפים ותצוגת פרטים</span>
+        <span style="font-size:12px;background:var(--bg);color:var(--sage);padding:3px 8px;border-radius:6px;border:1px solid var(--line);">גרסה V7</span>
+      </h2>
+      
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all" id="btn_all">הכל (<span id="cnt_all">0</span>)</button>
+        <button class="filter-btn" data-filter="גבר" id="btn_male">גברים (<span id="cnt_male">0</span>)</button>
+        <button class="filter-btn" data-filter="אישה" id="btn_female">נשים (<span id="cnt_female">0</span>)</button>
+        <input type="text" id="searchInput" class="search-input" placeholder="חיפוש לפי שם..." />
+      </div>
+
+      <div class="split-view">
+        <div class="names-list" id="namesList">
+          <p style="color:var(--muted);font-size:14px;">טוען רשימה...</p>
+        </div>
+        <div class="participant-detail" id="participantDetail">
+          <p class="placeholder-text">בחר/י שם מהרשימה לצפייה בפרטים המלאים</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- דשבורד גרפים -->
     <section class="grid">
       <div class="card"><h2>מתי מגיעים</h2><div id="c_att"></div></div>
       <div class="card">
@@ -107,17 +170,19 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </div>
 
   <script is:inline>
-    // ===== הגדרות =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
     const CAP = 25;
-    // הטלפון נלקח מהטופס (אותו דפדפן). הסקריפט בודק שהוא הטלפון המורשה.
     const LS_KEY = 'hanukkah2026_phone';
+
     let phone = '';
     try { phone = localStorage.getItem(LS_KEY) || ''; } catch {}
-    // ==================
+
+    let allParticipants = [];
+    let currentFilter = 'all';
+    let selectedPhone = '';
 
     const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -135,10 +200,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     function bars(el, items) {
       const max = Math.max(1, ...items.map((i) => i.count));
       $(el).innerHTML = items.map((i) =>
-        `<div class="bar${i.count ? '' : ' zero'}"><span class="lbl" title="${esc(i.label)}">${esc(i.label)}</span>` +
+        `<div class="bar"><span class="lbl">${esc(i.label)}</span>` +
         `<div class="track"><div class="fill" style="width:${(i.count / max) * 100}%"></div></div>` +
         `<span class="num">${i.count}</span></div>`).join('');
     }
+
     const fromTally = (t, rename = {}) => Object.keys(t)
       .filter((k) => k !== 'לא צוין' || t[k] > 0)
       .map((k) => ({ label: rename[k] || k, count: t[k] }));
@@ -146,13 +212,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     function nights(n) {
       const row = (name, x) => {
         const tot = x.venue + x.self, scale = Math.max(CAP, tot);
-        return `<div class="night${tot > CAP ? ' over' : ''}"><div class="top"><span>${name}</span><b>${tot} / ${CAP}</b></div>` +
+        return `<div class="night"><div class="top"><span>${name}</span><b>${tot} / ${CAP}</b></div>` +
           `<div class="track"><div class="v" style="width:${x.venue / scale * 100}%"></div><div class="s" style="width:${x.self / scale * 100}%"></div></div></div>`;
       };
       $('c_nights').innerHTML = row('חמישי בלילה', n.thu) + row('שישי בלילה', n.fri);
     }
 
-    function render(d) {
+    function renderStats(d) {
       const g = d.gender, a = d.age;
       $('k_total').textContent = d.total;
       $('k_male').textContent = g['גבר'] || 0;
@@ -173,18 +239,132 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         { label: 'לילה נוסף: כן', count: d.extraNight['כן'] || 0 },
         { label: 'לילה נוסף: אולי', count: d.extraNight['אולי'] || 0 }
       ]);
-      $('stamp').textContent = 'עודכן ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+      $('stamp').textContent = 'עודכן (גרסה V7) ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
     }
 
+    /* ---------- לוגיקת רשימת משתתפים ופילטור (V7) ---------- */
+    async function loadParticipants() {
+      try {
+        const res = await jsonp({ action: 'participants', phone });
+        if (res.ok) {
+          allParticipants = res.participants || [];
+          updateFilterCounts();
+          renderParticipantsList();
+        }
+      } catch (e) {
+        $('namesList').innerHTML = `<p style="color:var(--danger)">שגיאה בטעינת משתתפים (V7)</p>`;
+      }
+    }
+
+    function updateFilterCounts() {
+      $('cnt_all').textContent = allParticipants.length;
+      $('cnt_male').textContent = allParticipants.filter(p => p.gender === 'גבר').length;
+      $('cnt_female').textContent = allParticipants.filter(p => p.gender === 'אישה').length;
+    }
+
+    function renderParticipantsList() {
+      const q = ($('searchInput').value || '').trim().toLowerCase();
+      const filtered = allParticipants.filter(p => {
+        const matchGender = currentFilter === 'all' || p.gender === currentFilter;
+        const matchSearch = !q || (p.name && p.name.toLowerCase().includes(q)) || (p.phone && String(p.phone).includes(q));
+        return matchGender && matchSearch;
+      });
+
+      if (!filtered.length) {
+        $('namesList').innerHTML = `<p style="color:var(--muted);font-size:14px;padding:8px;">לא נמצאו משתתפים</p>`;
+        return;
+      }
+
+      $('namesList').innerHTML = filtered.map(p => `
+        <div class="name-item ${p.phone === selectedPhone ? 'selected' : ''}" onclick="selectParticipant('${p.phone}')">
+          <b>${esc(p.name)}</b>
+          <small style="display:block;">${esc(p.gender || 'לא צוין')} · ${esc(p.attendance || '')}</small>
+        </div>
+      `).join('');
+    }
+
+    window.selectParticipant = function(phoneNum) {
+      selectedPhone = phoneNum;
+      renderParticipantsList();
+      
+      const p = allParticipants.find(x => String(x.phone).replace(/\D/g, '').includes(String(phoneNum).replace(/\D/g, '')));
+      if (!p) return;
+
+      $('participantDetail').innerHTML = `
+        <div class="detail-header">
+          <h3>${esc(p.name)}</h3>
+          <p style="margin:0;color:var(--muted);">${esc(p.gender || 'לא צוין')} | גיל: ${esc(p.age || '-')} | טלפון: ${esc(p.phone)}</p>
+          ${p.email ? `<p style="margin:2px 0 0;font-size:13px;">מייל: ${esc(p.email)}</p>` : ''}
+        </div>
+
+        <div class="detail-group">
+          <h4>הגעה ולינה</h4>
+          <p><b>נוכחות:</b> ${esc(p.attendance || '-')}</p>
+          <p><b>לינה:</b> ${esc(p.lodging || '-')}</p>
+          <p><b>לילה נוסף:</b> ${esc(p.extra_night || 'לא')}</p>
+          <p><b>רכב וטרמפים:</b> ${esc(p.car || 'לא צוין')} (מאזור: ${esc(p.area || '-')})</p>
+        </div>
+
+        <div class="detail-group">
+          <h4>תזונה והעדפות</h4>
+          <p><b>סוג תזונה:</b> ${esc(p.diet || '-')}</p>
+          <p><b>נמנע מגלוטן:</b> ${esc(p.gluten || 'לא')}</p>
+          <p><b>העדפת חלב:</b> ${esc(p.milk || '-')}</p>
+          ${p.allergies ? `<p><b>אלרגיות:</b> ${esc(p.allergies)}</p>` : ''}
+          ${p.kashrut ? `<p><b>כשרות:</b> ${esc(p.kashrut)}</p>` : ''}
+        </div>
+
+        <div class="detail-group">
+          <h4>סדנאות ותוכן</h4>
+          <p><b>פעילויות שרוצה:</b> ${esc(p.activities_text || p.activities || 'אין')}</p>
+          <p><b>העברת סדנה:</b> ${esc(p.workshop || 'לא')}</p>
+          <p><b>שיתוף סיפור:</b> ${esc(p.story || 'לא')}</p>
+          ${p.content_details ? `<p><b>פירוט תוכן:</b> ${esc(p.content_details)}</p>` : ''}
+          ${p.two_facts ? `<p><b>עובדות מעניינות:</b> ${esc(p.two_facts)}</p>` : ''}
+        </div>
+
+        <div class="detail-group">
+          <h4>תפקידים ותקציב</h4>
+          <p><b>הלפר / תפקידים:</b> ${esc(p.helper_roles_text || p.helper_roles || 'ללא')}</p>
+          <p><b>מסלול יין:</b> ${esc(p.wine || 'לא')}</p>
+          <p><b>אופן תשלום מבוקש:</b> ${esc(p.payment || '-')}</p>
+          <p><b>מחיר כולל מחושב:</b> ₪${esc(p.price_total || '-')}</p>
+        </div>
+
+        ${p.why ? `
+          <div class="detail-group">
+            <h4>למה רוצה להצטרף</h4>
+            <p>${esc(p.why)}</p>
+          </div>
+        ` : ''}
+      `;
+    };
+
+    // אירועי פילטור וחיפוש
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        renderParticipantsList();
+      });
+    });
+
+    $('searchInput').addEventListener('input', renderParticipantsList);
+
+    /* ---------- טעינה הראשונית ---------- */
     async function load() {
       if (!phone) { $('gate').hidden = false; $('stamp').textContent = ''; return; }
       $('refresh').disabled = true;
       $('msg').textContent = '';
+
       try {
         const d = await jsonp({ action: 'stats', phone });
         if (!d.ok) throw new Error(d.error === 'unauthorized' ? 'אין הרשאה לצפות בנתונים.' : d.error);
+        
         $('gate').hidden = true;
-        render(d);
+        renderStats(d);
+        await loadParticipants();
       } catch (e) {
         $('stamp').textContent = '';
         $('gate').hidden = false;
@@ -193,10 +373,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         $('refresh').disabled = false;
       }
     }
+
     $('gateBtn').addEventListener('click', () => {
       phone = String($('gatePhone').value).replace(/\D/g, '');
       load();
     });
+
     $('refresh').addEventListener('click', load);
     load();
   </script>
