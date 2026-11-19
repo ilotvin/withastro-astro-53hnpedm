@@ -1,8 +1,10 @@
+// hanukkah2026_dashboard.astro
 ---
-// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים בלבד, בלי פרטים אישיים)
+// hanukkah2026_dashboard.astro
+// דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V3';
+const VERSION = 'V5';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -34,6 +36,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     h1 { margin: 0; font-size: 28px; }
     .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
     .btn { font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 999px; border: 0; background: var(--sage); color: var(--sage-ink); cursor: pointer; }
+    .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--sage); text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-small { padding: 7px 14px; font-size: 14px; }
     .btn:disabled { opacity: .6; cursor: progress; }
     .msg { color: var(--danger); margin: 0 0 16px; }
     .msg:empty { display: none; }
@@ -68,6 +72,17 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
     .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
 
+    .picker-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .picker-toolbar input[type="search"] { flex: 1 1 14em; font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+    .picker-toolbar input::placeholder { color: var(--muted); }
+    .names-box { max-height: 240px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 10px 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 6px 12px; }
+    .name-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
+    .name-item:hover { background: var(--surface); }
+    .name-item input { accent-color: var(--sage); width: 16px; height: 16px; margin: 0; cursor: pointer; }
+    .selected-preview { margin-top: 10px; font-size: 14px; color: var(--muted); min-height: 1.4em; }
+    .selected-preview b { color: var(--sage); }
+    .selected-preview.warn { color: var(--danger); }
+
     @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -80,7 +95,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         <p class="sub">ריטריט חנוכה · מצפה רמון · 10–12 לדצמבר 26 · <span id="stamp">טוען…</span></p>
       </div>
       <div style="display:flex;gap:8px">
-        <a class="btn" href="/Forms/hanukkah2026" style="text-decoration:none;background:transparent;color:var(--ink);border:2px solid var(--sage)">לטופס</a>
+        <a class="btn btn-ghost" href="/Forms/hanukkah2026">לטופס</a>
         <button class="btn" id="refresh" type="button">רענון</button>
       </div>
     </header>
@@ -98,6 +113,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         <button class="btn" id="saveCapBtn" type="button">שמירה</button>
         <span id="capStatus" class="note" style="margin:0"></span>
       </div>
+    </section>
+
+    <section class="card wide" id="participantsPickerCard" style="margin-bottom:12px" aria-label="בחירת שמות משתתפים">
+      <h2>בחירת שמות משתתפים</h2>
+      <div class="picker-toolbar">
+        <input id="nameSearch" type="search" placeholder="חיפוש לפי שם…" autocomplete="off" />
+        <button class="btn btn-ghost btn-small" id="selectAllNames" type="button">בחר הכל</button>
+        <button class="btn btn-ghost btn-small" id="clearAllNames" type="button">נקה בחירה</button>
+        <button class="btn btn-small" id="copySelectedNames" type="button">העתק נבחרים</button>
+      </div>
+      <div id="namesList" class="names-box">
+        <p class="note" style="margin:0">הרשימה תוצג ברגע שהנתונים ייטענו.</p>
+      </div>
+      <p id="selectedNamesSummary" class="selected-preview" role="status">נבחרו: <b>0</b> משתתפים</p>
     </section>
 
     <section class="kpis" aria-label="מספרים עיקריים">
@@ -133,6 +162,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     let latestTotal = 0;
+    let participantNames = [];
+    const selectedNames = new Set();
+
+    function normPhone(v) {
+      let d = String(v || '').replace(/\D/g, '');
+      if (d.startsWith('972')) d = '0' + d.slice(3);
+      return d;
+    }
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -174,8 +211,65 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       $('capStatus').textContent = `נרשמים נוכחים: ${latestTotal} מתוך ${cap} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
     }
 
+    function extractNames(d) {
+      const raw = d.participants || d.names || d.registrants || d.rows || [];
+      if (!Array.isArray(raw)) return [];
+      const seen = new Set();
+      const result = [];
+      for (const item of raw) {
+        const val = typeof item === 'string'
+          ? item
+          : (item?.name || item?.full_name || '');
+        const clean = String(val).trim();
+        if (clean && !seen.has(clean)) {
+          seen.add(clean);
+          result.push(clean);
+        }
+      }
+      return result;
+    }
+
+    function updateSelectedSummary(customText, isWarn = false) {
+      const el = $('selectedNamesSummary');
+      el.className = isWarn ? 'selected-preview warn' : 'selected-preview';
+      if (customText) {
+        el.innerHTML = customText;
+        return;
+      }
+      const arr = [...selectedNames];
+      el.innerHTML = arr.length
+        ? `נבחרו (<b>${arr.length}</b>): ${esc(arr.join(', '))}`
+        : 'נבחרו: <b>0</b> משתתפים';
+    }
+
+    function renderNamesList() {
+      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
+      const filtered = q
+        ? participantNames.filter((n) => n.toLowerCase().includes(q))
+        : participantNames;
+
+      if (!participantNames.length) {
+        $('namesList').innerHTML = '<p class="note" style="margin:0">אין שמות משתתפים להצגה בתגובה הנוכחית.</p>';
+        updateSelectedSummary();
+        return;
+      }
+
+      if (!filtered.length) {
+        $('namesList').innerHTML = '<p class="note" style="margin:0">לא נמצאו שמות התואמים לחיפוש.</p>';
+        updateSelectedSummary();
+        return;
+      }
+
+      $('namesList').innerHTML = filtered.map((name) => {
+        const checked = selectedNames.has(name) ? ' checked' : '';
+        return `<label class="name-item"><input type="checkbox" value="${esc(name)}"${checked} /><span>${esc(name)}</span></label>`;
+      }).join('');
+
+      updateSelectedSummary();
+    }
+
     function render(d) {
-      const g = d.gender, a = d.age;
+      const g = d.gender || {}, a = d.age || {};
       latestTotal = Number(d.total) || 0;
       $('k_total').textContent = latestTotal;
       $('k_male').textContent = g['גבר'] || 0;
@@ -185,23 +279,29 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       $('k_female_age').textContent = a.female != null ? 'גיל ממוצע ' + a.female : '';
       $('k_unknown').textContent = g['לא צוין'] ? g['לא צוין'] + ' בלי מגדר' : '';
 
-      bars('c_att', fromTally(d.attendance, { 'סופ"ש מלא (חמישי–שבת)': 'סופ"ש מלא' }));
-      nights(d.nights);
-      bars('c_act', d.activities);
-      bars('c_roles', d.roles);
+      bars('c_att', fromTally(d.attendance || {}, { 'סופ"ש מלא (חמישי–שבת)': 'סופ"ש מלא' }));
+      nights(d.nights || { thu: { venue: 0, self: 0 }, fri: { venue: 0, self: 0 } });
+      bars('c_act', d.activities || []);
+      bars('c_roles', d.roles || []);
       bars('c_more', [
-        { label: 'לינה במתחם', count: d.lodging['לינה במתחם (מזרנים על פרקט)'] || 0 },
-        { label: 'לינה עצמאית', count: d.lodging['לינה עצמאית (מלון / B&B)'] || 0 },
-        { label: 'מסלול יין', count: d.wine },
-        { label: 'לילה נוסף: כן', count: d.extraNight['כן'] || 0 },
-        { label: 'לילה נוסף: אולי', count: d.extraNight['אולי'] || 0 }
+        { label: 'לינה במתחם', count: d.lodging?.['לינה במתחם (מזרנים על פרקט)'] || 0 },
+        { label: 'לינה עצמאית', count: d.lodging?.['לינה עצמאית (מלון / B&B)'] || 0 },
+        { label: 'מסלול יין', count: d.wine || 0 },
+        { label: 'לילה נוסף: כן', count: d.extraNight?.['כן'] || 0 },
+        { label: 'לילה נוסף: אולי', count: d.extraNight?.['אולי'] || 0 }
       ]);
+
+      participantNames = extractNames(d);
+      for (const n of [...selectedNames]) {
+        if (!participantNames.includes(n)) selectedNames.delete(n);
+      }
+      renderNamesList();
 
       if (d.capacity !== undefined) {
         updateCapSummary(parseInt(d.capacity, 10));
       }
 
-      $('stamp').textContent = 'עודכן ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+      $('stamp').textContent = 'עודכן ' + new Date(d.updated || Date.now()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
     }
 
     async function load() {
@@ -221,6 +321,44 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         $('refresh').disabled = false;
       }
     }
+
+    $('nameSearch')?.addEventListener('input', renderNamesList);
+
+    $('namesList')?.addEventListener('change', (e) => {
+      const cb = e.target;
+      if (cb && cb.type === 'checkbox') {
+        if (cb.checked) selectedNames.add(cb.value);
+        else selectedNames.delete(cb.value);
+        updateSelectedSummary();
+      }
+    });
+
+    $('selectAllNames')?.addEventListener('click', () => {
+      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
+      const target = q ? participantNames.filter((n) => n.toLowerCase().includes(q)) : participantNames;
+      target.forEach((n) => selectedNames.add(n));
+      renderNamesList();
+    });
+
+    $('clearAllNames')?.addEventListener('click', () => {
+      selectedNames.clear();
+      renderNamesList();
+    });
+
+    $('copySelectedNames')?.addEventListener('click', async () => {
+      const arr = [...selectedNames];
+      if (!arr.length) {
+        updateSelectedSummary('לא נבחרו שמות להעתקה.', true);
+        return;
+      }
+      const text = arr.join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        updateSelectedSummary(`הועתקו (<b>${arr.length}</b>) ללוח: ${esc(arr.join(', '))}`);
+      } catch {
+        updateSelectedSummary('לא הצלחנו להעתיק אוטומטית ללוח.', true);
+      }
+    });
 
     $('saveCapBtn').addEventListener('click', async () => {
       if (!phone) {
@@ -250,11 +388,19 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     });
 
     $('gateBtn').addEventListener('click', () => {
-      phone = String($('gatePhone').value).replace(/\D/g, '');
+      phone = normPhone($('gatePhone').value);
+      try { if (phone) localStorage.setItem(LS_KEY, phone); } catch {}
       load();
+    });
+    $('gatePhone')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $('gateBtn').click();
+      }
     });
     $('refresh').addEventListener('click', load);
     load();
   </script>
 </body>
 </html>
+// hanukkah2026_dashboard.astro
