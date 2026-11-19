@@ -3,7 +3,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V7';
+const VERSION = 'V8';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -400,9 +400,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     // ===== הגדרות =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
     const LS_KEY = 'meetup_27_11_26_phone';
-    const OWNER_PHONE = '0546655862'; // רק למספר זה מוצג כפתור ההפניה לאנליטיקה
+    const OWNER_PHONE = '0546655862';
     const EVENT_FULL = false;
-    const FULL_COUPLES_TARGET = 5; // מספר זוגות מלאים (טלפון ראשי + טלפון +1) להפעלת הפופ-אפ
+    const FULL_COUPLES_TARGET = 5;
     // ==================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
@@ -441,8 +441,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const timer = setTimeout(() => ctrl.abort(), 20000);
       try {
         const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
-        return await r.json();
+        const txt = await r.text();
+        try {
+          return JSON.parse(txt);
+        } catch {
+          throw new Error('bad_response');
+        }
       } catch (e) {
+        if (e.message === 'bad_response') throw e;
         throw new Error(e.name === 'AbortError' ? 'timeout' : 'network');
       } finally {
         clearTimeout(timer);
@@ -459,26 +465,38 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
 
     function syncOwnerAnalyticsBtn(rawPhone) {
-      const isOwner = normPhone(rawPhone ?? els.phone.value) === OWNER_PHONE;
+      const isOwner = normPhone(rawPhone ?? els.phone?.value) === OWNER_PHONE;
       if (els.statsBtn) els.statsBtn.hidden = !isOwner;
       if (els.statsBtn2) els.statsBtn2.hidden = !isOwner;
     }
 
     function setMsg(el, text, kind) {
-      const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2] : [el];
+      if (!el) return;
+      const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2].filter(Boolean) : [el];
       targets.forEach((t) => { t.textContent = text; t.className = t === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); });
     }
-    function setSaveText(text) { els.saveBtn.textContent = text; els.saveBtn2.textContent = text; }
-    function setSaveDisabled(v) { els.saveBtn.disabled = v; els.saveBtn2.disabled = v; }
+    function setSaveText(text) {
+      if (els.saveBtn) els.saveBtn.textContent = text;
+      if (els.saveBtn2) els.saveBtn2.textContent = text;
+    }
+    function setSaveDisabled(v) {
+      if (els.saveBtn) els.saveBtn.disabled = v;
+      if (els.saveBtn2) els.saveBtn2.disabled = v;
+    }
     const radioVal = (name) => document.querySelector(`input[name=${name}]:checked`)?.value || '';
-    const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
-      : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
+    const errText = (err) => {
+      const m = err && err.message ? err.message : String(err || '');
+      if (m === 'timeout') return 'אין תגובה מהשרת. נסו שוב.';
+      if (m === 'network') return 'בעיית חיבור. נסו שוב.';
+      if (m === 'bad_response') return 'תגובה לא תקינה מהשרת.';
+      return m || 'שגיאה לא ידועה';
+    };
 
     function toggle() {
-      const noPlus = $('no_plus').checked;
-      els.storyField.hidden = radioVal('share_story') !== 'yes';
-      $('guestFields').hidden = noPlus;
-      $('guestTrackBox').hidden = noPlus;
+      const noPlus = Boolean($('no_plus')?.checked);
+      if (els.storyField) els.storyField.hidden = radioVal('share_story') !== 'yes';
+      if ($('guestFields')) $('guestFields').hidden = noPlus;
+      if ($('guestTrackBox')) $('guestTrackBox').hidden = noPlus;
       if (noPlus) {
         document.querySelectorAll('input[name="guest_track"]').forEach((r) => { r.checked = false; });
       }
@@ -495,7 +513,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       setRadio('gender', r.gender || '');
       setRadio('drink_track', r.drink_track || '');
       setRadio('guest_track', r.guest_track || '');
-      $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
+      if ($('no_plus')) $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
       toggle();
     }
 
@@ -528,59 +546,68 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     async function loadExisting(silent) {
-      const phone = normPhone(els.phone.value);
+      const phone = normPhone(els.phone?.value);
       syncOwnerAnalyticsBtn(phone);
-      if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
+      if (!validPhone(phone)) {
+        if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.');
+        return;
+      }
       setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
       if (els.refreshBtn) els.refreshBtn.disabled = true;
       try {
         const res = await jsonp({ action: 'get', phone });
-        if (!res.ok) throw new Error(res.error);
+        if (!res || !res.ok) throw new Error(res?.error || 'השרת החזיר שגיאה');
         loadedPhone = phone;
         syncOwnerAnalyticsBtn(phone);
-        if (res.found) {
+        if (res.found && res.record) {
           fillForm(res.record);
           setSaveText('עדכון ההרשמה');
-          els.deleteBtn.hidden = false;
+          if (els.deleteBtn) els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
         } else {
           setSaveText('שמירת ההרשמה');
-          els.deleteBtn.hidden = true;
+          if (els.deleteBtn) els.deleteBtn.hidden = true;
           setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
         }
       } catch (e) {
-        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
+        setMsg(els.loadMsg, 'הטעינה נכשלה: ' + errText(e));
       } finally {
         if (els.refreshBtn) els.refreshBtn.disabled = false;
       }
     }
 
     els.refreshBtn?.addEventListener('click', () => loadExisting(false));
-    els.phone.addEventListener('input', () => syncOwnerAnalyticsBtn());
-    els.phone.addEventListener('blur', () => {
+    els.phone?.addEventListener('input', () => syncOwnerAnalyticsBtn());
+    els.phone?.addEventListener('blur', () => {
       const p = normPhone(els.phone.value);
       syncOwnerAnalyticsBtn(p);
       if (validPhone(p) && p !== loadedPhone) loadExisting(true);
     });
-    els.phone.addEventListener('keydown', (e) => {
+    els.phone?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); }
     });
-    document.addEventListener('change', (e) => { if (e.target.name === 'share_story' || e.target.id === 'no_plus') toggle(); });
+    document.addEventListener('change', (e) => {
+      if (e.target && (e.target.name === 'share_story' || e.target.id === 'no_plus')) toggle();
+    });
 
-    els.form.addEventListener('submit', async (e) => {
+    els.form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const phone = normPhone(els.phone.value);
-      const fail = (msg, el) => { setMsg(els.saveMsg, msg, 'err'); if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+      const phone = normPhone(els.phone?.value);
+      const fail = (msg, el) => {
+        setMsg(els.saveMsg, msg, 'err');
+        if (el && el.focus) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      };
       if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
 
+      const noPlusChecked = Boolean($('no_plus')?.checked);
       const data = {};
       FIELDS.forEach((k) => { data[k] = $(k) ? $(k).value.trim() : ''; });
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
       data.gender = radioVal('gender');
       data.drink_track = radioVal('drink_track');
-      data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
-      data.guest_track = $('no_plus').checked ? '' : radioVal('guest_track');
+      data.no_plus = noPlusChecked ? 'TRUE' : 'FALSE';
+      data.guest_track = noPlusChecked ? '' : radioVal('guest_track');
       data.waitlist_popup = popupTriggered ? 'כן' : '';
 
       for (const [k, msg] of REQUIRED) {
@@ -590,20 +617,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
       if (data.name.split(/\s+/).length < 2) return fail('כתבו שם פרטי ושם משפחה.', $('name'));
       if (!validAge(data.age)) return fail('הגיל צריך להיות בין 18 ל‑99.', $('age'));
-      if (!$('no_plus').checked && data.guest_phone && !validPhone(normPhone(data.guest_phone))) return fail('מספר הטלפון של ה‑+1 לא תקין.', $('guest_phone'));
-      if (!$('no_plus').checked && data.guest_age && !validAge(data.guest_age)) return fail('גיל ה‑+1 צריך להיות בין 18 ל‑99.', $('guest_age'));
+      if (!noPlusChecked && data.guest_phone && !validPhone(normPhone(data.guest_phone))) return fail('מספר הטלפון של ה‑+1 לא תקין.', $('guest_phone'));
+      if (!noPlusChecked && data.guest_age && !validAge(data.guest_age)) return fail('גיל ה‑+1 צריך להיות בין 18 ל‑99.', $('guest_age'));
       if (data.share_story !== 'yes') data.story_details = '';
 
       setSaveDisabled(true);
       setMsg(els.saveMsg, 'שומרים…');
       try {
         const res = await post({ action: 'save', phone, ...data });
-        if (!res.ok) throw new Error(res.error);
+        if (!res || !res.ok) throw new Error(res?.error || 'שגיאה בשמירה');
         try { localStorage.setItem(LS_KEY, phone); } catch {}
         loadedPhone = phone;
         syncOwnerAnalyticsBtn(phone);
         setSaveText('עדכון ההרשמה');
-        els.deleteBtn.hidden = false;
+        if (els.deleteBtn) els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
         showDone();
@@ -614,8 +641,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     });
 
-    els.deleteBtn.addEventListener('click', async () => {
-      const phone = normPhone(els.phone.value);
+    els.deleteBtn?.addEventListener('click', async () => {
+      const phone = normPhone(els.phone?.value);
       if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
       if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
 
@@ -623,8 +650,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       setMsg(els.saveMsg, 'מוחקים…');
       try {
         const res = await jsonp({ action: 'delete', phone });
-        if (!res.ok) throw new Error(res.error);
-        els.form.reset();
+        if (!res || !res.ok) throw new Error(res?.error || 'שגיאה במחיקה');
+        els.form?.reset();
         loadedPhone = '';
         try { localStorage.removeItem(LS_KEY); } catch {}
         syncOwnerAnalyticsBtn('');
@@ -644,18 +671,19 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const doneDialog = $('doneDialog');
     function showDone() {
-      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
+      if (doneDialog && doneDialog.showModal) doneDialog.showModal();
+      else alert('תודה, הפרטים התקבלו.');
     }
-    $('doneClose').addEventListener('click', () => doneDialog.close());
-    doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
+    $('doneClose')?.addEventListener('click', () => doneDialog?.close());
+    doneDialog?.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
 
-    $('fullClose').addEventListener('click', () => fullDialog.close());
-    $('fullEditBtn').addEventListener('click', () => {
-      fullDialog.close();
-      els.phone.focus();
+    $('fullClose')?.addEventListener('click', () => fullDialog?.close());
+    $('fullEditBtn')?.addEventListener('click', () => {
+      fullDialog?.close();
+      els.phone?.focus();
     });
-    fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
-    if (EVENT_FULL && fullDialog.showModal) {
+    fullDialog?.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
+    if (EVENT_FULL && fullDialog && fullDialog.showModal) {
       popupTriggered = true;
       fullDialog.showModal();
     }
@@ -664,7 +692,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     checkFullPairsPopup();
     try {
       const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
+      if (saved && els.phone) {
         els.phone.value = saved;
         syncOwnerAnalyticsBtn(saved);
         loadExisting(true);
