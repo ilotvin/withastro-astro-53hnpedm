@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V14';
+const VERSION = 'V15';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -134,7 +134,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .done-pay { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
     .full-modal { text-align: right; max-height: 90vh; overflow-y: auto; }
     .full-modal h2 { text-align: center; font-size: 25px; color: var(--sage); margin-bottom: 10px; }
-    .full-modal .lead { font-size: 16px; margin: 0 0 16px; text-align: center; color: var(--ink); }
+    .full-modal .lead { font-size: 16px; margin: 0 0 16px; text-align: center; color: var(--ink); line-height: 1.65; }
     .full-modal .field { text-align: right; margin-bottom: 14px; }
     .full-modal .actions { justify-content: center; margin-top: 14px; }
     .wait-summary { margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--sage); text-align: right; font-size: 15px; }
@@ -463,14 +463,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     </main>
   </div>
 
-  <!-- פופ-אפ פתיחה + רשימת המתנה (Waiting List) / מילוי פרטים בכל זאת -->
+  <!-- פופ-אפ פתיחה + Waiting List / מילוי פרטים בכל זאת -->
   <dialog id="fullDialog" class="done full-modal" aria-labelledby="fullTitle">
     <div class="done-logo" aria-label="מנגנים שרים ביחד">
       <span class="l1">מנגנים שרים</span>
       <span class="l2">ביחד</span>
     </div>
-    <h2 id="fullTitle">ריטריט חנוכה · 10–12 לדצמבר 26</h2>
-    <p class="lead">אפשר להשאיר כאן פרטים ל-Waiting List, או לסגור ולהמשיך למלא/לעדכן פרטים בטופס בכל זאת.</p>
+    <h2 id="fullTitle">בשלב זה הקבוצה התמלאה</h2>
+    <p class="lead">בשלב זה הקבוצה התמלאה. ניתן להשאיר פרטים למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
     <form id="waitlistForm" novalidate>
       <div class="field">
         <label for="w_name">שם מלא <span class="req">*</span></label>
@@ -488,7 +488,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div id="waitSummary" class="wait-summary" hidden></div>
       <div class="actions">
         <button type="submit" id="waitBtn" class="btn btn-primary">שליחת פרטים</button>
-        <button type="button" id="waitAlreadyBtn" class="btn btn-small">מילוי פרטים / עדכון</button>
+        <button type="button" id="waitAlreadyBtn" class="btn btn-small">סגירה והמשך למילוי</button>
         <button type="button" id="waitClose" class="btn btn-small">סגירה</button>
       </div>
     </form>
@@ -656,7 +656,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <li>לילה אחד: לינה במתחם <b>${oneVenue}</b> · לינה עצמאית <b>${oneSelf}</b></li>
           <li>תוספת מסלול יין: <b>${fmt(WINE)}</b></li>
         </ul>
-        <p class="hint"><b>תזכורת:</b> נרשמת ל-Waiting List. אם יתפנה מקום בעקבות ביטול, ניצור קשר. אפשר גם לסגור ולמלא/לעדכן את הטופס המלא.</p>
+        <p class="hint"><b>תזכורת:</b> בשלב זה הקבוצה התמלאה ונרשמת ל-Waiting List למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
       `;
       box.hidden = false;
     }
