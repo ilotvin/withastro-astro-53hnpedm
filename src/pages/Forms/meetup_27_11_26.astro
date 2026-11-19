@@ -3,7 +3,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V5';
+const VERSION = 'V6';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -386,10 +386,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         <span class="l2">ביחד</span>
       </div>
     </div>
-    <h2 id="fullTitle">בשלב זה הקבוצה התמלאה</h2>
-    <p class="done-note">ניתן להשאיר פרטים למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
+    <h2 id="fullTitle">הקבוצה התמלאה</h2>
+    <p class="done-note">מוזמנים להשאיר פרטים במידה ויהיו ביטולים.</p>
     <div class="actions">
-      <button type="button" id="fullEditBtn" class="btn btn-small">מילוי פרטים / עדכון</button>
+      <button type="button" id="fullEditBtn" class="btn btn-small">השארת פרטים / עדכון</button>
       <button type="button" id="fullClose" class="btn btn-primary">הבנתי</button>
     </div>
   </dialog>
@@ -399,6 +399,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
     const LS_KEY = 'meetup_27_11_26_phone';
     const EVENT_FULL = false;
+    const FULL_COUPLES_TARGET = 5; // מספר זוגות מלאים (טלפון ראשי + טלפון +1) להפעלת הפופ-אפ
     // ==================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
@@ -417,6 +418,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
     };
     let loadedPhone = '';
+    let popupTriggered = false;
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -486,6 +488,34 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       toggle();
     }
 
+    function countFullPairsFromServer(res) {
+      if (!res) return 0;
+      if (typeof res.fullPairsCount === 'number') return res.fullPairsCount;
+      const list = Array.isArray(res.subscribers) ? res.subscribers
+        : Array.isArray(res.registrations) ? res.registrations
+        : Array.isArray(res.rows) ? res.rows : [];
+      return list.filter((r) => validPhone(normPhone(r?.phone)) && validPhone(normPhone(r?.guest_phone))).length;
+    }
+
+    const fullDialog = $('fullDialog');
+    function openFullPopup() {
+      popupTriggered = true;
+      if (fullDialog && fullDialog.showModal && !fullDialog.open) {
+        fullDialog.showModal();
+      }
+    }
+
+    async function checkFullPairsPopup() {
+      try {
+        const res = await jsonp({ action: 'list_full' });
+        if (!res || !res.ok) return;
+        const pairs = countFullPairsFromServer(res);
+        if (pairs >= FULL_COUPLES_TARGET) {
+          openFullPopup();
+        }
+      } catch {}
+    }
+
     async function loadExisting(silent) {
       const phone = normPhone(els.phone.value);
       if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
@@ -536,6 +566,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       data.drink_track = radioVal('drink_track');
       data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
       data.guest_track = $('no_plus').checked ? '' : radioVal('guest_track');
+      data.waitlist_popup = popupTriggered ? 'כן' : '';
 
       for (const [k, msg] of REQUIRED) {
         if (k === 'phone') continue;
@@ -601,16 +632,19 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     $('doneClose').addEventListener('click', () => doneDialog.close());
     doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
 
-    const fullDialog = $('fullDialog');
     $('fullClose').addEventListener('click', () => fullDialog.close());
     $('fullEditBtn').addEventListener('click', () => {
       fullDialog.close();
       els.phone.focus();
     });
     fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
-    if (EVENT_FULL && fullDialog.showModal) fullDialog.showModal();
+    if (EVENT_FULL && fullDialog.showModal) {
+      popupTriggered = true;
+      fullDialog.showModal();
+    }
 
     toggle();
+    checkFullPairsPopup();
     try {
       const saved = localStorage.getItem(LS_KEY);
       if (saved) { els.phone.value = saved; loadExisting(true); }
@@ -618,4 +652,3 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </script>
 </body>
 </html>
-<!-- End of File: src/pages/Forms/meetup_27_11_26.astro -->
