@@ -3,7 +3,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V8';
+const VERSION = 'V10';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -20,10 +20,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet" />
-  <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
-  <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
-  <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
+  <title>מנגנים שרים ביחד · 27.11.26 – ערב משחקים, חיבורים ומוסיקה</title>
+  <meta property="og:title" content="מנגנים שרים ביחד · 27.11.26 – ערב משחקים, חיבורים ומוסיקה" />
+  <meta property="og:description" content="27.11.26 · ערב שמוקדש לניתוק מהמסך וחיבור לבני אדם. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
   <meta property="og:image" content="https://atroproject1.vercel.app/images/meetup_6_11_26.jpeg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://atroproject1.vercel.app/Forms/meetup_27_11_26" />
 
   <style is:global>
     :root {
@@ -402,7 +404,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const LS_KEY = 'meetup_27_11_26_phone';
     const OWNER_PHONE = '0546655862';
     const EVENT_FULL = false;
-    const FULL_COUPLES_TARGET = 5;
     // ==================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
@@ -517,15 +518,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       toggle();
     }
 
-    function countFullPairsFromServer(res) {
-      if (!res) return 0;
-      if (typeof res.fullPairsCount === 'number') return res.fullPairsCount;
-      const list = Array.isArray(res.subscribers) ? res.subscribers
-        : Array.isArray(res.registrations) ? res.registrations
-        : Array.isArray(res.rows) ? res.rows : [];
-      return list.filter((r) => validPhone(normPhone(r?.phone)) && validPhone(normPhone(r?.guest_phone))).length;
-    }
-
     const fullDialog = $('fullDialog');
     function openFullPopup() {
       popupTriggered = true;
@@ -534,12 +526,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
-    async function checkFullPairsPopup() {
+    async function checkFullRowsPopup() {
       try {
         const res = await jsonp({ action: 'list_full' });
         if (!res || !res.ok) return;
-        const pairs = countFullPairsFromServer(res);
-        if (pairs >= FULL_COUPLES_TARGET) {
+        const count = Number(res.count ?? res.fullPairsCount ?? 0);
+        const cap = Number(res.capacity ?? 0);
+        if (res.isFull === true || (cap > 0 && count >= cap)) {
           openFullPopup();
         }
       } catch {}
@@ -689,7 +682,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     toggle();
-    checkFullPairsPopup();
+    checkFullRowsPopup();
     try {
       const saved = localStorage.getItem(LS_KEY);
       if (saved && els.phone) {
