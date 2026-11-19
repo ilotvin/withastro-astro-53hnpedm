@@ -1,8 +1,9 @@
 ---
+// File: src/pages/Forms/meetup_27_11_26.astro
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V2';
+const VERSION = 'V5';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -49,7 +50,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .event-date { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0 0; font-family: "Frank Ruhl Libre", serif; font-size: 18px; letter-spacing: .12em; color: var(--muted); }
     .event-date .sep { width: 28px; height: 1px; background: var(--sage); opacity: .8; }
     .event-place { margin: 6px 0 0; text-align: center; font-size: 16px; color: var(--ink); letter-spacing: .02em; }
-    .event-place .dot { color: var(--sage); margin: 0 8px; }
     .event-date + .cover, .event-place + .cover { margin: 20px auto 0; }
     .intro { font-size: 18px; margin: 24px auto 0; max-width: 32em; text-align: center; }
     .intro p { margin: 0 0 10px; }
@@ -161,16 +161,16 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <header class="hero">
       <h1>מנגנים שרים ביחד</h1>
       <p class="event-date"><span>27.11.26</span><span class="sep" aria-hidden="true"></span><span dir="ltr">Friday evening</span></p>
-      <p class="event-place">ערב חיבורים<span class="dot" aria-hidden="true">·</span>מנגנים שרים ביחד</p>
+      <p class="event-place">ערב חיבורים</p>
       <figure class="cover">
         <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <div class="intro">
         <p class="tagline">ערב שמוקדש לניתוק מהמסך<br /><span>וחיבור לבני אדם.</span></p>
         <p class="open-mind">בואו בראש פתוח 🤍</p>
-        <p class="activity">פעילות קלילה וחווייתית.<br />ערב שבו נשתף, נשאל, נעמיק, נופתע, נצחק, ואז ננגן.</p>
+        <p class="activity">מתחילים בסבב היכרות קליל. ומשם נזרום.</p>
       </div>
-      <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).<br /><b>*</b> האירוע מוגבל בכמות המשתתפים, ומילוי השאלון אינו מהווה אישור השתתפות.</p>
+      <p class="note"><b>*</b> ההרשמה לאירוע היא באיזון מגדרי ובעדיפות להזמין חברים חדשים.<br /><b>*</b> האירוע מוגבל בכמות המשתתפים, ומילוי השאלון אינו מהווה אישור השתתפות.</p>
     </header>
 
     <main>
@@ -241,10 +241,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
           <!-- +1 -->
           <fieldset class="group">
-            <legend>את מי תזמינו איתכם?</legend>
-            <p class="group-intro">פרטי ה‑+1 שמגיע איתכם (ממגדר שאינו שלכם, למקרה שפספסתם 😉)</p>
+            <legend>פרטים של ה+1 (יש למלא פעם אחת עבור שניכם)</legend>
+            <p class="group-intro">הערב מוקדש ליצירת חיבורים חדשים ולכן ההרשמה הינה באיזון מגדרי.<br />אפשר למלא את הפרטים עבור ה+1 (אין צורך שהוא\היא גם ימלאו)</p>
 
-            <label class="check-opt"><input type="checkbox" id="no_plus" /><span>אין לי +1 ואשמח לחיבור</span></label>
+            <label class="check-opt"><input type="checkbox" id="no_plus" /><span>כרגע מחפש פרטנר</span></label>
 
             <div id="guestFields">
               <div class="split">
@@ -260,14 +260,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
               <div class="field">
                 <label for="guest_phone">מספר טלפון</label>
                 <input id="guest_phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="050-0000000" maxlength="20" />
-              </div>
-              <div class="field">
-                <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">ה‑+1 שותה אלכוהול?</span>
-                <div class="modes inline three">
-                  <label><input type="radio" name="guest_drinks" value="כן" /><span>כן</span></label>
-                  <label><input type="radio" name="guest_drinks" value="לא" /><span>לא</span></label>
-                  <label><input type="radio" name="guest_drinks" value="אולי" /><span>אולי</span></label>
-                </div>
               </div>
               <div class="field">
                 <label for="guest_how_know">מאיפה אתם מכירים?</label>
@@ -300,7 +292,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
                 <label><input type="radio" name="guest_track" value="ללא אלכוהול" /><span class="t-name">השתתפות ללא אלכוהול</span><b class="t-price">30 ₪</b></label>
               </div>
             </div>
-            <p class="hint" style="margin:8px 0 18px">נא לשתות באחריות.<br />אתן לכם טוש כדי לצייר ציור ולכתוב את השם על הכוס, כדי שתזכרו אותה.</p>
+            <p class="hint" style="margin:8px 0 18px">נא לשתות באחריות.</p>
             <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">איך תרצו לשלם? <span class="muted" style="font-weight:400;font-size:15px">(בקשת תשלום תישלח בנפרד)</span></span>
             <div class="modes inline three">
               <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
@@ -311,7 +303,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           </fieldset>
 
           <div class="info">
-            <p><b>*</b> כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
+            <p><b>*</b> אתם מוזמנים להביא משהו טעים לשולחן.</p>
           </div>
 
           <div class="actions">
@@ -333,15 +325,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       </section>
 
       <section class="home-note">
-        <p>הערב הזה הוא חלק מעשרות ערבים שאירחתי ב‑3 השנים האחרונות בבית שלי.</p>
-        <p>אין כמו ערב באווירה ביתית, להיזרק על כריות, לשיר, לנגן…<br />ברגוע.</p>
+        <p>נפגשים לערב באווירה בייתית, עם מוסיקה טובה, דרינק בין ומקום פשוט להנות משיחה טובה, לשיר או פשוט להקשיב.</p>
       </section>
 
       <!-- פינת השראה – בסוף הדף, מחוברת לטופס דרך form="form" -->
       <section class="inspiration" aria-labelledby="insp-title">
         <fieldset class="group" form="form">
           <legend id="insp-title">פינת השראה</legend>
-          <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
+          <p class="group-intro">האם יש לך משהו שהיית מת לספר לעולם?</p>
 
           <div class="field" style="margin-bottom:0">
             <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
@@ -353,6 +344,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <div id="storyField" class="field" style="margin:14px 0 0" hidden>
             <label for="story_details">ספרו לנו קצת על הסיפור</label>
             <textarea id="story_details" maxlength="800" form="form"></textarea>
+          </div>
+          <div class="field" style="margin:14px 0 0">
+            <label for="game_activity">איזה משחק או פעילות היית רוצה לקיים ביחד?</label>
+            <textarea id="game_activity" maxlength="500" form="form"></textarea>
           </div>
         </fieldset>
         <div class="actions">
@@ -407,8 +402,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     // ==================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
-      'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
+      'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'game_activity', 'open_question'];
     const REQUIRED = [
+      ['phone', 'חסר מספר טלפון.'],
       ['name', 'חסר שם מלא.'],
       ['age', 'חסר גיל.'],
       ['why_join', 'ספרו למה תרצו להצטרף לערב.']
@@ -480,14 +476,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     function fillForm(r) {
-      FIELDS.forEach((k) => { $(k).value = r[k] ?? ''; });
+      FIELDS.forEach((k) => { if ($(k)) $(k).value = r[k] ?? ''; });
       setRadio('share_story', r.share_story || '');
       setRadio('payment', r.payment || '');
       setRadio('gender', r.gender || '');
       setRadio('drink_track', r.drink_track || '');
       setRadio('guest_track', r.guest_track || '');
       $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
-      setRadio('guest_drinks', r.guest_drinks || '');
       toggle();
     }
 
@@ -534,16 +529,16 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
 
       const data = {};
-      FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
+      FIELDS.forEach((k) => { data[k] = $(k) ? $(k).value.trim() : ''; });
       data.share_story = radioVal('share_story');
       data.payment = radioVal('payment');
       data.gender = radioVal('gender');
       data.drink_track = radioVal('drink_track');
       data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
       data.guest_track = $('no_plus').checked ? '' : radioVal('guest_track');
-      data.guest_drinks = $('no_plus').checked ? '' : radioVal('guest_drinks');
 
       for (const [k, msg] of REQUIRED) {
+        if (k === 'phone') continue;
         if (!data[k]) return fail(msg, $(k));
       }
       if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
@@ -623,3 +618,4 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </script>
 </body>
 </html>
+<!-- End of File: src/pages/Forms/meetup_27_11_26.astro -->
