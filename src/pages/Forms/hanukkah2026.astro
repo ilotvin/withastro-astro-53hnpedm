@@ -1,9 +1,10 @@
+// hanukkah2026.astro
 ---
 // hanukkah2026.astro
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V16';
+const VERSION = 'V18';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -461,16 +462,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
   <!-- פופ-אפ פתיחה עם פרטי הריטריט וכפתור הבנתי -->
   <dialog id="fullDialog" class="done full-modal" aria-label="פרטי הריטריט">
-    <div class="done-logo" aria-label="מנגנים שרים ביחד">
-      <span class="l1">מנגנים שרים</span>
-      <span class="l2">ביחד</span>
-    </div>
     <div class="retreat-header">
       <div class="r-title">מנגנים שרים ביחד · ריטריט חנוכה</div>
       <div class="r-sub">10–12 לדצמבר 26 (חמישי–שבת) · מתחם פעימה, מצפה רמון</div>
     </div>
-    <p class="lead">היי:
-כרגע הקבוצה מלא. מוזמנים להשאיר פרטים למקרה של ביטולים.</p>
+    <p class="lead">היי, הקבוצה כרגע מלאה. עצרתי את ההרשמה אבל תמיד שווה להשאיר פרטים כי יש ביטולים.
+
+ייתכן וייפתח מתחם נוסף במידה ויהיו מספיק נרשמים.</p>
     <div class="actions">
       <button type="button" id="waitClose" class="btn btn-primary">הבנתי</button>
     </div>
@@ -606,14 +604,25 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     // ---------- פופ-אפ פתיחה ----------
     const fullDialog = $('fullDialog');
     function openFullModal() {
-      if (fullDialog && fullDialog.showModal && !fullDialog.open) fullDialog.showModal();
+      if (!fullDialog) return;
+      if (fullDialog.showModal && !fullDialog.open) {
+        fullDialog.showModal();
+      } else if (!fullDialog.open) {
+        fullDialog.setAttribute('open', '');
+      }
     }
 
     $('waitClose')?.addEventListener('click', () => {
-      fullDialog?.close();
+      if (fullDialog?.close) fullDialog.close();
+      else fullDialog?.removeAttribute('open');
       els.phone?.focus();
     });
-    fullDialog?.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
+    fullDialog?.addEventListener('click', (e) => {
+      if (e.target === fullDialog) {
+        if (fullDialog.close) fullDialog.close();
+        else fullDialog.removeAttribute('open');
+      }
+    });
 
     function toggle() {
       $('prevBox').hidden = radioVal('prev_retreats') !== 'כן';
@@ -817,7 +826,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         loadExisting(true);
       }
     } catch {}
-    openFullModal();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', openFullModal, { once: true });
+    } else {
+      openFullModal();
+    }
   </script>
 </body>
 </html>
+// hanukkah2026.astro
