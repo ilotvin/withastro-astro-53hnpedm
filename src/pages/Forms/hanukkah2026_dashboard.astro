@@ -4,7 +4,7 @@
 // דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V7';
+const VERSION = 'V8';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -51,10 +51,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
     .card.wide { grid-column: 1 / -1; }
+    .card.cap-compact { padding: 10px 14px; margin-bottom: 12px; }
     .card h2 { margin: 0 0 12px; font-size: 17px; }
-    .cap-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .cap-row label { font-size: 15px; }
-    .cap-row input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; width: 6.5em; }
+    .cap-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+    .cap-row label { font-size: 14px; font-weight: 700; }
+    .cap-row input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; width: 4.5em; font-size: 14px; }
     .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 3em; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
     .bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bar .track { height: 12px; background: var(--track); border-radius: 999px; overflow: hidden; }
@@ -119,12 +120,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <button class="btn" id="gateBtn" type="button">כניסה</button>
     </div>
 
-    <section class="card wide" style="margin-bottom:12px" aria-label="הפעלת פופ-אפ הרשמה מלאה">
-      <h2>מספר שורות מלאות להפעלת פופ-אפ "ההרשמה התמלאה"</h2>
+    <section class="card wide cap-compact" aria-label="שורות להפעלת פופאפ :הרשמה התמלאה">
       <div class="cap-row">
-        <label for="capInput">מספר שורות מלאות:</label>
+        <label for="capInput">שורות להפעלת פופאפ :הרשמה התמלאה</label>
         <input id="capInput" type="number" min="0" max="500" value="25" />
-        <button class="btn" id="saveCapBtn" type="button">שמירה</button>
+        <button class="btn btn-small" id="saveCapBtn" type="button">שמירה</button>
         <span id="capStatus" class="note" style="margin:0"></span>
       </div>
     </section>
