@@ -4,7 +4,7 @@
 // דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V6';
+const VERSION = 'V7';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -75,7 +75,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .picker-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
     .picker-toolbar input[type="search"], .picker-toolbar select { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
     .picker-toolbar input[type="search"] { flex: 1 1 13em; }
-    .picker-toolbar select { min-width: 13em; }
+    .picker-toolbar select { min-width: 14em; }
     .picker-toolbar input::placeholder { color: var(--muted); }
     .names-box { max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 10px 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 6px 12px; }
     .name-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
@@ -274,9 +274,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       $('capStatus').textContent = `נרשמים נוכחים: ${latestTotal} מתוך ${cap} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
     }
 
+    function pickListFromObject(obj) {
+      if (!obj || typeof obj !== 'object') return [];
+      const keys = ['participants', 'registrants', 'rows', 'records', 'items', 'users', 'members', 'names', 'list', 'data'];
+      for (const k of keys) {
+        if (Array.isArray(obj[k]) && obj[k].length) return obj[k];
+      }
+      return [];
+    }
+
     function extractParticipants(d) {
-      const raw = d.participants || d.registrants || d.rows || d.records || d.items || d.names || [];
-      if (!Array.isArray(raw)) return [];
+      const raw = pickListFromObject(d);
+      if (!raw.length) return [];
       const list = [];
       raw.forEach((item, idx) => {
         if (typeof item === 'string') {
@@ -285,9 +294,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           return;
         }
         if (item && typeof item === 'object') {
-          const record = item.data && typeof item.data === 'object' ? { ...item, ...item.data } : item;
+          const record = item.data && typeof item.data === 'object' ? { ...item, ...item.data } : { ...item };
           delete record.data;
-          const name = String(record.name || record.full_name || record.שם || record.phone || `משתתף ${idx + 1}`).trim();
+          const name = String(record.name || record.full_name || record.שם || record.title || record.phone || `משתתף ${idx + 1}`).trim();
           const key = String(record.phone || record.id || `${idx}__${name}`);
           list.push({ key, name, raw: record });
         }
@@ -358,7 +367,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const filtered = participants.filter((p) => matchesSearch(p, q));
 
       if (!participants.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">אין שמות משתתפים להצגה בתגובה הנוכחית.</p>';
+        $('namesList').innerHTML = '<p class="note" style="margin:0">השרת החזיר נתונים מסוכמים בלבד ללא מערך משתתפים/רשומות.</p>';
         updateSelectedSummary();
         return;
       }
@@ -375,6 +384,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }).join('');
 
       updateSelectedSummary();
+    }
+
+    async function tryFetchParticipantsList(currentPhone) {
+      const candidateActions = ['list', 'registrants', 'participants', 'get_all'];
+      for (const act of candidateActions) {
+        try {
+          const res = await jsonp({ action: act, phone: currentPhone });
+          if (res && res.ok) {
+            const found = extractParticipants(res);
+            if (found.length) return found;
+          }
+        } catch {}
+      }
+      return [];
     }
 
     function render(d) {
@@ -400,7 +423,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         { label: 'לילה נוסף: אולי', count: d.extraNight?.['אולי'] || 0 }
       ]);
 
-      participants = extractParticipants(d);
       const validKeys = new Set(participants.map((p) => p.key));
       for (const k of [...selectedKeys]) {
         if (!validKeys.has(k)) selectedKeys.delete(k);
@@ -429,6 +451,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         const d = await jsonp({ action: 'stats', phone });
         if (!d.ok) throw new Error(d.error === 'unauthorized' ? 'אין הרשאה לצפות בנתונים.' : d.error);
         $('gate').hidden = true;
+        let list = extractParticipants(d);
+        if (!list.length) {
+          list = await tryFetchParticipantsList(phone);
+        }
+        participants = list;
         render(d);
       } catch (e) {
         $('stamp').textContent = '';
@@ -439,8 +466,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
-    $('participantSelect')?.addEventListener('change', (e) => {
-      renderParticipantDetails(e.target.value);
+    $('participantSelect')?.addEventListener('change', async (e) => {
+      const key = e.target.value;
+      renderParticipantDetails(key);
+      const p = participants.find((item) => item.key === key);
+      const targetPhone = normPhone(p?.raw?.phone || '');
+      if (p && targetPhone && Object.keys(p.raw || {}).length <= 2) {
+        try {
+          const single = await jsonp({ action: 'get', phone: targetPhone });
+          if (single && single.ok && single.found && single.data) {
+            p.raw = { ...p.raw, ...single.data };
+            renderParticipantDetails(key);
+          }
+        } catch {}
+      }
     });
 
     $('closeDetailsBtn')?.addEventListener('click', () => {
