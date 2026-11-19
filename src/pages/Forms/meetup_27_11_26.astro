@@ -3,7 +3,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V6';
+const VERSION = 'V7';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -309,6 +309,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <div class="actions">
             <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
             <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
+            <a id="statsBtn" class="btn" href="/Forms/meetup_27_11_26_dashboard" hidden>📊 אנליטיקה</a>
           </div>
           <p id="saveMsg" class="msg" role="status"></p>
         </form>
@@ -352,6 +353,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         </fieldset>
         <div class="actions">
           <button type="submit" form="form" id="saveBtn2" class="btn btn-primary">שמירת ההרשמה</button>
+          <a id="statsBtn2" class="btn" href="/Forms/meetup_27_11_26_dashboard" hidden>📊 אנליטיקה</a>
         </div>
         <p id="saveMsg2" class="msg" role="status"></p>
       </section>
@@ -398,6 +400,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     // ===== הגדרות =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
     const LS_KEY = 'meetup_27_11_26_phone';
+    const OWNER_PHONE = '0546655862'; // רק למספר זה מוצג כפתור ההפניה לאנליטיקה
     const EVENT_FULL = false;
     const FULL_COUPLES_TARGET = 5; // מספר זוגות מלאים (טלפון ראשי + טלפון +1) להפעלת הפופ-אפ
     // ==================
@@ -415,7 +418,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     const els = {
       form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), refreshBtn: $('refreshBtn'),
       storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'),
-      saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
+      saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2'), statsBtn: $('statsBtn'), statsBtn2: $('statsBtn2')
     };
     let loadedPhone = '';
     let popupTriggered = false;
@@ -449,10 +452,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     function normPhone(v) {
       let d = String(v || '').replace(/\D/g, '');
       if (d.startsWith('972')) d = '0' + d.slice(3);
+      if (d.length === 9 && d[0] !== '0') d = '0' + d;
       return d;
     }
     const validPhone = (d) => /^0\d{8,9}$/.test(d);
     const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
+
+    function syncOwnerAnalyticsBtn(rawPhone) {
+      const isOwner = normPhone(rawPhone ?? els.phone.value) === OWNER_PHONE;
+      if (els.statsBtn) els.statsBtn.hidden = !isOwner;
+      if (els.statsBtn2) els.statsBtn2.hidden = !isOwner;
+    }
+
     function setMsg(el, text, kind) {
       const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2] : [el];
       targets.forEach((t) => { t.textContent = text; t.className = t === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); });
@@ -518,6 +529,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     async function loadExisting(silent) {
       const phone = normPhone(els.phone.value);
+      syncOwnerAnalyticsBtn(phone);
       if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
       setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
       if (els.refreshBtn) els.refreshBtn.disabled = true;
@@ -525,6 +537,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
         loadedPhone = phone;
+        syncOwnerAnalyticsBtn(phone);
         if (res.found) {
           fillForm(res.record);
           setSaveText('עדכון ההרשמה');
@@ -543,8 +556,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     els.refreshBtn?.addEventListener('click', () => loadExisting(false));
+    els.phone.addEventListener('input', () => syncOwnerAnalyticsBtn());
     els.phone.addEventListener('blur', () => {
       const p = normPhone(els.phone.value);
+      syncOwnerAnalyticsBtn(p);
       if (validPhone(p) && p !== loadedPhone) loadExisting(true);
     });
     els.phone.addEventListener('keydown', (e) => {
@@ -586,6 +601,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         if (!res.ok) throw new Error(res.error);
         try { localStorage.setItem(LS_KEY, phone); } catch {}
         loadedPhone = phone;
+        syncOwnerAnalyticsBtn(phone);
         setSaveText('עדכון ההרשמה');
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
@@ -611,6 +627,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         els.form.reset();
         loadedPhone = '';
         try { localStorage.removeItem(LS_KEY); } catch {}
+        syncOwnerAnalyticsBtn('');
         setSaveText('שמירת ההרשמה');
         els.deleteBtn.hidden = true;
         setMsg(els.loadMsg, '');
@@ -647,7 +664,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     checkFullPairsPopup();
     try {
       const saved = localStorage.getItem(LS_KEY);
-      if (saved) { els.phone.value = saved; loadExisting(true); }
+      if (saved) {
+        els.phone.value = saved;
+        syncOwnerAnalyticsBtn(saved);
+        loadExisting(true);
+      }
     } catch {}
   </script>
 </body>
