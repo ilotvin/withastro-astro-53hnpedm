@@ -4,7 +4,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V19';
+const VERSION = 'V20';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -526,10 +526,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const els = { form: $('form'), phone:$('phone'), loadMsg: $('loadMsg'), saveBtn:$('saveBtn'),
-      saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'), refreshBtn:$('refreshBtn') };
+    const els = {
+      form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), saveBtn: $('saveBtn'),
+      saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'), refreshBtn: $('refreshBtn')
+    };
     let loadedPhone = '';
     let createdAt = null;
+    let receiptFile = null;
+
+    function normPhone(v) {
+      let d = String(v || '').replace(/\D/g, '');
+      if (d.startsWith('972')) d = '0' + d.slice(3);
+      if (d.length === 9 && d[0] !== '0') d = '0' + d;
+      return d.length >= 9 && d.length <= 10 ? d : '';
+    }
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -549,4 +559,272 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const timer = setTimeout(() => ctrl.abort(), ms);
       try {
         const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
-        return
+        return await r.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function getRadio(name) {
+      const el = els.form.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '';
+    }
+    function setRadio(name, val) {
+      els.form.querySelectorAll(`input[name="${name}"]`).forEach((el) => {
+        el.checked = el.value === String(val ?? '');
+      });
+    }
+    function getChecks(name) {
+      return [...els.form.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value);
+    }
+    function setChecks(name, val) {
+      const list = Array.isArray(val) ? val : String(val ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+      els.form.querySelectorAll(`input[name="${name}"]`).forEach((el) => {
+        el.checked = list.includes(el.value);
+      });
+    }
+
+    function toggleBoxes() {
+      $('prevBox').hidden = getRadio('prev_retreats') !== 'כן';
+      $('detailsBox').hidden = getRadio('workshop') !== 'כן' && getRadio('story') !== 'כן';
+    }
+
+    function calcPrice() {
+      const stage = stageFor(createdAt || new Date());
+      $('stageTag').textContent = STAGE_LABEL[stage];
+
+      const att = getRadio('attendance');
+      const lod = getRadio('lodging');
+      const wine = getChecks('wine').includes('כן');
+      const kind = att.startsWith('סופ"ש מלא') ? 'full' : (att ? 'one' : null);
+      const lodKey = lod.includes('במתחם') ? 'y' : (lod ? 'n' : null);
+
+      $('phead').innerHTML = '<tr><th>לינה</th><th>סופ"ש מלא</th><th>יום אחד</th></tr>';
+      $('ptab').innerHTML =
+        `<tr><td>לינה במתחם</td><td class="num">${PRICES.y.full[stage] + FOOD.full} ₪</td><td class="num">${PRICES.y.one[stage] + FOOD.one} ₪</td></tr>` +
+        `<tr><td>לינה עצמאית</td><td class="num">${PRICES.n.full[stage] + FOOD.full} ₪</td><td class="num">${PRICES.n.one[stage] + FOOD.one} ₪</td></tr>`;
+
+      const totalEl = $('total');
+      if (!kind || !lodKey) {
+        totalEl.className = 'total pending';
+        totalEl.textContent = 'בחרו מועד הגעה ולינה לחישוב הסכום המשוער.';
+        $('nextPrice').textContent = '';
+        return null;
+      }
+      const sum = PRICES[lodKey][kind][stage] + FOOD[kind] + (wine ? WINE : 0);
+      totalEl.className = 'total';
+      totalEl.textContent = `סה"כ משוער: ${sum} ₪`;
+      $('nextPrice').textContent = '';
+      return sum;
+    }
+
+    function renderPurchases(list) {
+      const ul = $('buyList');
+      if (!Array.isArray(list) || !list.length) {
+        ul.innerHTML = '';
+        $('buyTotal').textContent = '';
+        return;
+      }
+      let total = 0;
+      ul.innerHTML = list.map((p) => {
+        const amt = parseFloat(p.amount) || 0;
+        total += amt;
+        return `<li><span><b>${esc(p.store || 'קנייה')}</b>${p.details ? ' – ' + esc(p.details) : ''}${p.hasReceipt ? ' 📎' : ''}</span><span class="amt">${amt} ₪</span></li>`;
+      }).join('');
+      $('buyTotal').textContent = `סה"כ דווח: ${total} ₪`;
+    }
+
+    function fillForm(data) {
+      TEXT.forEach((id) => {
+        if ($(id) && data.hasOwnProperty(id)) $(id).value = data[id] ?? '';
+      });
+      RADIOS.forEach((name) => {
+        if (data.hasOwnProperty(name)) setRadio(name, data[name]);
+      });
+      CHECKS.forEach((name) => {
+        if (data.hasOwnProperty(name)) setChecks(name, data[name]);
+      });
+      if (data.created) {
+        const d = new Date(data.created);
+        if (!Number.isNaN(d.getTime())) createdAt = d;
+      }
+      toggleBoxes();
+      calcPrice();
+    }
+
+    async function loadByPhone(raw, showPopupIfFull = false) {
+      const p = normPhone(raw);
+      if (!p) {
+        els.loadMsg.textContent = '';
+        $('statsBtn').hidden = true;
+        els.deleteBtn.hidden = true;
+        $('buySec').hidden = true;
+        return;
+      }
+      els.loadMsg.textContent = 'טוען נתונים…';
+      try {
+        const res = await jsonp({ action: 'get', phone: p });
+        if (!res.ok) throw new Error(res.error || 'שגיאה בטעינה');
+        loadedPhone = p;
+        try { localStorage.setItem(LS_KEY, p); } catch {}
+        $('statsBtn').hidden = !res.owner;
+        if (res.found && res.data) {
+          fillForm(res.data);
+          els.deleteBtn.hidden = false;
+          els.loadMsg.textContent = 'נטענה הרשמה קיימת – ניתן לעדכן ולשמור.';
+        } else {
+          createdAt = null;
+          els.deleteBtn.hidden = true;
+          els.loadMsg.textContent = 'מספר חדש – מלאו את הפרטים ולחצו על שמירה.';
+          calcPrice();
+        }
+        if (res.buyer) {
+          $('buySec').hidden = false;
+          renderPurchases(res.purchases || []);
+        } else {
+          $('buySec').hidden = true;
+        }
+        if (showPopupIfFull && res.isFull && !res.found) {
+          const dlg = $('fullDialog');
+          if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+        }
+      } catch (e) {
+        els.loadMsg.textContent = 'לא ניתן לטעון כרגע (' + (e.message || e) + ').';
+      }
+    }
+
+    els.phone.addEventListener('change', () => loadByPhone(els.phone.value, false));
+    els.phone.addEventListener('blur', () => loadByPhone(els.phone.value, false));
+    els.refreshBtn.addEventListener('click', () => loadByPhone(els.phone.value || loadedPhone, false));
+
+    els.form.addEventListener('change', () => {
+      toggleBoxes();
+      calcPrice();
+    });
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      els.saveMsg.className = 'msg';
+      els.saveMsg.textContent = '';
+
+      const p = normPhone(els.phone.value);
+      const name = ($('name').value || '').trim();
+      const age = parseInt($('age').value, 10);
+      const why = ($('why').value || '').trim();
+      const att = getRadio('attendance');
+      const lod = getRadio('lodging');
+      const helpers = getChecks('helper_roles');
+
+      if (!p) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש להזין מספר טלפון תקין.'; return; }
+      if (!name) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש להזין שם מלא.'; return; }
+      if (!att) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש לבחור מתי מגיעים.'; return; }
+      if (!lod) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש לבחור אפשרות לינה.'; return; }
+      if (!(age >= 18 && age <= 99)) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש להזין גיל תקין (18–99).'; return; }
+      if (!why) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש למלא למה רוצים להצטרף.'; return; }
+      if (!helpers.length) { els.saveMsg.className = 'msg err'; els.saveMsg.textContent = 'יש לבחור לפחות תפקיד הלפר אחד.'; return; }
+
+      const payloadData = { phone: p };
+      TEXT.forEach((id) => { payloadData[id] = ($(id).value || '').trim(); });
+      RADIOS.forEach((nameKey) => { payloadData[nameKey] = getRadio(nameKey); });
+      CHECKS.forEach((nameKey) => { payloadData[nameKey] = getChecks(nameKey); });
+
+      els.saveBtn.disabled = true;
+      els.saveMsg.textContent = 'שומר…';
+      try {
+        const res = await post({ action: 'save', data: payloadData });
+        if (!res.ok) throw new Error(res.error || 'שגיאה בשמירה');
+        loadedPhone = p;
+        try { localStorage.setItem(LS_KEY, p); } catch {}
+        els.deleteBtn.hidden = false;
+        els.saveMsg.className = 'msg ok';
+        els.saveMsg.textContent = 'ההרשמה נשמרה בהצלחה.';
+        const dlg = $('doneDialog');
+        $('donePrice').innerHTML = res.total != null ? `סכום משוער: <b>${res.total} ₪</b>` : '';
+        if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+      } catch (err) {
+        els.saveMsg.className = 'msg err';
+        els.saveMsg.textContent = 'שגיאה בשמירה: ' + (err.message || err);
+      } finally {
+        els.saveBtn.disabled = false;
+      }
+    });
+
+    els.deleteBtn.addEventListener('click', async () => {
+      const p = normPhone(els.phone.value || loadedPhone);
+      if (!p) return;
+      if (!confirm('למחוק את ההרשמה עבור מספר זה?')) return;
+      els.deleteBtn.disabled = true;
+      try {
+        const res = await jsonp({ action: 'delete', phone: p });
+        if (!res.ok) throw new Error(res.error || 'שגיאה במחיקה');
+        els.form.reset();
+        createdAt = null;
+        els.deleteBtn.hidden = true;
+        els.saveMsg.className = 'msg ok';
+        els.saveMsg.textContent = 'ההרשמה נמחקה.';
+        calcPrice();
+      } catch (err) {
+        els.saveMsg.className = 'msg err';
+        els.saveMsg.textContent = 'שגיאה במחיקה: ' + (err.message || err);
+      } finally {
+        els.deleteBtn.disabled = false;
+      }
+    });
+
+    $('b_file').addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) { receiptFile = null; $('b_fileName').textContent = 'צילום או העלאת קבלה'; return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const b64 = String(reader.result || '').split(',')[1] || '';
+        receiptFile = { name: f.name, mime: f.type || 'application/octet-stream', b64 };
+        $('b_fileName').textContent = f.name;
+      };
+      reader.readAsDataURL(f);
+    });
+
+    $('buyBtn').addEventListener('click', async () => {
+      const p = normPhone(els.phone.value || loadedPhone);
+      const amount = ($('b_amount').value || '').trim();
+      const store = ($('b_store').value || '').trim();
+      const details = ($('b_details').value || '').trim();
+      if (!p) { $('buyMsg').className = 'msg err'; $('buyMsg').textContent = 'חסר מספר טלפון.'; return; }
+      if (!amount) { $('buyMsg').className = 'msg err'; $('buyMsg').textContent = 'יש להזין סכום.'; return; }
+      $('buyBtn').disabled = true;
+      $('buyMsg').className = 'msg';
+      $('buyMsg').textContent = 'שומר קנייה…';
+      try {
+        const res = await post({ action: 'purchase', phone: p, amount, store, details, file: receiptFile });
+        if (!res.ok) throw new Error(res.error || 'שגיאה');
+        $('b_amount').value = '';
+        $('b_store').value = '';
+        $('b_details').value = '';
+        $('b_file').value = '';
+        receiptFile = null;
+        $('b_fileName').textContent = 'צילום או העלאת קבלה';
+        $('buyMsg').className = 'msg ok';
+        $('buyMsg').textContent = 'הקנייה נשמרה.';
+        renderPurchases(res.purchases || []);
+      } catch (err) {
+        $('buyMsg').className = 'msg err';
+        $('buyMsg').textContent = 'שגיאה בשמירת הקנייה: ' + (err.message || err);
+      } finally {
+        $('buyBtn').disabled = false;
+      }
+    });
+
+    $('waitClose')?.addEventListener('click', () => $('fullDialog')?.close());
+    $('doneClose')?.addEventListener('click', () => $('doneDialog')?.close());
+
+    calcPrice();
+    try {
+      const saved = localStorage.getItem(LS_KEY) || '';
+      if (saved) {
+        els.phone.value = saved;
+        loadByPhone(saved, true);
+      }
+    } catch {}
+  </script>
+</body>
+</html>
+// hanukkah2026.astro
