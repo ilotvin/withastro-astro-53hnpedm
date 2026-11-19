@@ -2,7 +2,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V11';
+const VERSION = 'V12';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -500,8 +500,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     // ===== הגדרות – להדביק את כתובת ה-Web App אחרי פריסת ה-Apps Script =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
     const LS_KEY = 'hanukkah2026_phone';
-    // לשנות ל-true כדי להציג פופ-אפ שההרשמה התמלאה ולאפשר השארת פרטים לביטולים
-    const REGISTRATION_FULL = true;
     // =======================================================================
 
     // תמחור (חייב להתאים ל-Code_hanukkah2026.gs)
@@ -523,6 +521,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn') };
     let loadedPhone = '';
     let createdAt = null;
+    let isRegistrationFull = false;
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -609,6 +608,62 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
+    // ---------- פופ-אפ הרשמה מלאה / רשימת המתנה ----------
+    const fullDialog = $('fullDialog');
+    function openFullModal(forceOpen = false) {
+      if (!fullDialog || (!isRegistrationFull && !forceOpen)) return;
+      if ($('w_phone') && els.phone.value && !$('w_phone').value) {
+        $('w_phone').value = els.phone.value;
+      }
+      if ($('w_name') && $('name') && $('name').value && !$('w_name').value) {
+        $('w_name').value = $('name').value;
+      }
+      if (fullDialog.showModal && !fullDialog.open) fullDialog.showModal();
+    }
+
+    function syncFullStateFromServer(res) {
+      if (!res) return;
+      const count = Number(res.count);
+      const capacity = Number(res.capacity);
+      if (typeof res.isFull === 'boolean') {
+        isRegistrationFull = res.isFull;
+      } else if (Number.isFinite(count) && Number.isFinite(capacity) && capacity > 0) {
+        isRegistrationFull = count >= capacity;
+      }
+      if (isRegistrationFull && !res.found) {
+        openFullModal();
+      }
+    }
+
+    $('waitClose')?.addEventListener('click', () => fullDialog?.close());
+    $('waitAlreadyBtn')?.addEventListener('click', () => {
+      fullDialog?.close();
+      els.phone.focus();
+    });
+    fullDialog?.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
+
+    $('waitlistForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = $('w_name').value.trim();
+      const phone = normPhone($('w_phone').value);
+      const notes = $('w_notes').value.trim();
+      if (!name) { setMsg($('waitMsg'), 'נא למלא שם מלא.', 'err'); $('w_name').focus(); return; }
+      if (!validPhone(phone)) { setMsg($('waitMsg'), 'מספר הטלפון לא תקין.', 'err'); $('w_phone').focus(); return; }
+
+      $('waitBtn').disabled = true;
+      setMsg($('waitMsg'), 'שולחים…');
+      try {
+        const res = await post({ action: 'waitlist', data: { name, phone, notes } });
+        if (!res.ok) throw new Error(res.error);
+        setMsg($('waitMsg'), 'הפרטים נשמרו ברשימת המתנה! אם יתפנה מקום בעקבות ביטול, ניצור קשר.', 'ok');
+        $('waitlistForm').reset();
+      } catch (err) {
+        setMsg($('waitMsg'), 'השליחה נכשלה: ' + errText(err), 'err');
+      } finally {
+        $('waitBtn').disabled = false;
+      }
+    });
+
     function toggle() {
       $('prevBox').hidden = radioVal('prev_retreats') !== 'כן';
       $('detailsBox').hidden = radioVal('workshop') !== 'כן' && radioVal('story') !== 'כן';
@@ -636,13 +691,19 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       toggle();
     }
 
-    async function loadExisting(silent) {
-      const phone = normPhone(els.phone.value);
+    async function loadExisting(silent, overridePhone) {
+      const phone = normPhone(overridePhone || els.phone.value);
       if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
-      setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
+      if (!overridePhone) setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
       try {
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
+
+        if (overridePhone) {
+          syncFullStateFromServer(res);
+          return;
+        }
+
         loadedPhone = phone;
         $('statsBtn').hidden = !res.owner;
         if (res.found) {
@@ -657,13 +718,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           els.saveBtn.textContent = 'שמירת ההרשמה';
           els.deleteBtn.hidden = true;
           $('buySec').hidden = true;
-          setMsg(els.loadMsg, REGISTRATION_FULL
-            ? 'ההרשמה התמלאה. ניתן להשאיר פרטים בפופ-אפ למקרה שיהיו ביטולים.'
+          setMsg(els.loadMsg, isRegistrationFull
+            ? 'ההרשמה התמלאה. ניתן להשאיר פרטים ברשימת המתנה למקרה שיהיו ביטולים.'
             : 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
           toggle();
         }
+        syncFullStateFromServer(res);
       } catch (e) {
-        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
+        if (!overridePhone) setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
       }
     }
 
@@ -792,45 +854,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     });
 
-    // ---------- popups ----------
-    const fullDialog = $('fullDialog');
-    function openFullModal() {
-      if (!REGISTRATION_FULL) return;
-      if ($('w_phone') && els.phone.value && !$('w_phone').value) {
-        $('w_phone').value = els.phone.value;
-      }
-      if (fullDialog.showModal && !fullDialog.open) fullDialog.showModal();
-    }
-
-    $('waitClose').addEventListener('click', () => fullDialog.close());
-    $('waitAlreadyBtn').addEventListener('click', () => {
-      fullDialog.close();
-      els.phone.focus();
-    });
-    fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
-
-    $('waitlistForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = $('w_name').value.trim();
-      const phone = normPhone($('w_phone').value);
-      const notes = $('w_notes').value.trim();
-      if (!name) { setMsg($('waitMsg'), 'נא למלא שם מלא.', 'err'); $('w_name').focus(); return; }
-      if (!validPhone(phone)) { setMsg($('waitMsg'), 'מספר הטלפון לא תקין.', 'err'); $('w_phone').focus(); return; }
-
-      $('waitBtn').disabled = true;
-      setMsg($('waitMsg'), 'שולחים…');
-      try {
-        const res = await post({ action: 'waitlist', data: { name, phone, notes } });
-        if (!res.ok) throw new Error(res.error);
-        setMsg($('waitMsg'), 'הפרטים נשמרו ברשימת המתנה! אם יתפנה מקום בעקבות ביטול, ניצור קשר.', 'ok');
-        $('waitlistForm').reset();
-      } catch (err) {
-        setMsg($('waitMsg'), 'השליחה נכשלה: ' + errText(err), 'err');
-      } finally {
-        $('waitBtn').disabled = false;
-      }
-    });
-
     const doneDialog = $('doneDialog');
     function showDone(total) {
       $('donePrice').innerHTML = total ? 'סה"כ לתשלום: <b>' + fmt(total) + '</b>' : '';
@@ -843,9 +866,15 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     toggle();
     try {
       const saved = localStorage.getItem(LS_KEY);
-      if (saved) { els.phone.value = saved; loadExisting(true); }
-    } catch {}
-    openFullModal();
+      if (saved) {
+        els.phone.value = saved;
+        loadExisting(true);
+      } else {
+        loadExisting(true, '0500000000');
+      }
+    } catch {
+      loadExisting(true, '0500000000');
+    }
   </script>
 </body>
 </html>
