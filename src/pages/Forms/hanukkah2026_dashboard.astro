@@ -1,10 +1,9 @@
 ---
-// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים בלבד, בלי פרטים אישיים)
+// דשבורד – ריטריט חנוכה 2026 (נתונים מסוכמים בלבד, בלי פרטים אישיים)[cite: 3]
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V6';
+const VERSION = 'V3';
 // =========================================
-
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
@@ -35,7 +34,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     h1 { margin: 0; font-size: 28px; }
     .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
     .btn { font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 999px; border: 0; background: var(--sage); color: var(--sage-ink); cursor: pointer; }
-    .btn-ghost { text-decoration: none; background: transparent; color: var(--ink); border: 2px solid var(--sage); }
     .btn:disabled { opacity: .6; cursor: progress; }
     .msg { color: var(--danger); margin: 0 0 16px; }
     .msg:empty { display: none; }
@@ -50,6 +48,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
     .card.wide { grid-column: 1 / -1; }
     .card h2 { margin: 0 0 12px; font-size: 17px; }
+    .cap-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .cap-row label { font-size: 15px; }
+    .cap-row input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; width: 6.5em; }
     .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 3em; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
     .bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bar .track { height: 12px; background: var(--track); border-radius: 999px; overflow: hidden; }
@@ -67,28 +68,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
     .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
 
-    .names-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
-    .names-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-    .names-head h2 { margin: 0; font-size: 18px; }
-    .names-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .names-controls select, .names-controls input { font: inherit; font-size: 14px; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
-    .names-controls input { min-width: 14em; }
-    .names-list { display: grid; gap: 10px; }
-    .name-item { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-    .name-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-    .name-item-top strong { font-size: 16px; color: var(--sage); }
-    .name-item-top span { font-size: 13px; color: var(--muted); }
-    .name-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; font-size: 14px; }
-    .name-field { display: flex; gap: 6px; flex-wrap: wrap; }
-    .name-field b { color: var(--muted); font-weight: 700; }
-    .name-field span { overflow-wrap: anywhere; word-break: break-word; }
-    .social-link { color: var(--sage); text-decoration: underline; overflow-wrap: anywhere; }
-
-    @media (max-width: 700px) {
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid { grid-template-columns: 1fr; }
-      .name-fields { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -99,10 +79,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         <h1>דשבורד הרשמות</h1>
         <p class="sub">ריטריט חנוכה · מצפה רמון · 10–12 לדצמבר 26 · <span id="stamp">טוען…</span></p>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn btn-ghost" href="/Forms/hanukkah2026">לטופס</a>
+      <div style="display:flex;gap:8px">
+        <a class="btn" href="/Forms/hanukkah2026" style="text-decoration:none;background:transparent;color:var(--ink);border:2px solid var(--sage)">לטופס</a>
         <button class="btn" id="refresh" type="button">רענון</button>
-        <button class="btn btn-ghost" id="namesBtn" type="button">עמוד שמות</button>
       </div>
     </header>
     <p class="msg" id="msg" role="status"></p>
@@ -111,50 +90,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <button class="btn" id="gateBtn" type="button">כניסה</button>
     </div>
 
-    <section class="names-panel" id="namesSec" hidden aria-label="עמוד שמות">
-      <div class="names-head">
-        <h2>עמוד שמות (<span id="namesCount">0</span>)</h2>
-        <div class="names-controls">
-          <input id="namesSearch" type="search" placeholder="חפש לי שם" />
-          <select id="namesSelect" aria-label="בחירת שם">
-            <option value="">כל השמות</option>
-          </select>
-          <select id="namesField" aria-label="בחירת שדה">
-            <option value="all">כל השדות</option>
-            <option value="phone">טלפון</option>
-            <option value="email">מייל</option>
-            <option value="attendance">מתי מגיעים</option>
-            <option value="extra_night">לילה נוסף</option>
-            <option value="lodging">לינה</option>
-            <option value="age">גיל</option>
-            <option value="gender">מגדר</option>
-            <option value="why">למה להצטרף</option>
-            <option value="prev_retreats">ריטריטים בעבר</option>
-            <option value="prev_feedback">פידבק ריטריטים</option>
-            <option value="social">רשת חברתית</option>
-            <option value="car">הגעה / רכב</option>
-            <option value="area">אזור</option>
-            <option value="wine">מסלול יין</option>
-            <option value="baking">אפייה</option>
-            <option value="two_facts">שתי עובדות</option>
-            <option value="activities">פעילויות</option>
-            <option value="connect_ideas">פעילויות מחברות</option>
-            <option value="workshop">סדנה</option>
-            <option value="story">סיפור</option>
-            <option value="content_details">פרטי תוכן</option>
-            <option value="diet">תזונה</option>
-            <option value="gluten">גלוטן</option>
-            <option value="allergies">אלרגיות</option>
-            <option value="kashrut">כשרות</option>
-            <option value="milk">חלב</option>
-            <option value="helper_roles">הלפרים</option>
-            <option value="payment">תשלום</option>
-            <option value="price_stage">שלב מחיר</option>
-            <option value="price_total">סה"כ מחיר</option>
-          </select>
-        </div>
+    <section class="card wide" style="margin-bottom:12px" aria-label="הפעלת פופ-אפ הרשמה מלאה">
+      <h2>מספר שורות מלאות להפעלת פופ-אפ "ההרשמה התמלאה"</h2>
+      <div class="cap-row">
+        <label for="capInput">מספר שורות מלאות:</label>
+        <input id="capInput" type="number" min="0" max="500" value="25" />
+        <button class="btn" id="saveCapBtn" type="button">שמירה</button>
+        <span id="capStatus" class="note" style="margin:0"></span>
       </div>
-      <div class="names-list" id="namesList"></div>
     </section>
 
     <section class="kpis" aria-label="מספרים עיקריים">
@@ -179,68 +122,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </div>
 
   <script is:inline>
+    // ===== הגדרות =====
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
     const CAP = 25;
+    // הטלפון נלקח מהטופס (אותו דפדפן). הסקריפט בודק שהוא הטלפון המורשה.
     const LS_KEY = 'hanukkah2026_phone';
     let phone = '';
     try { phone = localStorage.getItem(LS_KEY) || ''; } catch {}
-
-    const FIELD_LABELS = {
-      phone: 'טלפון', email: 'מייל', attendance: 'מתי מגיעים', extra_night: 'לילה נוסף',
-      lodging: 'לינה', age: 'גיל', gender: 'מגדר', why: 'למה להצטרף',
-      prev_retreats: 'ריטריטים בעבר', prev_feedback: 'פידבק ריטריטים', social: 'רשת חברתית',
-      car: 'הגעה / רכב', area: 'אזור', wine: 'מסלול יין', baking: 'אפייה',
-      two_facts: 'שתי עובדות', activities: 'פעילויות', connect_ideas: 'פעילויות מחברות',
-      workshop: 'סדנה', story: 'סיפור', content_details: 'פרטי תוכן', diet: 'תזונה',
-      gluten: 'גלוטן', allergies: 'אלרגיות', kashrut: 'כשרות', milk: 'חלב',
-      helper_roles: 'הלפרים', payment: 'תשלום', price_stage: 'שלב מחיר', price_total: 'סה"כ מחיר'
-    };
+    // ==================
 
     const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-    function normalizeHttpUrl(raw) {
-      const candidate = /^www\./i.test(raw) ? 'https://' + raw : raw;
-      try {
-        const parsed = new URL(candidate);
-        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-          return parsed.toString();
-        }
-      } catch {}
-      return '';
-    }
-
-    function renderSocialValue(raw) {
-      const text = String(raw ?? '').trim();
-      if (!text) return '';
-      const urlRegex = /(?:https?:\/\/|www\.)[^\s<>"'\u0590-\u05FF]+/gi;
-      let out = '';
-      let lastIndex = 0;
-      let match;
-
-      while ((match = urlRegex.exec(text)) !== null) {
-        const rawMatch = match[0].replace(/[),.;!?]+$/, '');
-        const start = match.index;
-        const end = start + rawMatch.length;
-        if (start > lastIndex) {
-          out += esc(text.slice(lastIndex, start));
-        }
-        const href = normalizeHttpUrl(rawMatch);
-        if (href) {
-          out += `<a class="social-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(rawMatch)}</a>`;
-        } else {
-          out += esc(rawMatch);
-        }
-        lastIndex = end;
-      }
-
-      if (lastIndex < text.length) {
-        out += esc(text.slice(lastIndex));
-      }
-      return out || esc(text);
-    }
-
-    let latestRegistrations = [];
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let latestTotal = 0;
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -275,48 +168,17 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       $('c_nights').innerHTML = row('חמישי בלילה', n.thu) + row('שישי בלילה', n.fri);
     }
 
-    function populateNamesSelect() {
-      const sel = $('namesSelect');
-      const prev = sel.value;
-      const names = [...new Set(latestRegistrations.map((r) => String(r.name || '').trim()).filter(Boolean))]
-        .sort((a, b) => a.localeCompare(b, 'he'));
-      sel.innerHTML = '<option value="">כל השמות</option>' +
-        names.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
-      if (names.includes(prev)) sel.value = prev;
-    }
-
-    function renderNamesList() {
-      const q = ($('namesSearch').value || '').trim().toLowerCase();
-      const chosenName = ($('namesSelect').value || '').trim();
-      const selectedField = $('namesField').value || 'all';
-      const filtered = latestRegistrations.filter((item) => {
-        if (chosenName && String(item.name || '').trim() !== chosenName) return false;
-        if (!q) return true;
-        return Object.values(item).some((val) => String(val ?? '').toLowerCase().includes(q));
-      });
-      $('namesCount').textContent = filtered.length;
-      if (!filtered.length) {
-        $('namesList').innerHTML = '<div class="name-item">אין רשומות להצגה.</div>';
-        return;
-      }
-      const keys = selectedField === 'all' ? Object.keys(FIELD_LABELS) : [selectedField];
-      $('namesList').innerHTML = filtered.map((item) => {
-        const fieldsHtml = keys.map((k) => {
-          const val = item[k];
-          if (val == null || String(val).trim() === '') return '';
-          const renderedVal = k === 'social' ? renderSocialValue(val) : esc(val);
-          return `<div class="name-field"><b>${esc(FIELD_LABELS[k] || k)}:</b><span>${renderedVal}</span></div>`;
-        }).filter(Boolean).join('');
-        return `<div class="name-item">` +
-          `<div class="name-item-top"><strong>${esc(item.name || 'ללא שם')}</strong><span>${esc(item.phone || '')}</span></div>` +
-          `<div class="name-fields">${fieldsHtml || '<div class="name-field"><span>אין נתונים בשדה שנבחר</span></div>'}</div>` +
-          `</div>`;
-      }).join('');
+    function updateCapSummary(capValue) {
+      const cap = Number.isFinite(capValue) && capValue >= 0 ? capValue : CAP;
+      $('capInput').value = cap;
+      const active = cap > 0 && latestTotal >= cap;
+      $('capStatus').textContent = `נרשמים נוכחים: ${latestTotal} מתוך ${cap} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
     }
 
     function render(d) {
       const g = d.gender, a = d.age;
-      $('k_total').textContent = d.total;
+      latestTotal = Number(d.total) || 0;
+      $('k_total').textContent = latestTotal;
       $('k_male').textContent = g['גבר'] || 0;
       $('k_female').textContent = g['אישה'] || 0;
       $('k_age').textContent = a.all ?? '–';
@@ -335,9 +197,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         { label: 'לילה נוסף: כן', count: d.extraNight['כן'] || 0 },
         { label: 'לילה נוסף: אולי', count: d.extraNight['אולי'] || 0 }
       ]);
-      latestRegistrations = Array.isArray(d.registrations) ? d.registrations : [];
-      populateNamesSelect();
-      renderNamesList();
+
+      if (d.capacity !== undefined) {
+        updateCapSummary(parseInt(d.capacity, 10));
+      }
+
       $('stamp').textContent = 'עודכן ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
     }
 
@@ -359,12 +223,33 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
-    $('namesBtn').addEventListener('click', () => {
-      $('namesSec').hidden = !$('namesSec').hidden;
+    $('saveCapBtn').addEventListener('click', async () => {
+      if (!phone) {
+        $('capStatus').textContent = 'יש להתחבר תחילה עם מספר טלפון.';
+        return;
+      }
+      const cap = parseInt($('capInput').value, 10);
+      if (!Number.isFinite(cap) || cap < 0) {
+        $('capStatus').textContent = 'יש להזין מספר תקין (0 ומעלה).';
+        return;
+      }
+      $('saveCapBtn').disabled = true;
+      $('capStatus').textContent = 'שומר…';
+      try {
+        const r = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'set_capacity', phone, capacity: cap })
+        });
+        const res = await r.json();
+        if (!res.ok) throw new Error(res.error);
+        updateCapSummary(parseInt(res.capacity, 10));
+      } catch (e) {
+        $('capStatus').textContent = 'שגיאה בשמירה: ' + (e.message || e);
+      } finally {
+        $('saveCapBtn').disabled = false;
+      }
     });
-    $('namesSearch').addEventListener('input', renderNamesList);
-    $('namesSelect').addEventListener('change', renderNamesList);
-    $('namesField').addEventListener('change', renderNamesList);
+
     $('gateBtn').addEventListener('click', () => {
       phone = String($('gatePhone').value).replace(/\D/g, '');
       load();
