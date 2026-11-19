@@ -1,0 +1,631 @@
+// meetup_27_11_26.astro
+---
+// ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
+
+// ===== גרסה – להעלות ב-1 בכל עדכון =====
+const VERSION = 'V1';
+// =========================================
+
+// תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
+---
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0A7090" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet" />
+  <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
+  <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
+  <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
+  <meta property="og:image" content="https://atroproject1.vercel.app/images/meetup_6_11_26.jpeg" />
+
+  <style is:global>
+    :root {
+      --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
+      --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --gold-soft: #0B5770; --danger: #FFB4B4;
+      --field: #13809F;
+      --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
+    .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+    h1, h2 { font-family: var(--font); font-weight: 700; line-height: 1.1; margin: 0; }
+    h1 { font-size: clamp(38px, 10vw, 60px); letter-spacing: -0.01em; }
+    h2 { font-size: 30px; }
+    .muted { color: var(--muted); }
+    .req { color: var(--gold); font-weight: 700; }
+
+    .hero { padding: 48px 0 32px; }
+    .hero h1, .hero .subtitle { text-align: center; }
+    .event-date { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0 0; font-family: "Frank Ruhl Libre", serif; font-size: 18px; letter-spacing: .12em; color: var(--muted); }
+    .event-date .sep { width: 28px; height: 1px; background: var(--sage); opacity: .8; }
+    .event-place { margin: 6px 0 0; text-align: center; font-size: 16px; color: var(--ink); letter-spacing: .02em; }
+    .event-place .dot { color: var(--sage); margin: 0 8px; }
+    .event-date + .cover, .event-place + .cover { margin: 20px auto 0; }
+    .intro { font-size: 18px; margin: 24px auto 0; max-width: 32em; text-align: center; }
+    .intro p { margin: 0 0 10px; }
+    .tagline { font-size: clamp(24px, 6vw, 32px); font-weight: 700; line-height: 1.3; margin: 0 0 22px !important; }
+    .tagline span { color: var(--sage); }
+    .open-mind { font-size: 20px; font-weight: 700; margin: 0 0 12px !important; }
+    .activity { max-width: 28em; margin: 0 auto 18px !important; padding: 16px 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .06); font-size: 17px; line-height: 1.7; }
+    .cover { width: 80%; margin: 0 auto 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
+    .cover img { width: 100%; aspect-ratio: 5 / 6; object-fit: cover; object-position: center; display: block; }
+    .cover.is-empty { aspect-ratio: 16 / 9; display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
+    .cover.is-empty::after { content: "כאן תופיע תמונה"; color: var(--muted); font-size: 16px; }
+    .note { margin: 20px 0 0; padding: 14px 16px; border-inline-start: 3px solid var(--gold); background: var(--gold-soft); font-size: 16px; }
+    .note b { color: var(--gold); }
+
+    .btn { display: inline-block; font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 2px solid var(--sage); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
+    .btn-small { padding: 7px 14px; font-size: 14px; }
+    .btn-primary { background: var(--sage); color: var(--sage-ink); }
+    .btn-danger { border-color: var(--danger); color: var(--danger); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn:disabled { opacity: .55; cursor: progress; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+    .join { padding-top: 40px; border-top: 1px solid var(--line); }
+    .join > p { margin: 8px 0 20px; }
+    .field { margin-bottom: 18px; }
+    .field label, legend { display: block; font-weight: 700; margin-bottom: 6px; }
+    input[type=text], input[type=tel], input[type=number], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    input[dir=ltr] { text-align: left; }
+    input[dir=ltr]:placeholder-shown { direction: rtl; text-align: right; }
+    input[type=number] { max-width: 8em; }
+    textarea { min-height: 80px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    .hint { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+    fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+    .modes { display: grid; gap: 8px; }
+    .modes label { display: flex; gap: 10px; align-items: center; justify-content: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-weight: 400; }
+    .modes label:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+    .modes input { margin: 0; accent-color: var(--sage); }
+    .modes.inline { grid-template-columns: repeat(2, 1fr); max-width: 18em; }
+    .modes.tracks label { justify-content: flex-start; text-align: right; }
+    .modes.tracks .t-name { flex: 1; }
+    .modes.tracks .t-name small { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+    .modes.tracks .t-price { flex: none; color: var(--sage); font-size: 17px; white-space: nowrap; }
+    .subpanel { margin-top: 12px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; background: rgba(255, 255, 255, .04); }
+    .modes.inline.three { grid-template-columns: repeat(3, 1fr); max-width: 26em; }
+
+    .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
+    .group > legend, .group-title { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .group-intro { font-size: 16px; color: var(--muted); margin: 0 0 16px; }
+    .check-opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-weight: 400; }
+    .check-opt:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+    .check-opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--sage); }
+
+    .info { margin: 8px 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 16px; }
+    .info p { margin: 0 0 6px; }
+    .info p:last-child { margin-bottom: 0; }
+    .info b { color: var(--gold); }
+
+    .msg { margin: 12px 0 0; min-height: 1.6em; }
+    .msg.ok { color: var(--sage); }
+    .msg.err { color: var(--danger); }
+
+    .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
+    .done::backdrop { background: rgba(4, 30, 40, .7); }
+    .done-head { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
+    .done-logo { font-family: "Frank Ruhl Libre", serif; color: var(--sage); text-align: center; line-height: 1.05; }
+    .done-logo .l1 { display: block; font-size: 20px; font-weight: 500; letter-spacing: .06em; }
+    .done-logo .l2 { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; font-weight: 400; letter-spacing: .3em; margin-top: 3px; }
+    .done-logo .l2::before, .done-logo .l2::after { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
+    .done h2 { font-size: 26px; margin: 0 0 6px; }
+    .done .done-note { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+    .done p { margin: 0 0 18px; font-size: 17px; }
+    .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
+    .done-date { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .done-date b { display: block; font-size: 26px; color: var(--sage); font-variant-numeric: tabular-nums; }
+    .done-date span { display: block; font-size: 15px; color: var(--muted); }
+    .done-info .done-food { color: var(--ink); font-size: 15px; margin: 8px 0 0; }
+    .done-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 10px; }
+    .done-times div { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+    .done-times span { display: block; font-size: 13px; color: var(--muted); }
+    .done-times b { display: block; font-size: 24px; color: var(--sage); font-variant-numeric: tabular-nums; }
+    .done-info .done-ontime { color: var(--gold); font-weight: 700; margin: 0; }
+    .full-modal .actions { justify-content: center; margin-top: 12px; }
+
+    .community { margin-top: 28px; font-size: 0.85em; color: var(--muted); }
+    .community p { margin: 0 0 12px; }
+    .community strong { color: var(--ink); }
+    .community a { color: var(--sage); font-weight: 700; }
+
+    .inspiration { margin-top: 24px; }
+    .home-note { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: center; font-size: 17px; line-height: 1.7; }
+    .home-note p { margin: 0 0 10px; }
+    .home-note p:last-child { margin: 0; }
+
+    @media (max-width: 420px) {
+      .split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .cover { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+    <header class="hero">
+      <h1>מנגנים שרים ביחד</h1>
+      <p class="event-date"><span>27.11.26</span><span class="sep" aria-hidden="true"></span><span dir="ltr">Friday evening</span></p>
+      <p class="event-place">ערב חיבורים<span class="dot" aria-hidden="true">·</span>מנגנים שרים ביחד</p>
+      <figure class="cover">
+        <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+      </figure>
+      <div class="intro">
+        <p class="tagline">ערב שמוקדש לניתוק מהמסך<br /><span>וחיבור לבני אדם.</span></p>
+        <p class="open-mind">בואו בראש פתוח 🤍</p>
+        <p class="activity">פעילות קלילה וחווייתית.<br />ערב שבו נשתף, נשאל, נעמיק, נופתע, נצחק, ואז ננגן.</p>
+      </div>
+      <p class="note"><b>*</b> כדי להירשם לאירוע, אבקש מכל משתתף להזמין +1 (מהמין האחר).<br /><b>*</b> האירוע מוגבל בכמות המשתתפים, ומילוי השאלון אינו מהווה אישור השתתפות.</p>
+    </header>
+
+    <main>
+      <section id="join" class="join" aria-labelledby="join-title">
+        <h2 id="join-title">הרשמה ועדכון</h2>
+        <p class="muted">מספר הטלפון הוא המזהה שלכם. נרשמתם כבר? הזינו אותו, והפרטים שלכם ייטענו אוטומטית לעדכון.<br />שדות עם <span class="req">*</span> הם חובה, כל השאר לפי רצונכם.</p>
+
+        <form id="form" novalidate>
+          <div class="field">
+            <label for="phone">מספר טלפון <span class="req">*</span></label>
+            <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" required />
+            <p id="loadMsg" class="hint"></p>
+          </div>
+
+          <!-- פרטים אישיים -->
+          <fieldset class="group">
+            <legend>
+              <span class="legend-row">
+                <span>פרטים אישיים</span>
+                <button type="button" id="refreshBtn" class="btn btn-small">רענן פרטים</button>
+              </span>
+            </legend>
+
+            <div class="field">
+              <label for="name">שם מלא בעברית <span class="req">*</span></label>
+              <input id="name" type="text" autocomplete="name" maxlength="80" required />
+            </div>
+            <div class="field">
+              <label for="name_en">לינק לסושיאל</label>
+              <input id="name_en" type="text" dir="ltr" inputmode="url" autocomplete="off" maxlength="200" placeholder="מומלץ למלא סושיאל" />
+            </div>
+            <div class="split">
+              <div class="field">
+                <label for="age">גיל <span class="req">*</span></label>
+                <input id="age" type="number" inputmode="numeric" min="18" max="99" required />
+              </div>
+              <div class="field">
+                <label for="city">עיר</label>
+                <input id="city" type="text" autocomplete="address-level2" maxlength="60" />
+              </div>
+            </div>
+            <div class="field">
+              <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">מי אני?</span>
+              <div class="modes inline">
+                <label><input type="radio" name="gender" value="גבר" /><span>גבר</span></label>
+                <label><input type="radio" name="gender" value="אישה" /><span>אישה</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="occupation">עיסוק בחיים</label>
+              <input id="occupation" type="text" maxlength="100" />
+            </div>
+            <p class="group-intro" style="margin-top:4px">כמה מילים עליכם, כדי שנכיר.</p>
+            <div class="field">
+              <label for="hobby">תחביב</label>
+              <input id="hobby" type="text" maxlength="100" />
+            </div>
+            <div class="field">
+              <label for="surprising_fact">עובדה מפתיעה על עצמכם</label>
+              <input id="surprising_fact" type="text" maxlength="300" />
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label for="why_join">למה תרצו להצטרף לערב? <span class="req">*</span></label>
+              <textarea id="why_join" maxlength="500" required></textarea>
+              <p class="hint">אין צורך בתשובות מושלמות עכשיו. אפשר לחזור ולעדכן כשעולה לכם משהו.</p>
+            </div>
+          </fieldset>
+
+          <!-- +1 -->
+          <fieldset class="group">
+            <legend>את מי תזמינו איתכם?</legend>
+            <p class="group-intro">פרטי ה‑+1 שמגיע איתכם (ממגדר שאינו שלכם, למקרה שפספסתם 😉)</p>
+
+            <label class="check-opt"><input type="checkbox" id="no_plus" /><span>אין לי +1 ואשמח לחיבור</span></label>
+
+            <div id="guestFields">
+              <div class="split">
+                <div class="field">
+                  <label for="guest_name">שם מלא</label>
+                  <input id="guest_name" type="text" maxlength="80" />
+                </div>
+                <div class="field">
+                  <label for="guest_age">גיל</label>
+                  <input id="guest_age" type="number" inputmode="numeric" min="18" max="99" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="guest_phone">מספר טלפון</label>
+                <input id="guest_phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="050-0000000" maxlength="20" />
+              </div>
+              <div class="field">
+                <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">ה‑+1 שותה אלכוהול?</span>
+                <div class="modes inline three">
+                  <label><input type="radio" name="guest_drinks" value="כן" /><span>כן</span></label>
+                  <label><input type="radio" name="guest_drinks" value="לא" /><span>לא</span></label>
+                  <label><input type="radio" name="guest_drinks" value="אולי" /><span>אולי</span></label>
+                </div>
+              </div>
+              <div class="field">
+                <label for="guest_how_know">מאיפה אתם מכירים?</label>
+                <input id="guest_how_know" type="text" maxlength="200" />
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label for="guest_why">למה לדעתכם הוא/היא ייהנו בערב שלנו?</label>
+                <textarea id="guest_why" maxlength="400"></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="open_question">אם בא לכם לכתוב, לשאול או להציע, זה המקום :)</label>
+            <textarea id="open_question" maxlength="800" placeholder="מקום לכתוב מה שבא לכם"></textarea>
+          </div>
+
+          <fieldset class="group">
+            <legend style="font-size:17px;line-height:1.4;margin-bottom:10px">לצורך השתתפות בעלויות השונות, אשמח שתבחרו את המסלול שמתאים לכם:</legend>
+            <div class="modes tracks">
+              <label><input type="radio" name="drink_track" value="שתייה חריפה" /><span class="t-name">מסלול שתייה חריפה<small>וויסקי, ג'ין, קמפרי</small></span><b class="t-price">100 ₪</b></label>
+              <label><input type="radio" name="drink_track" value="יין ובירות" /><span class="t-name">מסלול יין ובירות<small>לבן חצי יבש, לבן יבש (אני חזק בשרדונה), אדום</small></span><b class="t-price">50 ₪</b></label>
+              <label><input type="radio" name="drink_track" value="ללא אלכוהול" /><span class="t-name">השתתפות ללא אלכוהול</span><b class="t-price">30 ₪</b></label>
+            </div>
+            <div id="guestTrackBox" class="subpanel">
+              <span class="group-title" style="display:block;font-size:16px;margin-bottom:6px">העדפת אלכוהול של ה‑+1</span>
+              <div class="modes tracks">
+                <label><input type="radio" name="guest_track" value="שתייה חריפה" /><span class="t-name">מסלול שתייה חריפה<small>וויסקי, ג'ין, קמפרי</small></span><b class="t-price">100 ₪</b></label>
+                <label><input type="radio" name="guest_track" value="יין ובירות" /><span class="t-name">מסלול יין ובירות<small>לבן חצי יבש, לבן יבש (אני חזק בשרדונה), אדום</small></span><b class="t-price">50 ₪</b></label>
+                <label><input type="radio" name="guest_track" value="ללא אלכוהול" /><span class="t-name">השתתפות ללא אלכוהול</span><b class="t-price">30 ₪</b></label>
+              </div>
+            </div>
+            <p class="hint" style="margin:8px 0 18px">נא לשתות באחריות.<br />אתן לכם טוש כדי לצייר ציור ולכתוב את השם על הכוס, כדי שתזכרו אותה.</p>
+            <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">איך תרצו לשלם? <span class="muted" style="font-weight:400;font-size:15px">(בקשת תשלום תישלח בנפרד)</span></span>
+            <div class="modes inline three">
+              <label><input type="radio" name="payment" value="ביט" /><span>ביט</span></label>
+              <label><input type="radio" name="payment" value="פייבוקס" /><span>פייבוקס</span></label>
+              <label><input type="radio" name="payment" value="מזומן" /><span>מזומן</span></label>
+            </div>
+            <p class="hint" style="margin-top:10px">בקשו מה‑+1 שלכם לציין שהוא מגיע יחד איתכם (אפשר גם לשלם עבור שניכם ולציין את השמות).</p>
+          </fieldset>
+
+          <div class="info">
+            <p><b>*</b> כל אורח יביא כיבוד כלשהו לשולחן (עוגה, פשטידה, פירות או משהו אחר שתכינו לכבודנו).</p>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="saveBtn" class="btn btn-primary">שמירת ההרשמה</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger" hidden>מחיקת ההרשמה</button>
+          </div>
+          <p id="saveMsg" class="msg" role="status"></p>
+        </form>
+
+        <div class="community">
+          <p><strong>מכירים את מנגנים שרים ביחד?</strong><br />
+            אם לא, אפשר להצטרף לקבוצה:
+            <a href="https://chat.whatsapp.com/ImcpNyO1goH1zLorpNDaBA" target="_blank" rel="noopener">לקבוצת הוואטסאפ</a></p>
+          <p>כדי לראות אירועים קודמים, אפשר להציץ באינסטגרם שלי:
+            <a href="https://www.instagram.com/ilan_lotvin" target="_blank" rel="noopener">ilan_lotvin@</a></p>
+          <p>לראות קטעים נוספים ביוטיוב:
+            <a href="https://www.youtube.com/playlist?list=PLGklmqorxzOw" target="_blank" rel="noopener">לפלייליסט ביוטיוב</a></p>
+        </div>
+      </section>
+
+      <section class="home-note">
+        <p>הערב הזה הוא חלק מעשרות ערבים שאירחתי ב‑3 השנים האחרונות בבית שלי.</p>
+        <p>אין כמו ערב באווירה ביתית, להיזרק על כריות, לשיר, לנגן…<br />ברגוע.</p>
+      </section>
+
+      <!-- פינת השראה – בסוף הדף, מחוברת לטופס דרך form="form" -->
+      <section class="inspiration" aria-labelledby="insp-title">
+        <fieldset class="group" form="form">
+          <legend id="insp-title">פינת השראה</legend>
+          <p class="group-intro">מדי פעם ניתן את הבמה לאחד המשתתפים, שישתף אותנו בסיפור שלו. סיפור שייתן השראה לכולם. למשל: שינוי שעשיתם, או אירוע שהתמודדתם איתו ואתם גאים בעצמכם.</p>
+
+          <div class="field" style="margin-bottom:0">
+            <span class="group-title" style="display:block;font-size:17px;margin-bottom:6px">תרצו לשתף סיפור?</span>
+            <div class="modes inline">
+              <label><input type="radio" name="share_story" value="yes" form="form" /><span>כן</span></label>
+              <label><input type="radio" name="share_story" value="no" form="form" /><span>לא</span></label>
+            </div>
+          </div>
+          <div id="storyField" class="field" style="margin:14px 0 0" hidden>
+            <label for="story_details">ספרו לנו קצת על הסיפור</label>
+            <textarea id="story_details" maxlength="800" form="form"></textarea>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="submit" form="form" id="saveBtn2" class="btn btn-primary">שמירת ההרשמה</button>
+        </div>
+        <p id="saveMsg2" class="msg" role="status"></p>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
+    <div class="done-head">
+      <div class="done-logo" aria-label="מנגנים שרים ביחד">
+        <span class="l1">מנגנים שרים</span>
+        <span class="l2">ביחד</span>
+      </div>
+    </div>
+    <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
+    <p class="done-note">הרשמה אינה מהווה אישור הזמנה.</p>
+    <div class="done-info">
+      <div class="done-date"><b>27.11.26</b><span>ערב חיבורים</span></div>
+      <div class="done-times">
+        <div><span>שעת הגעה</span><b>20:00</b></div>
+        <div><span>התחלת הפעילות</span><b>20:30</b></div>
+      </div>
+      <p class="done-ontime">חשוב להגיע בזמן</p>
+      <p class="done-food">להביא משהו טעים.</p>
+    </div>
+    <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
+  </dialog>
+
+  <dialog id="fullDialog" class="done full-modal" aria-labelledby="fullTitle">
+    <div class="done-head">
+      <div class="done-logo" aria-label="מנגנים שרים ביחד">
+        <span class="l1">מנגנים שרים</span>
+        <span class="l2">ביחד</span>
+      </div>
+    </div>
+    <h2 id="fullTitle">בשלב זה הקבוצה התמלאה</h2>
+    <p class="done-note">ניתן להשאיר פרטים למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
+    <div class="actions">
+      <button type="button" id="fullEditBtn" class="btn btn-small">מילוי פרטים / עדכון</button>
+      <button type="button" id="fullClose" class="btn btn-primary">הבנתי</button>
+    </div>
+  </dialog>
+
+  <script is:inline>
+    // ===== הגדרות – להדביק את כתובת ה-Web App של הערב החדש =====
+    const SCRIPT_URL = 'https://script.google.com/macros/s/REPLACE_WITH_NEW_WEB_APP_ID/exec';
+    const LS_KEY = 'meetup_27_11_26_phone';
+    const EVENT_FULL = false;
+    // ==============================================================
+
+    const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
+      'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
+    const REQUIRED = [
+      ['name', 'חסר שם מלא.'],
+      ['age', 'חסר גיל.'],
+      ['why_join', 'ספרו למה תרצו להצטרף לערב.']
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), refreshBtn: $('refreshBtn'),
+      storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'),
+      saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
+    };
+    let loadedPhone = '';
+    let isRegistered = false;
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+        document.head.appendChild(s);
+      });
+    }
+
+    async function post(payload) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);
+      try {
+        const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
+        return await r.json();
+      } catch (e) {
+        throw new Error(e.name === 'AbortError' ? 'timeout' : 'network');
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function normPhone(v) {
+      let d = String(v || '').replace(/\D/g, '');
+      if (d.startsWith('972')) d = '0' + d.slice(3);
+      return d;
+    }
+    const validPhone = (d) => /^0\d{8,9}$/.test(d);
+    const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
+    function setMsg(el, text, kind) {
+      const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2] : [el];
+      targets.forEach((t) => { t.textContent = text; t.className = t === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); });
+    }
+    function setSaveText(text) { els.saveBtn.textContent = text; els.saveBtn2.textContent = text; }
+    function setSaveDisabled(v) { els.saveBtn.disabled = v; els.saveBtn2.disabled = v; }
+    const radioVal = (name) => document.querySelector(`input[name=${name}]:checked`)?.value || '';
+    const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
+      : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
+
+    function toggle() {
+      const noPlus = $('no_plus').checked;
+      els.storyField.hidden = radioVal('share_story') !== 'yes';
+      $('guestFields').hidden = noPlus;
+      $('guestTrackBox').hidden = noPlus;
+      if (noPlus) {
+        document.querySelectorAll('input[name="guest_track"]').forEach((r) => { r.checked = false; });
+      }
+    }
+
+    function setRadio(name, value) {
+      document.querySelectorAll(`input[name=${name}]`).forEach((r) => { r.checked = r.value === value; });
+    }
+
+    function fillForm(r) {
+      FIELDS.forEach((k) => { $(k).value = r[k] ?? ''; });
+      setRadio('share_story', r.share_story || '');
+      setRadio('payment', r.payment || '');
+      setRadio('gender', r.gender || '');
+      setRadio('drink_track', r.drink_track || '');
+      setRadio('guest_track', r.guest_track || '');
+      $('no_plus').checked = String(r.no_plus).toUpperCase() === 'TRUE';
+      setRadio('guest_drinks', r.guest_drinks || '');
+      toggle();
+    }
+
+    async function loadExisting(silent) {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
+      setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
+      if (els.refreshBtn) els.refreshBtn.disabled = true;
+      try {
+        const res = await jsonp({ action: 'get', phone });
+        if (!res.ok) throw new Error(res.error);
+        loadedPhone = phone;
+        isRegistered = !!res.found;
+        if (res.found) {
+          fillForm(res.record);
+          setSaveText('עדכון ההרשמה');
+          els.deleteBtn.hidden = false;
+          setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
+        } else {
+          setSaveText('שמירת ההרשמה');
+          els.deleteBtn.hidden = true;
+          setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
+        }
+      } catch (e) {
+        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
+      } finally {
+        if (els.refreshBtn) els.refreshBtn.disabled = false;
+      }
+    }
+
+    els.refreshBtn?.addEventListener('click', () => loadExisting(false));
+    els.phone.addEventListener('blur', () => {
+      const p = normPhone(els.phone.value);
+      if (validPhone(p) && p !== loadedPhone) loadExisting(true);
+    });
+    els.phone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); }
+    });
+    document.addEventListener('change', (e) => { if (e.target.name === 'share_story' || e.target.id === 'no_plus') toggle(); });
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = normPhone(els.phone.value);
+      const fail = (msg, el) => { setMsg(els.saveMsg, msg, 'err'); if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
+      if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
+
+      const data = {};
+      FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
+      data.share_story = radioVal('share_story');
+      data.payment = radioVal('payment');
+      data.gender = radioVal('gender');
+      data.drink_track = radioVal('drink_track');
+      data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
+      data.guest_track = $('no_plus').checked ? '' : radioVal('guest_track');
+      data.guest_drinks = $('no_plus').checked ? '' : radioVal('guest_drinks');
+
+      for (const [k, msg] of REQUIRED) {
+        if (!data[k]) return fail(msg, $(k));
+      }
+      if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
+      if (data.name.split(/\s+/).length < 2) return fail('כתבו שם פרטי ושם משפחה.', $('name'));
+      if (!validAge(data.age)) return fail('הגיל צריך להיות בין 18 ל‑99.', $('age'));
+      if (!$('no_plus').checked && data.guest_phone && !validPhone(normPhone(data.guest_phone))) return fail('מספר הטלפון של ה‑+1 לא תקין.', $('guest_phone'));
+      if (!$('no_plus').checked && data.guest_age && !validAge(data.guest_age)) return fail('גיל ה‑+1 צריך להיות בין 18 ל‑99.', $('guest_age'));
+      if (data.share_story !== 'yes') data.story_details = '';
+
+      setSaveDisabled(true);
+      setMsg(els.saveMsg, 'שומרים…');
+      try {
+        const res = await post({ action: 'save', phone, ...data });
+        if (!res.ok) throw new Error(res.error);
+        try { localStorage.setItem(LS_KEY, phone); } catch {}
+        loadedPhone = phone;
+        isRegistered = true;
+        setSaveText('עדכון ההרשמה');
+        els.deleteBtn.hidden = false;
+        setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
+          ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
+        showDone();
+      } catch (err) {
+        setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
+      } finally {
+        setSaveDisabled(false);
+      }
+    });
+
+    els.deleteBtn.addEventListener('click', async () => {
+      const phone = normPhone(els.phone.value);
+      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
+      if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
+
+      els.deleteBtn.disabled = true; setSaveDisabled(true);
+      setMsg(els.saveMsg, 'מוחקים…');
+      try {
+        const res = await jsonp({ action: 'delete', phone });
+        if (!res.ok) throw new Error(res.error);
+        els.form.reset();
+        loadedPhone = '';
+        isRegistered = false;
+        try { localStorage.removeItem(LS_KEY); } catch {}
+        setSaveText('שמירת ההרשמה');
+        els.deleteBtn.hidden = true;
+        setMsg(els.loadMsg, '');
+        toggle();
+        setMsg(els.saveMsg, res.status === 'deleted'
+          ? 'ההרשמה נמחקה. אם תשנו את דעתכם, אפשר להירשם מחדש בכל זמן.'
+          : 'לא נמצאה הרשמה עם המספר הזה.', 'ok');
+      } catch (err) {
+        setMsg(els.saveMsg, 'המחיקה נכשלה: ' + errText(err), 'err');
+      } finally {
+        els.deleteBtn.disabled = false; setSaveDisabled(false);
+      }
+    });
+
+    const doneDialog = $('doneDialog');
+    function showDone() {
+      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
+    }
+    $('doneClose').addEventListener('click', () => doneDialog.close());
+    doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
+
+    const fullDialog = $('fullDialog');
+    $('fullClose').addEventListener('click', () => fullDialog.close());
+    $('fullEditBtn').addEventListener('click', () => {
+      fullDialog.close();
+      els.phone.focus();
+    });
+    fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
+    if (EVENT_FULL && fullDialog.showModal) fullDialog.showModal();
+
+    toggle();
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) { els.phone.value = saved; loadExisting(true); }
+    } catch {}
+  </script>
+</body>
+</html>
+// meetup_27_11_26.astro
