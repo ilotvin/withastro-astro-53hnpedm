@@ -1,8 +1,9 @@
 ---
+// hanukkah2026.astro
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V15';
+const VERSION = 'V16';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -133,16 +134,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .done-price b { color: var(--sage); }
     .done-pay { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
     .full-modal { text-align: right; max-height: 90vh; overflow-y: auto; }
-    .full-modal h2 { text-align: center; font-size: 25px; color: var(--sage); margin-bottom: 10px; }
-    .full-modal .lead { font-size: 16px; margin: 0 0 16px; text-align: center; color: var(--ink); line-height: 1.65; }
-    .full-modal .field { text-align: right; margin-bottom: 14px; }
-    .full-modal .actions { justify-content: center; margin-top: 14px; }
-    .wait-summary { margin-top: 14px; padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--sage); text-align: right; font-size: 15px; }
-    .wait-summary h3 { margin: 0 0 8px; font-size: 17px; color: var(--sage); }
-    .wait-summary p { margin: 4px 0; }
-    .wait-summary ul { margin: 6px 0 10px; padding-right: 18px; }
-    .wait-summary li { margin-bottom: 4px; }
-    .wait-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--sage); color: var(--sage-ink); font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+    .retreat-header { text-align: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .retreat-header .r-title { font-size: 22px; font-weight: 700; color: var(--sage); line-height: 1.2; }
+    .retreat-header .r-sub { font-size: 15px; color: var(--muted); margin-top: 4px; }
+    .full-modal .lead { font-size: 16px; margin: 0 0 14px; text-align: right; color: var(--ink); line-height: 1.65; white-space: pre-line; }
+    .full-modal .actions { justify-content: center; margin-top: 16px; }
     .about { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; font-size: 16px; line-height: 1.7; }
     .about h3 { margin: 0 0 6px; font-size: 20px; color: var(--sage); }
     .about p { margin: 0 0 10px; }
@@ -463,35 +459,21 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     </main>
   </div>
 
-  <!-- פופ-אפ פתיחה + Waiting List / מילוי פרטים בכל זאת -->
-  <dialog id="fullDialog" class="done full-modal" aria-labelledby="fullTitle">
+  <!-- פופ-אפ פתיחה עם פרטי הריטריט וכפתור הבנתי -->
+  <dialog id="fullDialog" class="done full-modal" aria-label="פרטי הריטריט">
     <div class="done-logo" aria-label="מנגנים שרים ביחד">
       <span class="l1">מנגנים שרים</span>
       <span class="l2">ביחד</span>
     </div>
-    <h2 id="fullTitle">בשלב זה הקבוצה התמלאה</h2>
-    <p class="lead">בשלב זה הקבוצה התמלאה. ניתן להשאיר פרטים למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
-    <form id="waitlistForm" novalidate>
-      <div class="field">
-        <label for="w_name">שם מלא <span class="req">*</span></label>
-        <input id="w_name" type="text" autocomplete="name" maxlength="80" placeholder="ישראל ישראלי" />
-      </div>
-      <div class="field">
-        <label for="w_phone">מספר טלפון <span class="req">*</span></label>
-        <input id="w_phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="050-0000000" />
-      </div>
-      <div class="field">
-        <label for="w_notes">העדפה או הערה (לא חובה)</label>
-        <textarea id="w_notes" maxlength="300" placeholder="למשל: סופ״ש מלא / שישי–שבת, לינה במתחם או עצמאית..."></textarea>
-      </div>
-      <p id="waitMsg" class="msg" role="status"></p>
-      <div id="waitSummary" class="wait-summary" hidden></div>
-      <div class="actions">
-        <button type="submit" id="waitBtn" class="btn btn-primary">שליחת פרטים</button>
-        <button type="button" id="waitAlreadyBtn" class="btn btn-small">סגירה והמשך למילוי</button>
-        <button type="button" id="waitClose" class="btn btn-small">סגירה</button>
-      </div>
-    </form>
+    <div class="retreat-header">
+      <div class="r-title">מנגנים שרים ביחד · ריטריט חנוכה</div>
+      <div class="r-sub">10–12 לדצמבר 26 (חמישי–שבת) · מתחם פעימה, מצפה רמון</div>
+    </div>
+    <p class="lead">היי:
+כרגע הקבוצה מלא. מוזמנים להשאיר פרטים למקרה של ביטולים.</p>
+    <div class="actions">
+      <button type="button" id="waitClose" class="btn btn-primary">הבנתי</button>
+    </div>
   </dialog>
 
   <dialog id="doneDialog" class="done" aria-labelledby="doneTitle">
@@ -535,7 +517,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'), refreshBtn: $('refreshBtn') };
     let loadedPhone = '';
     let createdAt = null;
-    let isWaitlisted = false;
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -622,77 +603,17 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
-    // ---------- פופ-אפ פתיחה + Waiting List + הצגת פרטים, עלויות ותזכורת ----------
+    // ---------- פופ-אפ פתיחה ----------
     const fullDialog = $('fullDialog');
     function openFullModal() {
-      if (!fullDialog) return;
-      if ($('w_phone') && els.phone.value && !$('w_phone').value) {
-        $('w_phone').value = els.phone.value;
-      }
-      if ($('w_name') && $('name') && $('name').value && !$('w_name').value) {
-        $('w_name').value = $('name').value;
-      }
-      if (fullDialog.showModal && !fullDialog.open) fullDialog.showModal();
+      if (fullDialog && fullDialog.showModal && !fullDialog.open) fullDialog.showModal();
     }
 
-    function renderWaitlistSummary({ name, phone, notes }) {
-      const box = $('waitSummary');
-      if (!box) return;
-      const st = stageFor(new Date());
-      const fullVenue = fmt(PRICES.y.full[st] + FOOD.full);
-      const fullSelf = fmt(PRICES.n.full[st] + FOOD.full);
-      const oneVenue = fmt(PRICES.y.one[st] + FOOD.one);
-      const oneSelf = fmt(PRICES.n.one[st] + FOOD.one);
-
-      box.innerHTML = `
-        <span class="wait-badge">תזכורת: נכנסת ל-Waiting List</span>
-        <h3>הפרטים שלך:</h3>
-        <p><b>שם:</b> ${esc(name)}</p>
-        <p><b>טלפון:</b> ${esc(phone)}</p>
-        ${notes ? `<p><b>הערה / העדפה:</b> ${esc(notes)}</p>` : ''}
-        <h3 style="margin-top:10px">פירוט עלויות (כולל ארוחות, שלב נוכחי):</h3>
-        <ul>
-          <li>סופ"ש מלא (2 לילות): לינה במתחם <b>${fullVenue}</b> · לינה עצמאית <b>${fullSelf}</b></li>
-          <li>לילה אחד: לינה במתחם <b>${oneVenue}</b> · לינה עצמאית <b>${oneSelf}</b></li>
-          <li>תוספת מסלול יין: <b>${fmt(WINE)}</b></li>
-        </ul>
-        <p class="hint"><b>תזכורת:</b> בשלב זה הקבוצה התמלאה ונרשמת ל-Waiting List למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
-      `;
-      box.hidden = false;
-    }
-
-    $('waitClose')?.addEventListener('click', () => fullDialog?.close());
-    $('waitAlreadyBtn')?.addEventListener('click', () => {
+    $('waitClose')?.addEventListener('click', () => {
       fullDialog?.close();
-      els.phone.focus();
+      els.phone?.focus();
     });
     fullDialog?.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
-
-    $('waitlistForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = $('w_name').value.trim();
-      const phone = normPhone($('w_phone').value);
-      const notes = $('w_notes').value.trim();
-      if (!name) { setMsg($('waitMsg'), 'נא למלא שם מלא.', 'err'); $('w_name').focus(); return; }
-      if (!validPhone(phone)) { setMsg($('waitMsg'), 'מספר הטלפון לא תקין.', 'err'); $('w_phone').focus(); return; }
-
-      $('waitBtn').disabled = true;
-      setMsg($('waitMsg'), 'שולחים…');
-      try {
-        const res = await post({ action: 'waitlist', data: { name, phone, notes } });
-        if (!res.ok) throw new Error(res.error);
-        isWaitlisted = true;
-        try { localStorage.setItem(LS_KEY, phone); } catch {}
-        if (!els.phone.value) els.phone.value = phone;
-        if ($('name') && !$('name').value) $('name').value = name;
-        setMsg($('waitMsg'), 'הפרטים נשמרו והוכנסת ל-Waiting List!', 'ok');
-        renderWaitlistSummary({ name, phone, notes });
-      } catch (err) {
-        setMsg($('waitMsg'), 'השליחה נכשלה: ' + errText(err), 'err');
-      } finally {
-        $('waitBtn').disabled = false;
-      }
-    });
 
     function toggle() {
       $('prevBox').hidden = radioVal('prev_retreats') !== 'כן';
@@ -708,13 +629,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         document.querySelectorAll(`input[name="${k}"]`).forEach((i) => { i.checked = vals.includes(i.value); });
       });
       createdAt = r.created ? new Date(r.created) : null;
-      isWaitlisted = String(r.status || '').trim() === 'רשימת המתנה';
       toggle();
     }
 
     function resetState() {
       els.form.reset();
-      loadedPhone = ''; createdAt = null; isWaitlisted = false;
+      loadedPhone = ''; createdAt = null;
       els.saveBtn.textContent = 'שמירת ההרשמה';
       els.deleteBtn.hidden = true;
       $('buySec').hidden = true;
@@ -736,14 +656,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           fillForm(res.data);
           els.saveBtn.textContent = 'עדכון ההרשמה';
           els.deleteBtn.hidden = false;
-          setMsg(els.loadMsg, isWaitlisted
-            ? 'נמצאה רשומה ב-Waiting List. אפשר לעדכן פרטים ולשמור.'
-            : 'הפרטים נטענו. אפשר לשנות ולעדכן.');
+          setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
           $('buySec').hidden = !res.buyer;
           if (res.buyer) renderPurchases(res.purchases || []);
         } else {
           createdAt = null;
-          isWaitlisted = false;
           els.saveBtn.textContent = 'שמירת ההרשמה';
           els.deleteBtn.hidden = true;
           $('buySec').hidden = true;
@@ -795,7 +712,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         try { localStorage.setItem(LS_KEY, phone); } catch {}
         loadedPhone = phone;
         createdAt = new Date(res.created);
-        isWaitlisted = false;
         renderPrices();
         els.saveBtn.textContent = 'עדכון ההרשמה';
         els.deleteBtn.hidden = false;
@@ -885,9 +801,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const doneDialog = $('doneDialog');
     function showDone(total) {
-      $('doneNote').textContent = isWaitlisted
-        ? 'תזכורת: הפרטים שלך רשומים גם ב-Waiting List. הרשמה אינה מהווה אישור השתתפות.'
-        : 'הרשמה אינה מהווה אישור השתתפות.';
+      $('doneNote').textContent = 'הרשמה אינה מהווה אישור השתתפות.';
       $('donePrice').innerHTML = total ? 'סה"כ לתשלום: <b>' + fmt(total) + '</b>' : '';
       if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
     }
