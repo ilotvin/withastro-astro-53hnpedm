@@ -2,7 +2,7 @@
 // File: src/pages/Forms/meetup_27_11_26_dashboard.astro
 // דשבורד צפייה בפרטי נרשמים – ערב משחקים, חיבורים ומוסיקה (27.11.26)
 
-const VERSION = 'V1';
+const VERSION = 'V2';
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
@@ -33,7 +33,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .btn-ghost { background: transparent; color: var(--ink); }
     .btn-small { padding: 6px 12px; font-size: 13px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
-    input, select { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+    input { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
     input::placeholder { color: var(--muted); }
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
     .toolbar input[type="search"] { flex: 1 1 220px; }
@@ -185,13 +185,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         const list = Array.isArray(res.subscribers) ? res.subscribers
           : Array.isArray(res.registrations) ? res.registrations
           : Array.isArray(res.rows) ? res.rows : [];
-        if (!res.ok || !list.length) {
-          throw new Error(res.error || 'השרת עדיין לא מחזיר רשימת נרשמים מלאה (נדרש תמיכה ב-action=list_full ב-Apps Script)');
+        if (!res.ok) {
+          throw new Error(res.error || 'השרת החזיר שגיאה');
         }
         subscribers = list;
         updateKpis(subscribers);
         renderList();
         if (subscribers.length && !selected) renderDetail(subscribers[0]);
+        else if (!subscribers.length) renderDetail(null);
         $('stamp').textContent = 'עודכן: ' + new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
         $('statusMsg').textContent = `נטענו ${subscribers.length} נרשמים.`;
       } catch (err) {
