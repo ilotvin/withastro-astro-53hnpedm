@@ -1,0 +1,221 @@
+---
+// File: src/pages/Forms/meetup_27_11_26_dashboard.astro
+// דשבורד צפייה בפרטי נרשמים – ערב משחקים, חיבורים ומוסיקה (27.11.26)
+
+const VERSION = 'V1';
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
+---
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0A7090" />
+  <title>דשבורד נרשמים – מנגנים שרים ביחד (27.11.26)</title>
+  <style is:global>
+    :root {
+      --bg: #0A7090; --surface: #0D5F7A; --ink: #FFFFFF; --muted: #C6EEF5; --line: #2A8BA8;
+      --sage: #FFD23F; --sage-ink: #2A2100; --gold: #FF7AB6; --danger: #FFB4B4; --field: #13809F;
+      --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 28px 20px 64px; position: relative; }
+    .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .65; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: 28px; }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .btn { font: inherit; font-weight: 700; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--sage); background: var(--sage); color: var(--sage-ink); cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-ghost { background: transparent; color: var(--ink); }
+    .btn-small { padding: 6px 12px; font-size: 13px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+    input, select { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+    input::placeholder { color: var(--muted); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .toolbar input[type="search"] { flex: 1 1 220px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .kpi span { display: block; font-size: 13px; color: var(--muted); }
+    .kpi b { display: block; font-size: 26px; color: var(--sage); margin-top: 2px; }
+    .picker { display: grid; grid-template-columns: 260px 1fr; gap: 16px; }
+    .list { max-height: 440px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: rgba(0, 0, 0, .14); }
+    .item { width: 100%; text-align: right; background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.08); color: var(--ink); padding: 10px 12px; cursor: pointer; font: inherit; display: block; }
+    .item:last-child { border-bottom: 0; }
+    .item:hover, .item.active { background: rgba(255, 210, 63, .16); }
+    .item small { display: block; color: var(--muted); font-size: 12px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .field-box { background: rgba(0, 0, 0, .18); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 10px 12px; }
+    .field-box span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .field-box b { font-weight: 700; word-break: break-word; }
+    .msg { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+    .msg.err { color: var(--danger); }
+    @media (max-width: 720px) { .picker { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+    <header>
+      <div>
+        <h1>דשבורד נרשמים – 27.11.26</h1>
+        <p class="sub">מנגנים שרים ביחד · ערב חיבורים · <span id="stamp">ממתין לטעינה</span></p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn btn-ghost" href="/Forms/meetup_27_11_26">לטופס ההרשמה</a>
+        <button class="btn" id="reloadBtn" type="button">רענון נתונים</button>
+      </div>
+    </header>
+
+    <section class="kpis" aria-label="סיכום">
+      <div class="kpi"><span>סה"כ נרשמים</span><b id="kTotal">–</b></div>
+      <div class="kpi"><span>כולל +1</span><b id="kWithPlus">–</b></div>
+      <div class="kpi"><span>ללא +1 / מחפשים</span><b id="kNoPlus">–</b></div>
+      <div class="kpi"><span>רוצים לשתף סיפור</span><b id="kStory">–</b></div>
+    </section>
+
+    <section class="card" aria-label="צפייה בנרשמים">
+      <h2>רשימת נרשמים ופרטים מלאים</h2>
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="חיפוש לפי שם, טלפון, עיר או מסלול…" autocomplete="off" />
+        <button class="btn btn-ghost btn-small" id="copyBtn" type="button">העתק פרטי נבחר</button>
+      </div>
+      <p id="statusMsg" class="msg">טוען נתונים מהשרת…</p>
+
+      <div class="picker">
+        <div id="namesList" class="list" role="listbox" aria-label="שמות נרשמים"></div>
+        <div id="detailPanel" class="detail-grid">
+          <p class="msg">בחרו נרשם מהרשימה כדי לצפות בכל הפרטים שלו ושל ה-+1.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
+    const LABELS = {
+      phone: 'טלפון', name: 'שם מלא', name_en: 'לינק לסושיאל', age: 'גיל', city: 'עיר',
+      gender: 'מי אני', occupation: 'עיסוק', hobby: 'תחביב', surprising_fact: 'עובדה מפתיעה',
+      why_join: 'למה להצטרף', no_plus: 'אין +1 / מחפש פרטנר', guest_name: 'שם +1',
+      guest_age: 'גיל +1', guest_phone: 'טלפון +1', guest_how_know: 'מאיפה מכירים',
+      guest_why: 'למה ה-+1 ייהנה', drink_track: 'מסלול שתייה', guest_track: 'מסלול שתייה +1',
+      payment: 'אמצעי תשלום', share_story: 'לשתף סיפור', story_details: 'פירוט הסיפור',
+      game_activity: 'משחק / פעילות', open_question: 'שאלה / הצעה פתוחה'
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let subscribers = [];
+    let filtered = [];
+    let selected = null;
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
+        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error('network')); };
+        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+        document.head.appendChild(s);
+      });
+    }
+
+    function updateKpis(list) {
+      $('kTotal').textContent = list.length;
+      const noPlusCount = list.filter((r) => String(r.no_plus).toUpperCase() === 'TRUE' || !String(r.guest_name || '').trim()).length;
+      $('kNoPlus').textContent = noPlusCount;
+      $('kWithPlus').textContent = Math.max(0, list.length - noPlusCount);
+      $('kStory').textContent = list.filter((r) => r.share_story === 'yes').length;
+    }
+
+    function renderDetail(rec) {
+      selected = rec;
+      if (!rec) {
+        $('detailPanel').innerHTML = '<p class="msg">בחרו נרשם מהרשימה כדי לצפות בכל הפרטים שלו ושל ה-+1.</p>';
+        return;
+      }
+      const keys = Object.keys(LABELS);
+      $('detailPanel').innerHTML = keys.map((k) => {
+        const raw = rec[k];
+        const val = k === 'no_plus'
+          ? (String(raw).toUpperCase() === 'TRUE' ? 'כן (מחפש פרטנר)' : 'לא')
+          : (String(raw || '').trim() || '–');
+        return `<div class="field-box"><span>${esc(LABELS[k])}</span><b>${esc(val)}</b></div>`;
+      }).join('');
+    }
+
+    function renderList() {
+      const q = $('searchInput').value.trim().toLowerCase();
+      filtered = subscribers.filter((r) => {
+        if (!q) return true;
+        return [r.name, r.phone, r.city, r.drink_track, r.guest_name, r.occupation]
+          .some((v) => String(v || '').toLowerCase().includes(q));
+      });
+      $('namesList').innerHTML = filtered.length
+        ? filtered.map((r, i) => `
+            <button type="button" class="item${selected === r ? ' active' : ''}" data-idx="${i}">
+              <strong>${esc(r.name || 'ללא שם')}</strong>
+              <small>${esc(r.phone || '')}${r.city ? ' · ' + esc(r.city) : ''}${r.drink_track ? ' · ' + esc(r.drink_track) : ''}</small>
+            </button>
+          `).join('')
+        : '<p class="msg" style="padding:12px">לא נמצאו נרשמים תואמים.</p>';
+
+      $('namesList').querySelectorAll('.item').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const rec = filtered[+btn.dataset.idx];
+          renderDetail(rec);
+          renderList();
+        });
+      });
+    }
+
+    async function loadSubscribers() {
+      $('statusMsg').className = 'msg';
+      $('statusMsg').textContent = 'טוען נתונים…';
+      try {
+        const res = await jsonp({ action: 'list_full' });
+        const list = Array.isArray(res.subscribers) ? res.subscribers
+          : Array.isArray(res.registrations) ? res.registrations
+          : Array.isArray(res.rows) ? res.rows : [];
+        if (!res.ok || !list.length) {
+          throw new Error(res.error || 'השרת עדיין לא מחזיר רשימת נרשמים מלאה (נדרש תמיכה ב-action=list_full ב-Apps Script)');
+        }
+        subscribers = list;
+        updateKpis(subscribers);
+        renderList();
+        if (subscribers.length && !selected) renderDetail(subscribers[0]);
+        $('stamp').textContent = 'עודכן: ' + new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        $('statusMsg').textContent = `נטענו ${subscribers.length} נרשמים.`;
+      } catch (err) {
+        $('statusMsg').className = 'msg err';
+        $('statusMsg').textContent = 'שגיאה בטעינה: ' + (err.message || err);
+      }
+    }
+
+    $('searchInput').addEventListener('input', renderList);
+    $('reloadBtn').addEventListener('click', loadSubscribers);
+    $('copyBtn').addEventListener('click', async () => {
+      if (!selected) return;
+      const text = Object.keys(LABELS)
+        .map((k) => `${LABELS[k]}: ${String(selected[k] ?? '').trim() || '–'}`)
+        .join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        $('statusMsg').textContent = `הפרטים של ${selected.name || ''} הועתקו ללוח.`;
+      } catch {
+        $('statusMsg').textContent = 'לא ניתן להעתיק אוטומטית ללוח בדפדפן זה.';
+      }
+    });
+
+    loadSubscribers();
+  </script>
+</body>
+</html>
