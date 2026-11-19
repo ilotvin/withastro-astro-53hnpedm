@@ -108,7 +108,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     .info { margin: 8px 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 16px; }
     .info p { margin: 0 0 6px; }
-    .info p:last-child { margin-bottom: 0; }
+    .info p:last-child { margin: 0; }
     .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
@@ -400,11 +400,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </dialog>
 
   <script is:inline>
-    // ===== הגדרות – להדביק את כתובת ה-Web App של הערב החדש =====
-    const SCRIPT_URL = 'https://script.google.com/macros/s/REPLACE_WITH_NEW_WEB_APP_ID/exec';
+    // ===== הגדרות =====
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
     const LS_KEY = 'meetup_27_11_26_phone';
     const EVENT_FULL = false;
-    // ==============================================================
+    // ==================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
       'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
