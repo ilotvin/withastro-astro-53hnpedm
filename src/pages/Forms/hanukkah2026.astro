@@ -4,7 +4,7 @@
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V18';
+const VERSION = 'V19';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -38,6 +38,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
       color-scheme: dark;
     }
+    html { scroll-behavior: smooth; }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
     body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
@@ -65,7 +66,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .btn:disabled { opacity: .55; cursor: progress; }
     :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-    .join { padding-top: 40px; border-top: 1px solid var(--line); }
+    .join { padding-top: 24px; border-top: 1px solid var(--line); }
+    .about-jump { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+    .about-jump p { margin: 0; font-weight: 700; }
     .join > p { margin: 8px 0 20px; }
     .field { margin-bottom: 18px; }
     .field > label, .q { display: block; font-weight: 700; margin-bottom: 6px; }
@@ -143,6 +146,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .about { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; font-size: 16px; line-height: 1.7; }
     .about h3 { margin: 0 0 6px; font-size: 20px; color: var(--sage); }
     .about p { margin: 0 0 10px; }
+    .about p:last-child { margin-bottom: 0; }
+    .about a { color: var(--sage); font-weight: 700; }
     .community { margin-top: 20px; font-size: 0.9em; color: var(--muted); }
     .community p { margin: 0 0 10px; }
     .community a { color: var(--sage); font-weight: 700; }
@@ -166,6 +171,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     <main>
       <section class="join" aria-labelledby="join-title">
+        <div class="about-jump">
+          <p>קצת על מה שקורה בסופ"שים של "מנגנים שרים ביחד"</p>
+          <a href="#about-section" class="btn btn-small">להסבר למטה</a>
+        </div>
+
         <h2 id="join-title">הרשמה ועדכון</h2>
         <p class="muted">מספר הטלפון הוא המזהה שלכם. נרשמתם כבר? הזינו אותו, והפרטים שלכם ייטענו אוטומטית לעדכון.<br />שדות עם <span class="req">*</span> הם חובה, כל השאר לפי רצונכם.</p>
 
@@ -440,12 +450,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           <p id="buyTotal" class="buy-total"></p>
         </section>
 
-        <div class="about">
+        <div class="about" id="about-section">
           <h3>על הריטריט</h3>
           <p>מדובר בשלושה ימים של בילוי ביחד, שבהם נזכה להכיר חברים וחברות חדשים. נתחבר דרך המוסיקה, טיול, בישול משותף, או פשוט ישיבה על קפה באחד מבתי הקפה ברובע דרכי האומנים.</p>
           <p>בריטריט נוכל לקחת חלק בפעילויות קבוצתיות שמטרתן חיבור והתפתחות אישית.</p>
-          <p>בסופ"ש נשלב בין טבע ומדבר: טיול עצמי במצפה רמון, ישיבה סביב המדורה, תרגול יוגה, למידת ריקוד ועוד.</p>
+          <p>בסופ"ש נשלב בין טבע ומדבר: טיול עצמי ברובע דרכי הבשמים, ישיבה סביב המדורה, תרגול יוגה, למידת ריקוד ועוד.</p>
           <p>הלו"ז ייבנה בצורה גמישה כדי שיתאים למזג האוויר. נשאף להיות בטבע ככל שניתן, ובשאר הזמן ננוח ונהנה ביחד במתחם הנעים שלנו.</p>
+          <p><a href="https://mitzpe-ramon.muni.il/%D7%9E%D7%91%D7%A7%D7%A8%D7%99%D7%9D/%D7%A8%D7%95%D7%91%D7%A2-%D7%93%D7%A8%D7%9B%D7%99-%D7%94%D7%91%D7%A9%D7%9E%D7%99%D7%9D/" target="_blank" rel="noopener">mitzpe-ramon.muni.il</a></p>
         </div>
 
         <div class="community">
@@ -462,6 +473,10 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
   <!-- פופ-אפ פתיחה עם פרטי הריטריט וכפתור הבנתי -->
   <dialog id="fullDialog" class="done full-modal" aria-label="פרטי הריטריט">
+    <div class="done-logo" aria-label="מנגנים שרים ביחד">
+      <span class="l1">מנגנים שרים</span>
+      <span class="l2">ביחד</span>
+    </div>
     <div class="retreat-header">
       <div class="r-title">מנגנים שרים ביחד · ריטריט חנוכה</div>
       <div class="r-sub">10–12 לדצמבר 26 (חמישי–שבת) · מתחם פעימה, מצפה רמון</div>
@@ -511,8 +526,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const els = { form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), saveBtn: $('saveBtn'),
-      saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'), refreshBtn: $('refreshBtn') };
+    const els = { form: $('form'), phone:$('phone'), loadMsg: $('loadMsg'), saveBtn:$('saveBtn'),
+      saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'), refreshBtn:$('refreshBtn') };
     let loadedPhone = '';
     let createdAt = null;
 
@@ -534,304 +549,4 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const timer = setTimeout(() => ctrl.abort(), ms);
       try {
         const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload), signal: ctrl.signal });
-        return await r.json();
-      } catch (e) {
-        throw new Error(e.name === 'AbortError' ? 'timeout' : 'network');
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    function normPhone(v) {
-      let d = String(v || '').replace(/\D/g, '');
-      if (d.startsWith('972')) d = '0' + d.slice(3);
-      return d;
-    }
-    const validPhone = (d) => /^0\d{8,9}$/.test(d);
-    const validAge = (v) => /^\d{1,2}$/.test(v) && +v >= 18 && +v <= 99;
-    const validEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    const radioVal = (n) => document.querySelector(`input[name="${n}"]:checked`)?.value || '';
-    const checkVals = (n) => [...document.querySelectorAll(`input[name="${n}"]:checked`)].map((i) => i.value).join(', ');
-    function setMsg(el, text, kind) { el.textContent = text; el.className = el === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); }
-    const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
-      : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
-    const fmt = (n) => Number(n).toLocaleString('he-IL') + ' ₪';
-
-    function choice() {
-      const a = radioVal('attendance'), l = radioVal('lodging');
-      if (!a || !l) return null;
-      return { kind: a.startsWith('סופ"ש מלא') ? 'full' : 'one', lod: l.includes('במתחם') ? 'y' : 'n' };
-    }
-    function currentStage() { return stageFor(createdAt || new Date()); }
-    function totalFor(st) {
-      const c = choice();
-      if (!c) return null;
-      return PRICES[c.lod][c.kind][st] + FOOD[c.kind] + (checkVals('wine') ? WINE : 0);
-    }
-
-    function renderPrices() {
-      const st = currentStage();
-      $('stageTag').textContent = STAGE_LABEL[st];
-      $('stageTag').style.display = createdAt ? 'none' : '';
-      const a = radioVal('attendance'), l = radioVal('lodging');
-      const lod = l ? (l.includes('במתחם') ? 'y' : 'n') : 'y';
-      const kinds = a ? [a.startsWith('סופ"ש מלא') ? 'full' : 'one'] : ['full', 'one'];
-      const kindName = { full: 'סופ"ש מלא (2 לילות)', one: 'לילה אחד' };
-      $('phead').innerHTML = `<tr><th>${createdAt ? 'המחיר שלך' : 'מחירי השלב הנוכחי'}</th><th>${lod === 'y' ? 'לינה במתחם' : 'לינה עצמאית'}</th></tr>`;
-      $('ptab').innerHTML = kinds.map((k) =>
-        `<tr><td>${kindName[k]}</td><td class="num">${fmt(PRICES[lod][k][st] + FOOD[k])}</td></tr>`).join('');
-
-      const t = totalFor(st), c = choice();
-      if (t == null) {
-        $('total').className = 'total pending';
-        $('total').textContent = 'בחרו מתי מגיעים ולינה כדי לראות את המחיר שלכם.';
-        $('nextPrice').textContent = '';
-        return;
-      }
-      $('total').className = 'total';
-      $('total').textContent = 'סה"כ: ' + fmt(t);
-      if (!createdAt && st < 2) {
-        const now = PRICES[c.lod][c.kind][st] + FOOD[c.kind];
-        const next = PRICES[c.lod][c.kind][st + 1] + FOOD[c.kind];
-        const label = c.kind === 'full' ? 'הסופ"ש' : 'הלילה האחד';
-        const wineNote = checkVals('wine') ? ' (לא כולל יין)' : '';
-        $('nextPrice').textContent = `ב-${st === 0 ? '27.11' : '3.12'} המחיר של ${label}${wineNote} יעלה מ-${fmt(now)} ל-${fmt(next)}.`;
-      } else {
-        $('nextPrice').textContent = '';
-      }
-    }
-
-    // ---------- פופ-אפ פתיחה ----------
-    const fullDialog = $('fullDialog');
-    function openFullModal() {
-      if (!fullDialog) return;
-      if (fullDialog.showModal && !fullDialog.open) {
-        fullDialog.showModal();
-      } else if (!fullDialog.open) {
-        fullDialog.setAttribute('open', '');
-      }
-    }
-
-    $('waitClose')?.addEventListener('click', () => {
-      if (fullDialog?.close) fullDialog.close();
-      else fullDialog?.removeAttribute('open');
-      els.phone?.focus();
-    });
-    fullDialog?.addEventListener('click', (e) => {
-      if (e.target === fullDialog) {
-        if (fullDialog.close) fullDialog.close();
-        else fullDialog.removeAttribute('open');
-      }
-    });
-
-    function toggle() {
-      $('prevBox').hidden = radioVal('prev_retreats') !== 'כן';
-      $('detailsBox').hidden = radioVal('workshop') !== 'כן' && radioVal('story') !== 'כן';
-      renderPrices();
-    }
-
-    function fillForm(r) {
-      TEXT.forEach((k) => { $(k).value = r[k] ?? ''; });
-      RADIOS.forEach((k) => document.querySelectorAll(`input[name="${k}"]`).forEach((i) => { i.checked = i.value === String(r[k] ?? ''); }));
-      CHECKS.forEach((k) => {
-        const vals = String(r[k] ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-        document.querySelectorAll(`input[name="${k}"]`).forEach((i) => { i.checked = vals.includes(i.value); });
-      });
-      createdAt = r.created ? new Date(r.created) : null;
-      toggle();
-    }
-
-    function resetState() {
-      els.form.reset();
-      loadedPhone = ''; createdAt = null;
-      els.saveBtn.textContent = 'שמירת ההרשמה';
-      els.deleteBtn.hidden = true;
-      $('buySec').hidden = true;
-      $('statsBtn').hidden = true;
-      toggle();
-    }
-
-    async function loadExisting(silent) {
-      const phone = normPhone(els.phone.value);
-      if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
-      setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
-      if (els.refreshBtn) els.refreshBtn.disabled = true;
-      try {
-        const res = await jsonp({ action: 'get', phone });
-        if (!res.ok) throw new Error(res.error);
-        loadedPhone = phone;
-        $('statsBtn').hidden = !res.owner;
-        if (res.found) {
-          fillForm(res.data);
-          els.saveBtn.textContent = 'עדכון ההרשמה';
-          els.deleteBtn.hidden = false;
-          setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
-          $('buySec').hidden = !res.buyer;
-          if (res.buyer) renderPurchases(res.purchases || []);
-        } else {
-          createdAt = null;
-          els.saveBtn.textContent = 'שמירת ההרשמה';
-          els.deleteBtn.hidden = true;
-          $('buySec').hidden = true;
-          setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
-          toggle();
-        }
-      } catch (e) {
-        setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
-      } finally {
-        if (els.refreshBtn) els.refreshBtn.disabled = false;
-      }
-    }
-
-    els.refreshBtn?.addEventListener('click', () => loadExisting(false));
-    els.phone.addEventListener('blur', () => {
-      const p = normPhone(els.phone.value);
-      if (validPhone(p) && p !== loadedPhone) loadExisting(true);
-    });
-    els.phone.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); els.phone.blur(); } });
-    els.form.addEventListener('change', toggle);
-
-    els.form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const phone = normPhone(els.phone.value);
-      const fail = (msg, el) => { setMsg(els.saveMsg, msg, 'err'); if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
-      if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
-
-      const data = { phone };
-      TEXT.forEach((k) => { data[k] = $(k).value.trim(); });
-      RADIOS.forEach((k) => { data[k] = radioVal(k); });
-      CHECKS.forEach((k) => { data[k] = checkVals(k); });
-
-      if (!data.name) return fail('חסר שם מלא.', $('name'));
-      if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
-      if (data.name.split(/\s+/).length < 2) return fail('כתבו שם פרטי ושם משפחה.', $('name'));
-      if (data.email && !validEmail(data.email)) return fail('כתובת המייל לא תקינה.', $('email'));
-      if (!data.attendance) return fail('בחרו מתי מגיעים.', document.querySelector('input[name="attendance"]'));
-      if (!data.lodging) return fail('בחרו סוג לינה.', document.querySelector('input[name="lodging"]'));
-      if (!validAge(data.age)) return fail('הגיל צריך להיות בין 18 ל‑99.', $('age'));
-      if (!data.why) return fail('ספרו בקצרה למה תרצו להצטרף לריטריט.', $('why'));
-      if (data.prev_retreats !== 'כן') data.prev_feedback = '';
-      if (data.workshop !== 'כן' && data.story !== 'כן') data.content_details = '';
-
-      els.saveBtn.disabled = true;
-      setMsg(els.saveMsg, 'שומרים…');
-      try {
-        const res = await post({ action: 'save', data });
-        if (!res.ok) throw new Error(res.error);
-        try { localStorage.setItem(LS_KEY, phone); } catch {}
-        loadedPhone = phone;
-        createdAt = new Date(res.created);
-        renderPrices();
-        els.saveBtn.textContent = 'עדכון ההרשמה';
-        els.deleteBtn.hidden = false;
-        setMsg(els.saveMsg, (res.isNew ? 'ההרשמה נשמרה.' : 'ההרשמה עודכנה.') + ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
-        showDone(res.total);
-      } catch (err) {
-        setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
-      } finally {
-        els.saveBtn.disabled = false;
-      }
-    });
-
-    els.deleteBtn.addEventListener('click', async () => {
-      const phone = normPhone(els.phone.value);
-      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err');
-      if (!confirm('למחוק את ההרשמה שלכם? כל הפרטים יימחקו.')) return;
-      els.deleteBtn.disabled = true; els.saveBtn.disabled = true;
-      setMsg(els.saveMsg, 'מוחקים…');
-      try {
-        const res = await jsonp({ action: 'delete', phone });
-        if (!res.ok) throw new Error(res.error);
-        try { localStorage.removeItem(LS_KEY); } catch {}
-        resetState();
-        setMsg(els.loadMsg, '');
-        setMsg(els.saveMsg, res.status === 'deleted'
-          ? 'ההרשמה נמחקה. אם תשנו את דעתכם, אפשר להירשם מחדש בכל זמן.' : 'לא נמצאה הרשמה עם המספר הזה.', 'ok');
-      } catch (err) {
-        setMsg(els.saveMsg, 'המחיקה נכשלה: ' + errText(err), 'err');
-      } finally {
-        els.deleteBtn.disabled = false; els.saveBtn.disabled = false;
-      }
-    });
-
-    // ---------- דיווח קניות ----------
-    function renderPurchases(list) {
-      $('buyList').innerHTML = list.map((p) => {
-        const d = p.created ? new Date(p.created).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }) : '';
-        return `<li><span>${esc(d)}${p.store ? ' · ' + esc(p.store) : ''}${p.details ? ' – ' + esc(p.details) : ''}</span><span class="amt">${fmt(p.amount)}</span></li>`;
-      }).join('');
-      const sum = list.reduce((s, p) => s + (+p.amount || 0), 0);
-      $('buyTotal').textContent = list.length ? 'סה"כ קניות שדווחו: ' + fmt(Math.round(sum * 100) / 100) : '';
-    }
-
-    async function fileToPayload(f) {
-      if (f.type.startsWith('image/')) {
-        try {
-          const img = await createImageBitmap(f);
-          const s = Math.min(1, 1600 / Math.max(img.width, img.height));
-          const c = document.createElement('canvas');
-          c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          const url = c.toDataURL('image/jpeg', 0.75);
-          return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', mime: 'image/jpeg', b64: url.split(',')[1] };
-        } catch {}
-      }
-      if (f.size > 8 * 1024 * 1024) throw new Error('הקובץ גדול מדי (עד 8MB).');
-      const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
-      return { name: f.name, mime: f.type || 'application/octet-stream', b64: String(url).split(',')[1] };
-    }
-
-    $('b_file').addEventListener('change', (e) => {
-      const f = e.target.files[0];
-      $('b_fileName').textContent = f ? 'קבלה צורפה: ' + f.name : 'צילום או העלאת קבלה';
-    });
-
-    $('buyBtn').addEventListener('click', async () => {
-      const phone = normPhone(els.phone.value);
-      const amount = parseFloat($('b_amount').value.replace(/[^\d.]/g, ''));
-      if (!(amount > 0)) { setMsg($('buyMsg'), 'הזינו סכום.', 'err'); $('b_amount').focus(); return; }
-      $('buyBtn').disabled = true;
-      setMsg($('buyMsg'), 'שומרים…');
-      try {
-        const f = $('b_file').files[0];
-        const file = f ? await fileToPayload(f) : null;
-        const res = await post({ action: 'purchase', phone, amount, store: $('b_store').value.trim(), details: $('b_details').value.trim(), file }, 60000);
-        if (!res.ok) throw new Error(res.error === 'not a buyer' ? 'החלק הזה פתוח רק לצוות הקניות.' : res.error);
-        renderPurchases(res.purchases || []);
-        ['b_amount', 'b_store', 'b_details', 'b_file'].forEach((id) => { $(id).value = ''; });
-        $('b_fileName').textContent = 'צילום או העלאת קבלה';
-        setMsg($('buyMsg'), 'הקנייה נשמרה. אפשר להוסיף קנייה נוספת.', 'ok');
-      } catch (err) {
-        setMsg($('buyMsg'), 'השמירה נכשלה: ' + errText(err), 'err');
-      } finally {
-        $('buyBtn').disabled = false;
-      }
-    });
-
-    const doneDialog = $('doneDialog');
-    function showDone(total) {
-      $('doneNote').textContent = 'הרשמה אינה מהווה אישור השתתפות.';
-      $('donePrice').innerHTML = total ? 'סה"כ לתשלום: <b>' + fmt(total) + '</b>' : '';
-      if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
-    }
-    $('doneClose').addEventListener('click', () => doneDialog.close());
-    doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
-
-    // ---------- init ----------
-    toggle();
-    try {
-      const saved = localStorage.getItem(LS_KEY);
-      if (saved) {
-        els.phone.value = saved;
-        loadExisting(true);
-      }
-    } catch {}
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', openFullModal, { once: true });
-    } else {
-      openFullModal();
-    }
-  </script>
-</body>
-</html>
-// hanukkah2026.astro
+        return
