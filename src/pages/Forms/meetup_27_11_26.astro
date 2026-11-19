@@ -1,8 +1,8 @@
 ---
-// ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
+// ערבב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V2';
+const VERSION = 'V9';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -22,7 +22,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   <title>מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה</title>
   <meta property="og:title" content="מנגנים שרים ביחד – ערב משחקים, חיבורים ומוסיקה" />
   <meta property="og:description" content="ערב של חיבורים חדשים ומשחקים חווייתיים. נרשמים יחד עם +1, ומעדכנים מתי שרוצים." />
-  <meta property="og:image" content="https://atroproject1.vercel.app/images/meetup_6_11_26.jpeg" />
+  <meta property="og:image" content="https://atroproject1.vercel.app/images/meetup_27_11_26.jpeg" />
 
   <style is:global>
     :root {
@@ -34,13 +34,13 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
     body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.6; }
     .wrap { max-width: 640px; margin: 0 auto; padding: 0 20px 64px; position: relative; }
     .version { position: absolute; top: 10px; left: 20px; font-size: 11px; color: var(--muted); opacity: .55; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
     h1, h2 { font-family: var(--font); font-weight: 700; line-height: 1.1; margin: 0; }
     h1 { font-size: clamp(38px, 10vw, 60px); letter-spacing: -0.01em; }
     h2 { font-size: 30px; }
+    h3 { font-size: 19px; margin: 28px 0 8px; }
     .muted { color: var(--muted); }
     .req { color: var(--gold); font-weight: 700; }
 
@@ -48,15 +48,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .hero h1, .hero .subtitle { text-align: center; }
     .event-date { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px 0 0; font-family: "Frank Ruhl Libre", serif; font-size: 18px; letter-spacing: .12em; color: var(--muted); }
     .event-date .sep { width: 28px; height: 1px; background: var(--sage); opacity: .8; }
+    .subtitle { font-weight: 700; font-size: clamp(21px, 5vw, 28px); line-height: 1.25; margin: 10px 0 0; color: var(--sage); }
     .event-place { margin: 6px 0 0; text-align: center; font-size: 16px; color: var(--ink); letter-spacing: .02em; }
     .event-place .dot { color: var(--sage); margin: 0 8px; }
-    .event-date + .cover, .event-place + .cover { margin: 20px auto 0; }
+    .subtitle + .cover, .event-date + .cover, .event-place + .cover { margin: 20px auto 0; }
     .intro { font-size: 18px; margin: 24px auto 0; max-width: 32em; text-align: center; }
     .intro p { margin: 0 0 10px; }
     .tagline { font-size: clamp(24px, 6vw, 32px); font-weight: 700; line-height: 1.3; margin: 0 0 22px !important; }
     .tagline span { color: var(--sage); }
     .open-mind { font-size: 20px; font-weight: 700; margin: 0 0 12px !important; }
     .activity { max-width: 28em; margin: 0 auto 18px !important; padding: 16px 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .06); font-size: 17px; line-height: 1.7; }
+    .fine { font-size: 15px; color: var(--muted); margin: 14px 0 0; max-width: 34em; }
+    .fine b { color: var(--gold); }
     .cover { width: 80%; margin: 0 auto 24px; border-radius: 14px; overflow: hidden; background: var(--surface); }
     .cover img { width: 100%; aspect-ratio: 5 / 6; object-fit: cover; object-position: center; display: block; }
     .cover.is-empty { aspect-ratio: 16 / 9; display: grid; place-items: center; border: 2px dashed var(--line); background: transparent; }
@@ -65,12 +68,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .note b { color: var(--gold); }
 
     .btn { display: inline-block; font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 2px solid var(--sage); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
-    .btn-small { padding: 7px 14px; font-size: 14px; }
     .btn-primary { background: var(--sage); color: var(--sage-ink); }
     .btn-danger { border-color: var(--danger); color: var(--danger); }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .btn:disabled { opacity: .55; cursor: progress; }
     :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
 
     .join { padding-top: 40px; border-top: 1px solid var(--line); }
     .join > p { margin: 8px 0 20px; }
@@ -82,6 +85,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     input[type=number] { max-width: 8em; }
     textarea { min-height: 80px; resize: vertical; }
     input::placeholder, textarea::placeholder { color: var(--muted); }
+    .row { display: flex; gap: 10px; align-items: stretch; }
+    .row input { flex: 1; }
     .hint { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 
@@ -100,7 +105,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     .group { padding: 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 18px; }
     .group > legend, .group-title { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
-    .legend-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .group-intro { font-size: 16px; color: var(--muted); margin: 0 0 16px; }
     .check-opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-weight: 400; }
     .check-opt:has(input:checked) { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
@@ -112,8 +116,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .info b { color: var(--gold); }
 
     .msg { margin: 12px 0 0; min-height: 1.6em; }
-    .msg.ok { color: var(--sage); }
-    .msg.err { color: var(--danger); }
+    .price-line { margin-bottom: 8px !important; }
+    .drinks { margin: 0 0 16px; font-size: 16px; }
+    .drinks small, .done-info .resp { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 
     .done { width: min(92vw, 420px); padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: center; font-family: var(--font); }
     .done::backdrop { background: rgba(4, 30, 40, .7); }
@@ -126,6 +131,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .done .done-note { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
     .done p { margin: 0 0 18px; font-size: 17px; }
     .done-info { border-top: 1px solid var(--line); padding-top: 16px; margin-bottom: 22px; }
+    .done-info p { font-size: 15px; color: var(--muted); margin: 0 0 6px; }
     .done-date { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
     .done-date b { display: block; font-size: 26px; color: var(--sage); font-variant-numeric: tabular-nums; }
     .done-date span { display: block; font-size: 15px; color: var(--muted); }
@@ -135,17 +141,43 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .done-times span { display: block; font-size: 13px; color: var(--muted); }
     .done-times b { display: block; font-size: 24px; color: var(--sage); font-variant-numeric: tabular-nums; }
     .done-info .done-ontime { color: var(--gold); font-weight: 700; margin: 0; }
-    .full-modal .actions { justify-content: center; margin-top: 12px; }
-
+    .done-info .done-price { color: var(--ink); font-size: 16px; margin: 12px 0 0; }
+    .done-price b { color: var(--sage); }
+    .done-info .done-pay { font-size: 14px; margin: 4px 0 0; }
+    .msg.ok { color: var(--sage); }
+    .msg.err { color: var(--danger); }
     .community { margin-top: 28px; font-size: 0.85em; color: var(--muted); }
     .community p { margin: 0 0 12px; }
     .community strong { color: var(--ink); }
     .community a { color: var(--sage); font-weight: 700; }
 
+    .about { margin-top: 32px; }
     .inspiration { margin-top: 24px; }
     .home-note { margin-top: 32px; padding: 20px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; text-align: center; font-size: 17px; line-height: 1.7; }
     .home-note p { margin: 0 0 10px; }
     .home-note p:last-child { margin: 0; }
+    .about > details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+    .about summary { list-style: none; cursor: pointer; display: block; }
+    .about > details > summary { padding: 18px 18px 14px; }
+    .about summary::-webkit-details-marker { display: none; }
+    .about-title { display: block; font-size: 22px; font-weight: 700; color: var(--sage); }
+    .about-first { display: block; font-size: 17px; margin-top: 6px; }
+    .about-hint { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--gold); border-bottom: 1px dashed var(--gold); }
+    .about .arrow { display: inline-block; transition: transform .2s; }
+    .about details[open] > summary .arrow { transform: rotate(180deg); }
+    .about .when-open { display: none; }
+    .about details[open] > summary .when-open { display: inline; }
+    .about details[open] > summary .when-closed { display: none; }
+    .about-body { padding: 0 18px 18px; font-size: 16px; }
+    .about-body p { margin: 0 0 12px; }
+    .about-body p:last-child { margin-bottom: 0; }
+    .more { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 14px; }
+    .more-title { display: block; font-size: 18px; font-weight: 700; color: var(--sage); }
+    .more .about-hint { margin-top: 6px; }
+    .thought { position: relative; margin: 14px 0 0; padding: 16px 18px 16px 18px; padding-inline-start: 46px; background: var(--bg); border-inline-start: 3px solid var(--gold); border-start-start-radius: 0; border-end-start-radius: 0; border-start-end-radius: 10px; border-end-end-radius: 10px; font-size: 17px; }
+    .thought::before { content: "״"; position: absolute; inset-inline-start: 12px; top: 2px; font-size: 48px; line-height: 1; color: var(--gold); font-weight: 700; }
+    .thought p { margin: 0 0 8px; }
+    .thought p:last-child { margin: 0; }
 
     @media (max-width: 420px) {
       .split { grid-template-columns: 1fr; }
@@ -161,9 +193,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <header class="hero">
       <h1>מנגנים שרים ביחד</h1>
       <p class="event-date"><span>27.11.26</span><span class="sep" aria-hidden="true"></span><span dir="ltr">Friday evening</span></p>
-      <p class="event-place">ערב חיבורים<span class="dot" aria-hidden="true">·</span>מנגנים שרים ביחד</p>
+      <p class="event-place">דרך השלום 95, תל אביב<span class="dot" aria-hidden="true">·</span>20:30</p>
       <figure class="cover">
-        <img src="/images/meetup_6_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
+        <img src="/images/meetup_27_11_26.jpeg" alt="מנגנים שרים ביחד" onerror="this.parentElement.classList.add('is-empty'); this.remove();" />
       </figure>
       <div class="intro">
         <p class="tagline">ערב שמוקדש לניתוק מהמסך<br /><span>וחיבור לבני אדם.</span></p>
@@ -187,12 +219,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
           <!-- פרטים אישיים -->
           <fieldset class="group">
-            <legend>
-              <span class="legend-row">
-                <span>פרטים אישיים</span>
-                <button type="button" id="refreshBtn" class="btn btn-small">רענן פרטים</button>
-              </span>
-            </legend>
+            <legend>פרטים אישיים</legend>
 
             <div class="field">
               <label for="name">שם מלא בעברית <span class="req">*</span></label>
@@ -360,6 +387,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         </div>
         <p id="saveMsg2" class="msg" role="status"></p>
       </section>
+
     </main>
   </div>
 
@@ -373,7 +401,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
     <p class="done-note">הרשמה אינה מהווה אישור הזמנה.</p>
     <div class="done-info">
-      <div class="done-date"><b>27.11.26</b><span>ערב חיבורים</span></div>
+      <div class="done-date"><b>27.11.26</b><span>ערב שישי</span></div>
       <div class="done-times">
         <div><span>שעת הגעה</span><b>20:00</b></div>
         <div><span>התחלת הפעילות</span><b>20:30</b></div>
@@ -384,27 +412,23 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     <button type="button" id="doneClose" class="btn btn-primary">הבנתי, סגור</button>
   </dialog>
 
-  <dialog id="fullDialog" class="done full-modal" aria-labelledby="fullTitle">
+  <dialog id="fullDialog" class="done" aria-labelledby="fullTitle">
     <div class="done-head">
       <div class="done-logo" aria-label="מנגנים שרים ביחד">
         <span class="l1">מנגנים שרים</span>
         <span class="l2">ביחד</span>
       </div>
     </div>
-    <h2 id="fullTitle">בשלב זה הקבוצה התמלאה</h2>
-    <p class="done-note">ניתן להשאיר פרטים למקרה של ביטולים. מומלץ למלא את הטופס, ואז לסגור ולהמשיך למילוי.</p>
-    <div class="actions">
-      <button type="button" id="fullEditBtn" class="btn btn-small">מילוי פרטים / עדכון</button>
-      <button type="button" id="fullClose" class="btn btn-primary">הבנתי</button>
-    </div>
+    <h2 id="fullTitle">הקבוצה לערב התמלאה</h2>
+    <p class="done-note">ניתן להשאיר פרטים במידה ויהיו ביטולים.</p>
+    <button type="button" id="fullClose" class="btn btn-primary">הבנתי</button>
   </dialog>
 
   <script is:inline>
-    // ===== הגדרות – להדביק את כתובת ה-Web App של הערב החדש =====
-    const SCRIPT_URL = 'https://script.google.com/macros/s/REPLACE_WITH_NEW_WEB_APP_ID/exec';
-    const LS_KEY = 'meetup_27_11_26_phone';
-    const EVENT_FULL = false;
-    // ==============================================================
+    // ===== הגדרות – לעדכן אחרי פריסת ה-Apps Script החדש =====
+    const EVENT_FULL = true; // true = מציג בכניסה הודעה שהקבוצה התמלאה. false = מבטל את ההודעה
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec';
+    // ==========================================================
 
     const FIELDS = ['name', 'name_en', 'age', 'city', 'occupation', 'hobby', 'surprising_fact', 'why_join',
       'guest_name', 'guest_age', 'guest_phone', 'guest_how_know', 'guest_why', 'story_details', 'open_question'];
@@ -416,12 +440,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const $ = (id) => document.getElementById(id);
     const els = {
-      form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'), refreshBtn: $('refreshBtn'),
+      form: $('form'), phone: $('phone'), loadMsg: $('loadMsg'),
       storyField: $('storyField'), saveBtn: $('saveBtn'), saveMsg: $('saveMsg'), deleteBtn: $('deleteBtn'),
       saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
     };
     let loadedPhone = '';
+    let isRegistered = false; // האם המספר הנוכחי כבר רשום בגיליון
 
+    // ---------- JSONP (קריאה ומחיקה) ----------
     function jsonp(params) {
       return new Promise((resolve, reject) => {
         const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
@@ -435,6 +461,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       });
     }
 
+    // ---------- POST (שמירה – טקסטים ארוכים לא נכנסים בבטחה ב-URL) ----------
     async function post(payload) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 20000);
@@ -448,6 +475,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     }
 
+    // ---------- helpers ----------
     function normPhone(v) {
       let d = String(v || '').replace(/\D/g, '');
       if (d.startsWith('972')) d = '0' + d.slice(3);
@@ -459,20 +487,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const targets = el === els.saveMsg ? [els.saveMsg, els.saveMsg2] : [el];
       targets.forEach((t) => { t.textContent = text; t.className = t === els.loadMsg ? 'hint' : 'msg ' + (kind || ''); });
     }
+    // שני כפתורי השמירה (באמצע ובסוף הדף) תמיד באותו מצב
     function setSaveText(text) { els.saveBtn.textContent = text; els.saveBtn2.textContent = text; }
     function setSaveDisabled(v) { els.saveBtn.disabled = v; els.saveBtn2.disabled = v; }
     const radioVal = (name) => document.querySelector(`input[name=${name}]:checked`)?.value || '';
     const errText = (err) => err.message === 'timeout' ? 'אין תגובה מהשרת. נסו שוב.'
       : err.message === 'network' ? 'בעיית חיבור. נסו שוב.' : err.message;
 
+    // ---------- form ----------
     function toggle() {
-      const noPlus = $('no_plus').checked;
       els.storyField.hidden = radioVal('share_story') !== 'yes';
-      $('guestFields').hidden = noPlus;
-      $('guestTrackBox').hidden = noPlus;
-      if (noPlus) {
-        document.querySelectorAll('input[name="guest_track"]').forEach((r) => { r.checked = false; });
-      }
+      $('guestFields').hidden = $('no_plus').checked; // בלי +1 – מסתירים את פרטי ה-+1
+      $('guestTrackBox').hidden = $('no_plus').checked; // וגם את מסלול השתייה של ה-+1
     }
 
     function setRadio(name, value) {
@@ -495,11 +521,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       const phone = normPhone(els.phone.value);
       if (!validPhone(phone)) { if (!silent) setMsg(els.loadMsg, 'הזינו מספר טלפון תקין, למשל 0501234567.'); return; }
       setMsg(els.loadMsg, 'מחפשים הרשמה קיימת…');
-      if (els.refreshBtn) els.refreshBtn.disabled = true;
       try {
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
         loadedPhone = phone;
+        isRegistered = !!res.found;
         if (res.found) {
           fillForm(res.record);
           setSaveText('עדכון ההרשמה');
@@ -512,12 +538,9 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         }
       } catch (e) {
         setMsg(els.loadMsg, 'הטעינה נכשלה. בדקו את החיבור ונסו שוב.');
-      } finally {
-        if (els.refreshBtn) els.refreshBtn.disabled = false;
       }
     }
 
-    els.refreshBtn?.addEventListener('click', () => loadExisting(false));
     els.phone.addEventListener('blur', () => {
       const p = normPhone(els.phone.value);
       if (validPhone(p) && p !== loadedPhone) loadExisting(true);
@@ -530,8 +553,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     els.form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const phone = normPhone(els.phone.value);
-      const fail = (msg, el) => { setMsg(els.saveMsg, msg, 'err'); if (el) { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } };
-      if (!validPhone(phone)) return fail('מספר הטלפון לא תקין.', els.phone);
+      if (!validPhone(phone)) return setMsg(els.saveMsg, 'מספר הטלפון לא תקין.', 'err'), els.phone.focus();
 
       const data = {};
       FIELDS.forEach((k) => { data[k] = $(k).value.trim(); });
@@ -539,18 +561,18 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       data.payment = radioVal('payment');
       data.gender = radioVal('gender');
       data.drink_track = radioVal('drink_track');
+      data.guest_track = radioVal('guest_track');
       data.no_plus = $('no_plus').checked ? 'TRUE' : 'FALSE';
-      data.guest_track = $('no_plus').checked ? '' : radioVal('guest_track');
-      data.guest_drinks = $('no_plus').checked ? '' : radioVal('guest_drinks');
+      data.guest_drinks = radioVal('guest_drinks');
 
       for (const [k, msg] of REQUIRED) {
-        if (!data[k]) return fail(msg, $(k));
+        if (!data[k]) return setMsg(els.saveMsg, msg, 'err'), $(k).focus();
       }
-      if (!/[\u0590-\u05FF]/.test(data.name)) return fail('כתבו את השם המלא בעברית.', $('name'));
-      if (data.name.split(/\s+/).length < 2) return fail('כתבו שם פרטי ושם משפחה.', $('name'));
-      if (!validAge(data.age)) return fail('הגיל צריך להיות בין 18 ל‑99.', $('age'));
-      if (!$('no_plus').checked && data.guest_phone && !validPhone(normPhone(data.guest_phone))) return fail('מספר הטלפון של ה‑+1 לא תקין.', $('guest_phone'));
-      if (!$('no_plus').checked && data.guest_age && !validAge(data.guest_age)) return fail('גיל ה‑+1 צריך להיות בין 18 ל‑99.', $('guest_age'));
+      if (!/[\u0590-\u05FF]/.test(data.name)) return setMsg(els.saveMsg, 'כתבו את השם המלא בעברית.', 'err'), $('name').focus();
+      if (data.name.split(/\s+/).length < 2) return setMsg(els.saveMsg, 'כתבו שם פרטי ושם משפחה.', 'err'), $('name').focus();
+      if (!validAge(data.age)) return setMsg(els.saveMsg, 'הגיל צריך להיות בין 18 ל‑99.', 'err'), $('age').focus();
+      if (data.guest_phone && !validPhone(normPhone(data.guest_phone))) return setMsg(els.saveMsg, 'מספר הטלפון של ה‑+1 לא תקין.', 'err'), $('guest_phone').focus();
+      if (data.guest_age && !validAge(data.guest_age)) return setMsg(els.saveMsg, 'גיל ה‑+1 צריך להיות בין 18 ל‑99.', 'err'), $('guest_age').focus();
       if (data.share_story !== 'yes') data.story_details = '';
 
       setSaveDisabled(true);
@@ -558,13 +580,14 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       try {
         const res = await post({ action: 'save', phone, ...data });
         if (!res.ok) throw new Error(res.error);
-        try { localStorage.setItem(LS_KEY, phone); } catch {}
+        try { localStorage.setItem('meetup_27_11_26_phone', phone); } catch {}
         loadedPhone = phone;
+        isRegistered = true;
         setSaveText('עדכון ההרשמה');
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
           ' אפשר לחזור ולעדכן בכל זמן עם אותו מספר טלפון.', 'ok');
-        showDone();
+        showDone(res.status === 'updated');
       } catch (err) {
         setMsg(els.saveMsg, 'השמירה נכשלה: ' + errText(err), 'err');
       } finally {
@@ -584,7 +607,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         if (!res.ok) throw new Error(res.error);
         els.form.reset();
         loadedPhone = '';
-        try { localStorage.removeItem(LS_KEY); } catch {}
+        isRegistered = false;
+        try { localStorage.removeItem('meetup_27_11_26_phone'); } catch {}
         setSaveText('שמירת ההרשמה');
         els.deleteBtn.hidden = true;
         setMsg(els.loadMsg, '');
@@ -599,25 +623,24 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     });
 
+    // ---------- popup ----------
     const doneDialog = $('doneDialog');
-    function showDone() {
+    function showDone(updated) {
       if (doneDialog.showModal) doneDialog.showModal(); else alert('תודה, הפרטים התקבלו.');
     }
     $('doneClose').addEventListener('click', () => doneDialog.close());
     doneDialog.addEventListener('click', (e) => { if (e.target === doneDialog) doneDialog.close(); });
 
+    // ---------- הודעת "הקבוצה התמלאה" בכניסה לדף ----------
     const fullDialog = $('fullDialog');
     $('fullClose').addEventListener('click', () => fullDialog.close());
-    $('fullEditBtn').addEventListener('click', () => {
-      fullDialog.close();
-      els.phone.focus();
-    });
     fullDialog.addEventListener('click', (e) => { if (e.target === fullDialog) fullDialog.close(); });
     if (EVENT_FULL && fullDialog.showModal) fullDialog.showModal();
 
+    // ---------- init ----------
     toggle();
     try {
-      const saved = localStorage.getItem(LS_KEY);
+      const saved = localStorage.getItem('meetup_27_11_26_phone');
       if (saved) { els.phone.value = saved; loadExisting(true); }
     } catch {}
   </script>
