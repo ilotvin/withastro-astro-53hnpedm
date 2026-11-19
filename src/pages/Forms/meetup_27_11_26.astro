@@ -422,7 +422,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       saveBtn2: $('saveBtn2'), saveMsg2: $('saveMsg2')
     };
     let loadedPhone = '';
-    let isRegistered = false;
 
     function jsonp(params) {
       return new Promise((resolve, reject) => {
@@ -502,7 +501,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         const res = await jsonp({ action: 'get', phone });
         if (!res.ok) throw new Error(res.error);
         loadedPhone = phone;
-        isRegistered = !!res.found;
         if (res.found) {
           fillForm(res.record);
           setSaveText('עדכון ההרשמה');
@@ -563,7 +561,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         if (!res.ok) throw new Error(res.error);
         try { localStorage.setItem(LS_KEY, phone); } catch {}
         loadedPhone = phone;
-        isRegistered = true;
         setSaveText('עדכון ההרשמה');
         els.deleteBtn.hidden = false;
         setMsg(els.saveMsg, (res.status === 'updated' ? 'ההרשמה עודכנה.' : 'ההרשמה נשמרה.') +
@@ -588,7 +585,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         if (!res.ok) throw new Error(res.error);
         els.form.reset();
         loadedPhone = '';
-        isRegistered = false;
         try { localStorage.removeItem(LS_KEY); } catch {}
         setSaveText('שמירת ההרשמה');
         els.deleteBtn.hidden = true;
