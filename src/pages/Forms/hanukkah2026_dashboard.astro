@@ -1,629 +1,606 @@
-// hanukkah2026_dashboard.astro
----
-// hanukkah2026_dashboard.astro
-// דשבורד – ריטריט חנוכה 2026
+/**
+ * Apps Script – ריטריט חנוכה 2026 (מנגנים שרים ביחד)
+ * גיליון: https://docs.google.com/spreadsheets/d/1Os77ieMxxzK3RfuM-MRJgKf-OLVuJ2WfLcp65hOLiUk
+ *
+ * פעולות:
+ *   GET  ?action=status&callback=cb         (JSONP)  בדיקת מכסה ופופ-אפ בפתיחת הטופס
+ *   GET  ?action=get&phone=...&callback=cb   (JSONP)  טעינת הרשמה קיימת + קניות + ספירת שורות + מכסה
+ *   GET  ?action=delete&phone=...&callback=cb (JSONP)  מחיקת הרשמה + ספירת שורות
+ *   GET  ?action=stats&phone=...&callback=cb  (JSONP)  נתונים מסוכמים + רשימת נרשמים לדשבורד – רק ל-OWNER_PHONE
+ *   GET  ?action=ping                                  בדיקת חיבור
+ *   POST {action:"save", data:{...}}                   שמירה / עדכון הרשמה לפי טלפון (כולל סימון waitlist_popup)
+ *   POST {action:"waitlist", data:{phone,name,notes}}  שמירה בלשונית Registrations עם status = "רשימת המתנה"
+ *   POST {action:"set_capacity", phone, capacity}      עדכון מכסת שורות מלאות ב-PropertiesService – רק ל-OWNER_PHONE
+ *   POST {action:"purchase", phone, amount, store, details, file:{name,mime,b64}}
+ *   POST {action:"approve", phone(owner), target, resend?}   אישור משתתף + שליחת מייל – רק ל-OWNER_PHONE
+ */
 
-// ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V10';
-// =========================================
-const UPDATED = new Intl.DateTimeFormat('he-IL', {
-  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
-  hour: '2-digit', minute: '2-digit', hour12: false
-}).format(new Date()).replace(',', '');
----
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#A35A32" />
-  <title>דשבורד – ריטריט חנוכה 2026</title>
-  <style is:global>
-    :root {
-      --bg: #8A4B2A; --surface: #6E3A1F; --ink: #FFFFFF; --muted: #F3D9BF; --line: #A9683F;
-      --sage: #F6C453; --sage-ink: #2A1A00; --gold: #FFB38A; --danger: #FFD0C8; --track: #5A2F18;
-      --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
-      color-scheme: dark;
+var SCRIPT_VERSION = 'V14';
+
+var OWNER_PHONE = '0546655862';
+var REG_SHEET = 'Registrations';
+var BUY_SHEET = 'Purchases';
+var RECEIPTS_FOLDER = 'קבלות ריטריט חנוכה 2026';
+var DEFAULT_CAPACITY = 25;
+
+var REG_HEADERS = [
+  'created', 'updated', 'phone', 'name', 'email',
+  'attendance', 'extra_night', 'lodging',
+  'age', 'gender', 'why', 'prev_retreats', 'prev_feedback', 'social',
+  'car', 'area',
+  'wine', 'baking',
+  'two_facts', 'connect_ideas', 'workshop', 'story', 'content_details',
+  'diet', 'gluten', 'allergies', 'kashrut', 'milk',
+  'payment',
+  'price_stage', 'price_total',
+  'buyer', 'show',
+  'status',
+  'waitlist_popup',
+  'email_sent'
+];
+
+var ACT_COLS = [
+  ['act_dance', 'שיעור ריקוד'], ['act_yoga', 'יוגה'], ['act_acro_yoga', 'אקרו-יוגה'],
+  ['act_painting', 'ציור'], ['act_craft', 'יצירה'], ['act_cyber', 'הרצאת סייבר'],
+  ['act_nutrition', 'תזונה ואורח חיים'], ['act_public_speaking', 'דיבור מול קהל'],
+  ['act_improv', 'אימפרוביזציה'], ['act_hike', 'מסלול הליכה']
+];
+var ROLE_COLS = [
+  ['role_kitchen_chef', 'מנהל מטבח + שף'], ['role_shopping', 'קניות'], ['role_meat_wine_grill', 'בשרים, יינות ומנגל']
+];
+ACT_COLS.concat(ROLE_COLS).forEach(function (c) { REG_HEADERS.push(c[0]); });
+
+var BUY_HEADERS = ['created', 'phone', 'name', 'amount', 'store', 'details', 'receipt_url', 'receipt_name'];
+var PROTECTED = ['created', 'updated', 'phone', 'price_stage', 'price_total', 'buyer', 'show', 'status', 'email_sent'];
+
+// ===== מייל אישור =====
+var APPROVED_STATUS = 'מאושר';
+var MAIL_FROM_NAME = 'מנגנים שרים ביחד';
+var FORM_URL = 'https://atroproject1.vercel.app/Forms/hanukkah2026';
+var PAYBOX_URL = 'https://links.payboxapp.com/aFmrkV1Gd8b';
+var BANK = { bank: 'בנק דיסקונט (11)', branch: '055', account: '123562637', owner: 'אילן לוטווין' };
+var DEPOSIT = 100; // מקדמה לשריון מקום
+
+
+var PRICES = { y: { full: [350, 400, 450], one: [290, 340, 390] },
+               n: { full: [200, 250, 300], one: [140, 190, 240] } };
+var FOOD = { full: 200, one: 100 };
+var WINE = 90;
+var STAGE2 = new Date(2026, 10, 27); // 27.11.2026
+var STAGE3 = new Date(2026, 11, 3);  // 3.12.2026
+var STAGE_NAMES = ['הרשמה מוקדמת', 'שלב שני', 'שלב אחרון'];
+
+/* ---------- התקנה: להריץ פעם אחת ידנית ---------- */
+function setup() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  ensureSheet_(ss, BUY_SHEET, BUY_HEADERS);
+  getFolder_();
+  getCapacity_();
+}
+
+/* ---------- מכסה (PropertiesService – ללא גיליון נוסף) ---------- */
+function getCapacity_() {
+  var raw = PropertiesService.getScriptProperties().getProperty('CAPACITY');
+  var n = parseInt(raw, 10);
+  return isFinite(n) && n >= 0 ? n : DEFAULT_CAPACITY;
+}
+
+function setCapacity_(rawPhone, rawCap) {
+  if (normPhone_(rawPhone) !== OWNER_PHONE) throw new Error('unauthorized');
+  var cap = parseInt(rawCap, 10);
+  if (!isFinite(cap) || cap < 0) throw new Error('bad capacity');
+  PropertiesService.getScriptProperties().setProperty('CAPACITY', String(cap));
+  return { ok: true, capacity: cap };
+}
+
+/* ---------- GET (JSONP) ---------- */
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  var out;
+  try {
+    if (p.action === 'ping') {
+      out = { ok: true, version: SCRIPT_VERSION };
+    } else if (p.action === 'status') {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+      var count = getRegistrationCount_(sh);
+      var capacity = getCapacity_();
+      out = { ok: true, count: count, capacity: capacity, isFull: capacity > 0 && count >= capacity };
+    } else if (p.action === 'get') {
+      out = getRegistration_(p.phone);
+    } else if (p.action === 'delete') {
+      out = deleteRegistration_(p.phone);
+    } else if (p.action === 'stats') {
+      if (normPhone_(p.phone) !== OWNER_PHONE) throw new Error('unauthorized');
+      out = getStats_();
+    } else {
+      throw new Error('unknown action');
     }
-    * { box-sizing: border-box; }
-    [hidden] { display: none !important; }
-    .gate { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
-    .gate input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 12em; }
-    body { margin: 0; min-height: 100vh; background: linear-gradient(180deg, #A35A32 0, #8A4B2A 520px, #6E3A1F 100%) fixed; background-color: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 56px; position: relative; }
-    .version { position: absolute; top: 10px; left: 16px; font-size: 11px; color: var(--muted); opacity: .55; }
-    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-    h1 { margin: 0; font-size: 28px; }
-    .sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
-    .btn { font: inherit; font-weight: 700; padding: 10px 18px; border-radius: 999px; border: 0; background: var(--sage); color: var(--sage-ink); cursor: pointer; }
-    .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--sage); text-decoration: none; display: inline-flex; align-items: center; }
-    .btn-small { padding: 7px 14px; font-size: 14px; }
-    .btn:disabled { opacity: .6; cursor: progress; }
-    .msg { color: var(--danger); margin: 0 0 16px; }
-    .msg:empty { display: none; }
+  } catch (err) {
+    out = { ok: false, error: String(err.message || err) };
+  }
+  return respond_(out, p.callback);
+}
 
-    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
-    .kpi span { display: block; font-size: 13px; color: var(--muted); }
-    .kpi b { display: block; font-size: 32px; line-height: 1.1; margin-top: 4px; color: var(--sage); font-variant-numeric: tabular-nums; }
-    .kpi small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
-
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
-    .card.wide { grid-column: 1 / -1; }
-    .card.cap-compact { padding: 10px 14px; margin-bottom: 12px; }
-    .card h2 { margin: 0 0 12px; font-size: 17px; }
-    .cap-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 14px; }
-    .cap-row label { font-size: 14px; font-weight: 700; }
-    .cap-row input { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; width: 4.5em; font-size: 14px; }
-    .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 3em; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
-    .bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bar .track { height: 12px; background: var(--track); border-radius: 999px; overflow: hidden; }
-    .bar .fill { height: 100%; background: var(--sage); border-radius: 999px; }
-    .bar .num { text-align: left; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .bar.zero .lbl, .bar.zero .num { color: var(--muted); font-weight: 400; }
-    .night { margin-bottom: 14px; }
-    .night:last-child { margin-bottom: 0; }
-    .night .top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
-    .night .track { height: 14px; background: var(--track); border-radius: 999px; overflow: hidden; display: flex; }
-    .night .v { background: var(--sage); }
-    .night .s { background: var(--gold); }
-    .night.over .top b { color: var(--danger); }
-    .legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 10px; }
-    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
-    .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
-
-    .picker-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-    .picker-toolbar input[type="search"], .picker-toolbar select { font: inherit; color: var(--ink); background: #9A5733; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
-    .picker-toolbar input[type="search"] { flex: 1 1 13em; }
-    .picker-toolbar select { min-width: 14em; }
-    .picker-toolbar input::placeholder { color: var(--muted); }
-    .names-box { max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 10px 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 6px 12px; }
-    .name-item { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 8px; }
-    .name-item:hover { background: var(--surface); }
-    .name-item input { accent-color: var(--sage); width: 16px; height: 16px; margin: 0; cursor: pointer; }
-    .selected-preview { margin-top: 10px; font-size: 14px; color: var(--muted); min-height: 1.4em; }
-    .selected-preview b { color: var(--sage); }
-    .selected-preview.warn { color: var(--danger); }
-
-    .participant-details { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 14px; }
-    .participant-details-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
-    .participant-details-head h3 { margin: 0; font-size: 16px; color: var(--sage); }
-    .fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 14px; }
-    .field-row { padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); word-break: break-word; }
-    .field-key { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
-    .field-val { color: var(--ink); font-weight: 700; white-space: pre-wrap; }
-
-    @media (max-width: 700px) {
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid { grid-template-columns: 1fr; }
-      .fields-grid { grid-template-columns: 1fr; }
+/* ---------- POST ---------- */
+function doPost(e) {
+  var out;
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(20000);
+    var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (body.action === 'save') {
+      out = saveRegistration_(body.data || {});
+    } else if (body.action === 'waitlist') {
+      out = saveWaitlist_(body.data || {});
+    } else if (body.action === 'set_capacity') {
+      out = setCapacity_(body.phone, body.capacity);
+    } else if (body.action === 'purchase') {
+      out = savePurchase_(body);
+    } else if (body.action === 'approve') {
+      out = approve_(body);
+    } else {
+      throw new Error('unknown action');
     }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
-    <header>
-      <div>
-        <h1>דשבורד הרשמות</h1>
-        <p class="sub">ריטריט חנוכה · מצפה רמון · 10–12 לדצמבר 26 · <span id="stamp">טוען…</span></p>
-      </div>
-      <div style="display:flex;gap:8px">
-        <a class="btn btn-ghost" href="/Forms/hanukkah2026">לטופס</a>
-        <button class="btn" id="refresh" type="button">רענון</button>
-      </div>
-    </header>
-    <p class="msg" id="msg" role="status"></p>
-    <div class="gate" id="gate" hidden>
-      <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון" />
-      <button class="btn" id="gateBtn" type="button">כניסה</button>
-    </div>
+  } catch (err) {
+    out = { ok: false, error: String(err.message || err) };
+  } finally {
+    try { lock.releaseLock(); } catch (x) {}
+  }
+  return respond_(out);
+}
 
-    <section class="card wide cap-compact" aria-label="שורות להפעלת פופאפ :הרשמה התמלאה">
-      <div class="cap-row">
-        <label for="capInput">שורות להפעלת פופאפ :הרשמה התמלאה</label>
-        <input id="capInput" type="number" min="0" max="500" value="25" />
-        <button class="btn btn-small" id="saveCapBtn" type="button">שמירה</button>
-        <span id="capStatus" class="note" style="margin:0"></span>
-      </div>
-    </section>
+function getRegistrationCount_(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return 0;
+  var headers = getHeaders_(sh);
+  var pi = headers.indexOf('phone');
+  var si = headers.indexOf('status');
+  if (pi < 0) return Math.max(0, last - 1);
+  var vals = sh.getRange(2, pi + 1, last - 1, 1).getValues();
+  var statusVals = si >= 0 ? sh.getRange(2, si + 1, last - 1, 1).getValues() : null;
+  return vals.filter(function (r, idx) {
+    if (!normPhone_(r[0])) return false;
+    if (statusVals && String(statusVals[idx][0] || '').trim() === 'רשימת המתנה') return false;
+    return true;
+  }).length;
+}
 
+/* ---------- הרשמה ---------- */
+function getRegistration_(rawPhone) {
+  var phone = normPhone_(rawPhone);
+  if (!phone) throw new Error('bad phone');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var count = getRegistrationCount_(sh);
+  var capacity = getCapacity_();
+  var isFull = capacity > 0 && count >= capacity;
+  var hit = findRow_(sh, phone);
+  var owner = phone === OWNER_PHONE;
+  if (!hit) {
+    return { ok: true, found: false, owner: owner, count: count, capacity: capacity, isFull: isFull };
+  }
 
-    <section class="kpis" aria-label="מספרים עיקריים">
-      <div class="kpi"><span>נרשמים</span><b id="k_total">–</b></div>
-      <div class="kpi"><span>גברים</span><b id="k_male">–</b><small id="k_male_age"></small></div>
-      <div class="kpi"><span>נשים</span><b id="k_female">–</b><small id="k_female_age"></small></div>
-      <div class="kpi"><span>גיל ממוצע</span><b id="k_age">–</b><small id="k_unknown"></small></div>
-    </section>
+  var data = hit.obj;
+  var isBuyer = /^(כן|yes|true|1|v|✓)$/i.test(String(data.buyer || '').trim());
+  var clean = {};
+  Object.keys(data).forEach(function (k) {
+    if (k === 'show' || k === 'buyer') return;
+    clean[k] = data[k] instanceof Date ? data[k].toISOString() : data[k];
+  });
+  clean.activities = readFlags_(data, ACT_COLS) || String(data.activities || '');
+  clean.helper_roles = readFlags_(data, ROLE_COLS) || String(data.helper_roles || '');
+  return {
+    ok: true,
+    found: true,
+    owner: owner,
+    count: count,
+    capacity: capacity,
+    isFull: isFull,
+    data: clean,
+    buyer: isBuyer,
+    purchases: isBuyer ? listPurchases_(ss, phone) : []
+  };
+}
 
-    <section class="grid">
-      <div class="card"><h2>מתי מגיעים</h2><div id="c_att"></div></div>
-      <div class="card">
-        <h2>תפוסה לפי לילה (מכסה: 25)</h2>
-        <div id="c_nights"></div>
-        <div class="legend"><span><i style="background:var(--sage)"></i>לינה במתחם</span><span><i style="background:var(--gold)"></i>לינה עצמאית</span></div>
-        <p class="note">המתחם גובה על כל משתתף מעל 25 בלילה, גם על מי שלא ישן בו.</p>
-      </div>
-      <div class="card wide"><h2>פעילויות מבוקשות</h2><div id="c_act"></div></div>
-      <div class="card"><h2>הלפרים לפי תפקיד</h2><div id="c_roles"></div></div>
-      <div class="card"><h2>עוד נתונים</h2><div id="c_more"></div></div>
-    </section>
-    <section class="card wide" id="participantsPickerCard" style="margin-top:12px" aria-label="בחירת שמות משתתפים והצגת פרטים">
-      <h2>משתתפים – בחירה והצגת כל השדות</h2>
-      <div class="picker-toolbar">
-        <select id="participantSelect" aria-label="בחירת משתתף לצפייה בכל השדות">
-          <option value="">בחר משתתף לצפייה בכל השדות…</option>
-        </select>
-        <select id="genderFilter" aria-label="סינון לפי מגדר">
-          <option value="">כל המגדרים</option>
-          <option value="גבר">גברים</option>
-          <option value="אישה">נשים</option>
-          <option value="__none">לא צוין</option>
-        </select>
-        <button class="btn btn-ghost btn-small" id="selectAllNames" type="button">סמן הכל</button>
-        <button class="btn btn-ghost btn-small" id="clearAllNames" type="button">נקה סימון</button>
-        <button class="btn btn-small" id="copySelectedNames" type="button">העתק מסומנים</button>
-      </div>
-      <div id="namesList" class="names-box">
-        <p class="note" style="margin:0">הרשימה תוצג ברגע שהנתונים ייטענו.</p>
-      </div>
-      <p id="selectedNamesSummary" class="selected-preview" role="status">מסומנים: <b>0</b> משתתפים</p>
+function saveRegistration_(data) {
+  var phone = normPhone_(data.phone);
+  if (!phone) throw new Error('bad phone');
+  if (!String(data.name || '').trim()) throw new Error('missing name');
 
-      <div id="participantDetails" class="participant-details" hidden>
-        <div class="participant-details-head">
-          <h3 id="detailsTitle">פרטי משתתף</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <button class="btn btn-small" id="approveBtn" type="button">✅ אישור ושליחת מייל</button>
-            <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
-          </div>
-        </div>
-        <p id="approveMsg" class="note" style="margin:0 0 10px" role="status"></p>
-        <div id="detailsGrid" class="fields-grid"></div>
-      </div>
-    </section>
-  </div>
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var headers = getHeaders_(sh);
+  var hit = findRow_(sh, phone);
+  var now = new Date();
+  var created = hit && hit.obj.created instanceof Date ? hit.obj.created : now;
 
-  <script is:inline>
-    // ===== הגדרות =====
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec';
-    const CAP = 25;
-    const LS_KEY = 'hanukkah2026_phone';
-    let phone = '';
-    try { phone = localStorage.getItem(LS_KEY) || ''; } catch {}
-    // ==================
+  var countBefore = getRegistrationCount_(sh);
+  var capacity = getCapacity_();
+  var currentlyFull = capacity > 0 && countBefore >= capacity;
+  var fromPopup = String(data.waitlist_popup || '').trim() === 'כן' || (!hit && currentlyFull);
 
-    const FIELD_LABELS = {
-      name: 'שם מלא',
-      full_name: 'שם מלא',
-      phone: 'טלפון',
-      email: 'מייל',
-      attendance: 'מתי מגיעים',
-      extra_night: 'לילה נוסף (שבת–ראשון)',
-      lodging: 'לינה',
-      age: 'גיל',
-      gender: 'מגדר',
-      why: 'למה להצטרף',
-      prev_retreats: 'היה בריטריטים בעבר',
-      prev_feedback: 'פידבק מריטריטים קודמים',
-      social: 'רשת חברתית',
-      car: 'הגעה / טרמפ',
-      area: 'אזור יציאה',
-      wine: 'מסלול יין',
-      baking: 'אפייה',
-      two_facts: 'שתי עובדות מעניינות',
-      activities: 'פעילויות',
-      connect_ideas: 'רעיונות לפעילויות מחברות',
-      workshop: 'להעביר סדנה',
-      story: 'לשתף סיפור',
-      content_details: 'פרטי סדנה / סיפור',
-      diet: 'תזונה',
-      gluten: 'נמנע מגלוטן',
-      allergies: 'אלרגיות',
-      kashrut: 'מגבלות כשרות',
-      milk: 'העדפת חלב',
-      helper_roles: 'תפקידי הלפרים',
-      payment: 'אמצעי תשלום',
-      status: 'סטטוס',
-      created: 'תאריך יצירה / הרשמה',
-      updated: 'תאריך עדכון',
-      total: 'סה"כ עלות',
-      email_sent: 'מייל אישור נשלח'
-    };
-    const APPROVED = 'מאושר';
-    const isApproved = (p) => String(p?.raw?.status || '').trim() === APPROVED;
-    const mark = (p) => (isApproved(p) ? '✅ ' : '') + p.name;
-
-    const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    let latestTotal = 0;
-    let participants = [];
-    let activeDetailKey = '';
-    const selectedKeys = new Set();
-
-    function normPhone(v) {
-      let d = String(v || '').replace(/\D/g, '');
-      if (d.startsWith('972')) d = '0' + d.slice(3);
-      return d;
+  var row = hit ? headers.map(function (h) { return hit.obj[h]; }) : headers.map(function () { return ''; });
+  headers.forEach(function (h, i) {
+    if (PROTECTED.indexOf(h) >= 0) return;
+    if (data.hasOwnProperty(h)) {
+      var v = data[h];
+      row[i] = Array.isArray(v) ? v.join(', ') : String(v == null ? '' : v);
     }
+  });
 
-    function jsonp(params) {
-      return new Promise((resolve, reject) => {
-        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
-        const s = document.createElement('script');
-        const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 20000);
-        function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
-        window[cb] = (data) => { cleanup(); resolve(data); };
-        s.onerror = () => { cleanup(); reject(new Error('network')); };
-        s.src = SCRIPT_URL + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
-        document.head.appendChild(s);
-      });
-    }
+  writeFlags_(row, headers, ACT_COLS, data.activities);
+  writeFlags_(row, headers, ROLE_COLS, data.helper_roles);
 
-    function bars(el, items) {
-      const max = Math.max(1, ...items.map((i) => i.count));
-      $(el).innerHTML = items.map((i) =>
-        `<div class="bar${i.count ? '' : ' zero'}"><span class="lbl" title="${esc(i.label)}">${esc(i.label)}</span>` +
-        `<div class="track"><div class="fill" style="width:${(i.count / max) * 100}%"></div></div>` +
-        `<span class="num">${i.count}</span></div>`).join('');
-    }
-    const fromTally = (t, rename = {}) => Object.keys(t)
-      .filter((k) => k !== 'לא צוין' || t[k] > 0)
-      .map((k) => ({ label: rename[k] || k, count: t[k] }));
+  var stage = stageFor_(created);
+  var total = priceFor_(data, stage);
+  var existingStatus = hit ? String(hit.obj.status || '').trim() : '';
+  var finalStatus = hit
+    ? (existingStatus || (fromPopup ? 'רשימת המתנה' : 'רשום'))
+    : (fromPopup ? 'רשימת המתנה' : 'רשום');
 
-    function nights(n) {
-      const row = (name, x) => {
-        const tot = x.venue + x.self, scale = Math.max(CAP, tot);
-        return `<div class="night${tot > CAP ? ' over' : ''}"><div class="top"><span>${name}</span><b>${tot} / ${CAP}</b></div>` +
-          `<div class="track"><div class="v" style="width:${(x.venue / scale) * 100}%"></div><div class="s" style="width:${(x.self / scale) * 100}%"></div></div></div>`;
-      };
-      $('c_nights').innerHTML = row('חמישי בלילה', n.thu) + row('שישי בלילה', n.fri);
-    }
+  setCol_(row, headers, 'created', created);
+  setCol_(row, headers, 'updated', now);
+  setCol_(row, headers, 'phone', "'" + phone);
+  setCol_(row, headers, 'price_stage', STAGE_NAMES[stage]);
+  setCol_(row, headers, 'price_total', total == null ? '' : total);
+  setCol_(row, headers, 'status', finalStatus);
+  setCol_(row, headers, 'waitlist_popup', fromPopup || (hit && String(hit.obj.waitlist_popup || '').trim() === 'כן') ? 'כן' : '');
 
-    function updateCapSummary(capValue) {
-      const cap = Number.isFinite(capValue) && capValue >= 0 ? capValue : CAP;
-      $('capInput').value = cap;
-      const active = cap > 0 && latestTotal >= cap;
-      $('capStatus').textContent = `נרשמים נוכחים: ${latestTotal} מתוך ${cap} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
-    }
+  if (hit) {
+    sh.getRange(hit.row, 1, 1, headers.length).setValues([row]);
+  } else {
+    sh.appendRow(row);
+  }
+  var count = getRegistrationCount_(sh);
+  return {
+    ok: true,
+    isNew: !hit,
+    stage: stage,
+    total: total,
+    status: finalStatus,
+    waitlistPopup: fromPopup,
+    created: created.toISOString(),
+    count: count,
+    capacity: capacity,
+    isFull: capacity > 0 && count >= capacity
+  };
+}
 
-    function pickListFromObject(obj) {
-      if (!obj || typeof obj !== 'object') return [];
-      const keys = ['participants', 'registrants', 'rows', 'records', 'items', 'users', 'members', 'names', 'list', 'data'];
-      for (const k of keys) {
-        if (Array.isArray(obj[k]) && obj[k].length) return obj[k];
-      }
-      return [];
-    }
+/* ---------- רשימת המתנה (באותו גיליון Registrations) ---------- */
+function saveWaitlist_(data) {
+  var phone = normPhone_(data.phone);
+  if (!phone) throw new Error('bad phone');
+  var name = String(data.name || '').trim();
+  if (!name) throw new Error('missing name');
+  var notes = String(data.notes || '').trim();
 
-    function extractParticipants(d) {
-      const raw = pickListFromObject(d);
-      if (!raw.length) return [];
-      const list = [];
-      raw.forEach((item, idx) => {
-        if (typeof item === 'string') {
-          const name = item.trim();
-          if (name) list.push({ key: `${idx}__${name}`, name, raw: { name } });
-          return;
-        }
-        if (item && typeof item === 'object') {
-          const record = item.data && typeof item.data === 'object' ? { ...item, ...item.data } : { ...item };
-          delete record.data;
-          const name = String(record.name || record.full_name || record.שם || record.title || record.phone || `משתתף ${idx + 1}`).trim();
-          const key = String(record.phone || record.id || `${idx}__${name}`);
-          list.push({ key, name, raw: record });
-        }
-      });
-      return list;
-    }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var headers = getHeaders_(sh);
+  var hit = findRow_(sh, phone);
+  var now = new Date();
+  var created = hit && hit.obj.created instanceof Date ? hit.obj.created : now;
 
-    function matchesSearch(p, q) {
-      if (!q) return true;
-      const g = String(p.raw?.gender || '').trim();
-      return q === '__none' ? !g : g === q;
-    }
+  var row = hit ? headers.map(function (h) { return hit.obj[h]; }) : headers.map(function () { return ''; });
+  setCol_(row, headers, 'created', created);
+  setCol_(row, headers, 'updated', now);
+  setCol_(row, headers, 'phone', "'" + phone);
+  setCol_(row, headers, 'name', name);
+  setCol_(row, headers, 'status', 'רשימת המתנה');
+  setCol_(row, headers, 'waitlist_popup', 'כן');
+  if (notes) {
+    var curWhy = String(hit && hit.obj.why ? hit.obj.why : '').trim();
+    var noteLine = 'רשימת המתנה: ' + notes;
+    setCol_(row, headers, 'why', curWhy ? (curWhy.indexOf(noteLine) >= 0 ? curWhy : curWhy + ' | ' + noteLine) : noteLine);
+  }
 
-    function updateSelectedSummary(customText, isWarn = false) {
-      const el = $('selectedNamesSummary');
-      el.className = isWarn ? 'selected-preview warn' : 'selected-preview';
-      if (customText) {
-        el.innerHTML = customText;
-        return;
-      }
-      const chosen = participants.filter((p) => selectedKeys.has(p.key)).map((p) => p.name);
-      el.innerHTML = chosen.length
-        ? `מסומנים (<b>${chosen.length}</b>): ${esc(chosen.join(', '))}`
-        : 'מסומנים: <b>0</b> משתתפים';
-    }
+  if (hit) {
+    sh.getRange(hit.row, 1, 1, headers.length).setValues([row]);
+  } else {
+    sh.appendRow(row);
+  }
+  return { ok: true, updated: !!hit, status: 'רשימת המתנה' };
+}
 
-    function formatFieldValue(val) {
-      if (val === null || val === undefined || val === '') return '–';
-      if (Array.isArray(val)) return val.length ? val.join(', ') : '–';
-      if (typeof val === 'object') return JSON.stringify(val, null, 2);
-      return String(val);
-    }
+function deleteRegistration_(rawPhone) {
+  var phone = normPhone_(rawPhone);
+  if (!phone) throw new Error('bad phone');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = ensureSheet_(SpreadsheetApp.getActiveSpreadsheet(), REG_SHEET, REG_HEADERS);
+    var hit = findRow_(sh, phone);
+    if (!hit) return { ok: true, status: 'not_found', count: getRegistrationCount_(sh) };
+    sh.deleteRow(hit.row);
+    return { ok: true, status: 'deleted', count: getRegistrationCount_(sh) };
+  } finally {
+    lock.releaseLock();
+  }
+}
 
-    function renderParticipantDetails(key) {
-      activeDetailKey = key || '';
-      const sel = $('participantSelect');
-      if (sel && sel.value !== activeDetailKey) sel.value = activeDetailKey;
+/* ---------- דשבורד ---------- */
+function getStats_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var last = sh.getLastRow();
+  var headers = getHeaders_(sh);
+  var allValidRows = last < 2 ? [] : sh.getRange(2, 1, last - 1, headers.length).getValues().map(function (r) {
+    var o = {}; headers.forEach(function (h, i) { o[h] = r[i]; }); return o;
+  }).filter(function (o) {
+    return normPhone_(o.phone);
+  });
 
-      const p = participants.find((item) => item.key === activeDetailKey);
-      if (!p) {
-        $('participantDetails').hidden = true;
-        $('detailsGrid').innerHTML = '';
-        return;
-      }
+  var rows = allValidRows.filter(function (o) {
+    return String(o.status || '').trim() !== 'רשימת המתנה';
+  });
 
-      $('detailsTitle').textContent = `כל השדות של: ${p.name}`;
-      const entries = Object.entries(p.raw || {});
-      $('detailsGrid').innerHTML = entries.length
-        ? entries.map(([k, v]) => {
-            const label = FIELD_LABELS[k] || k;
-            return `<div class="field-row"><span class="field-key">${esc(label)} (${esc(k)})</span><span class="field-val">${esc(formatFieldValue(v))}</span></div>`;
-          }).join('')
-        : `<div class="field-row"><span class="field-key">שם</span><span class="field-val">${esc(p.name)}</span></div>`;
-
-      $('participantDetails').hidden = false;
-      syncApproveBtn(p);
-    }
-
-    function syncApproveBtn(p) {
-      const btn = $('approveBtn');
-      const sent = String(p.raw?.email_sent || '').trim();
-      $('approveMsg').textContent = isApproved(p)
-        ? ('מאושר' + (sent ? ' · מייל נשלח ' + sent : ' · מייל לא נשלח'))
-        : '';
-      btn.textContent = !isApproved(p) ? '✅ אישור ושליחת מייל' : (sent ? '✉️ שליחת מייל חוזרת' : '✉️ שליחת מייל');
-      btn.disabled = false;
-    }
-
-    function renderSelectOptions() {
-      const sel = $('participantSelect');
-      if (!sel) return;
-      const current = activeDetailKey;
-      sel.innerHTML = '<option value="">בחר משתתף לצפייה בכל השדות…</option>' +
-        participants.map((p) => `<option value="${esc(p.key)}"${p.key === current ? ' selected' : ''}>${esc(mark(p))}</option>`).join('');
-    }
-
-    function renderNamesList() {
-      const q = $('genderFilter')?.value || '';
-      const filtered = participants.filter((p) => matchesSearch(p, q));
-
-      if (!participants.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">השרת החזיר נתונים מסוכמים בלבד ללא מערך משתתפים/רשומות.</p>';
-        updateSelectedSummary();
-        return;
-      }
-
-      if (!filtered.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">אין משתתפים במגדר הזה.</p>';
-        updateSelectedSummary();
-        return;
-      }
-
-      $('namesList').innerHTML = filtered.map((p) => {
-        const checked = selectedKeys.has(p.key) ? ' checked' : '';
-        return `<label class="name-item"><input type="checkbox" value="${esc(p.key)}"${checked} /><span>${esc(mark(p))}</span></label>`;
-      }).join('');
-
-      updateSelectedSummary();
-    }
-
-    async function tryFetchParticipantsList(currentPhone) {
-      const candidateActions = ['list', 'registrants', 'participants', 'get_all'];
-      for (const act of candidateActions) {
-        try {
-          const res = await jsonp({ action: act, phone: currentPhone });
-          if (res && res.ok) {
-            const found = extractParticipants(res);
-            if (found.length) return found;
-          }
-        } catch {}
-      }
-      return [];
-    }
-
-    function render(d) {
-      const g = d.gender || {}, a = d.age || {};
-      latestTotal = Number(d.total) || 0;
-      $('k_total').textContent = latestTotal;
-      $('k_male').textContent = g['גבר'] || 0;
-      $('k_female').textContent = g['אישה'] || 0;
-      $('k_age').textContent = a.all ?? '–';
-      $('k_male_age').textContent = a.male != null ? 'גיל ממוצע ' + a.male : '';
-      $('k_female_age').textContent = a.female != null ? 'גיל ממוצע ' + a.female : '';
-      $('k_unknown').textContent = g['לא צוין'] ? g['לא צוין'] + ' בלי מגדר' : '';
-
-      bars('c_att', fromTally(d.attendance || {}, { 'סופ"ש מלא (חמישי–שבת)': 'סופ"ש מלא' }));
-      nights(d.nights || { thu: { venue: 0, self: 0 }, fri: { venue: 0, self: 0 } });
-      bars('c_act', d.activities || []);
-      bars('c_roles', d.roles || []);
-      bars('c_more', [
-        { label: 'לינה במתחם', count: d.lodging?.['לינה במתחם (מזרנים על פרקט)'] || 0 },
-        { label: 'לינה עצמאית', count: d.lodging?.['לינה עצמאית (מלון / B&B)'] || 0 },
-        { label: 'מסלול יין', count: d.wine || 0 },
-        { label: 'לילה נוסף: כן', count: d.extraNight?.['כן'] || 0 },
-        { label: 'לילה נוסף: אולי', count: d.extraNight?.['אולי'] || 0 }
-      ]);
-
-      const validKeys = new Set(participants.map((p) => p.key));
-      for (const k of [...selectedKeys]) {
-        if (!validKeys.has(k)) selectedKeys.delete(k);
-      }
-
-      renderSelectOptions();
-      renderNamesList();
-      if (activeDetailKey && validKeys.has(activeDetailKey)) {
-        renderParticipantDetails(activeDetailKey);
-      } else {
-        renderParticipantDetails('');
-      }
-
-      if (d.capacity !== undefined) {
-        updateCapSummary(parseInt(d.capacity, 10));
-      }
-
-      $('stamp').textContent = 'עודכן ' + new Date(d.updated || Date.now()).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    }
-
-    async function load() {
-      if (!phone) { $('gate').hidden = false; $('stamp').textContent = ''; return; }
-      $('refresh').disabled = true;
-      $('msg').textContent = '';
-      try {
-        const d = await jsonp({ action: 'stats', phone });
-        if (!d.ok) throw new Error(d.error === 'unauthorized' ? 'אין הרשאה לצפות בנתונים.' : d.error);
-        $('gate').hidden = true;
-        let list = extractParticipants(d);
-        if (!list.length) {
-          list = await tryFetchParticipantsList(phone);
-        }
-        participants = list;
-        render(d);
-      } catch (e) {
-        $('stamp').textContent = '';
-        $('gate').hidden = false;
-        $('msg').textContent = e.message === 'timeout' || e.message === 'network' ? 'הטעינה נכשלה. נסו לרענן.' : e.message;
-      } finally {
-        $('refresh').disabled = false;
-      }
-    }
-
-    $('participantSelect')?.addEventListener('change', async (e) => {
-      const key = e.target.value;
-      renderParticipantDetails(key);
-      const p = participants.find((item) => item.key === key);
-      const targetPhone = normPhone(p?.raw?.phone || '');
-      if (p && targetPhone && Object.keys(p.raw || {}).length <= 2) {
-        try {
-          const single = await jsonp({ action: 'get', phone: targetPhone });
-          if (single && single.ok && single.found && single.data) {
-            p.raw = { ...p.raw, ...single.data };
-            renderParticipantDetails(key);
-          }
-        } catch {}
-      }
+  function tally(key, options) {
+    var t = {}; options.forEach(function (k) { t[k] = 0; }); t['לא צוין'] = 0;
+    rows.forEach(function (o) {
+      var v = String(o[key] || '').trim();
+      if (t.hasOwnProperty(v)) t[v]++; else if (!v) t['לא צוין']++; else t[v] = (t[v] || 0) + 1;
     });
-
-    $('approveBtn')?.addEventListener('click', async () => {
-      const p = participants.find((item) => item.key === activeDetailKey);
-      const target = normPhone(p?.raw?.phone || '');
-      if (!p || !target) return;
-      const sent = String(p.raw?.email_sent || '').trim();
-      const resend = isApproved(p) && !!sent;
-      const email = String(p.raw?.email || '').trim();
-      const q = resend ? `לשלוח שוב מייל אישור ל-${p.name}?` : `לאשר את ${p.name}${email ? ' ולשלוח מייל ל-' + email : ' (אין מייל – רק סימון כמאושר)'}?`;
-      if (!confirm(q)) return;
-      const btn = $('approveBtn');
-      btn.disabled = true;
-      $('approveMsg').textContent = 'שולח…';
-      try {
-        const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve', phone, target, resend }) });
-        const res = await r.json();
-        if (!res.ok) throw new Error(res.error === 'unauthorized' ? 'אין הרשאה.' : res.error);
-        p.raw.status = res.status;
-        if (res.email_sent) p.raw.email_sent = res.email_sent;
-        renderSelectOptions();
-        renderNamesList();
-        renderParticipantDetails(p.key);
-        if (!res.emailSent) {
-          $('approveMsg').textContent = res.reason === 'no email' ? 'סומן כמאושר. אין כתובת מייל – המייל לא נשלח.'
-            : res.reason === 'already sent' ? 'מאושר. מייל כבר נשלח ב-' + res.email_sent : 'סומן כמאושר.';
-        }
-      } catch (e) {
-        $('approveMsg').textContent = 'שגיאה: ' + (e.message || e);
-        btn.disabled = false;
-      }
+    return t;
+  }
+  function avgAge(filter) {
+    var ages = rows.filter(filter).map(function (o) { return parseFloat(o.age); })
+      .filter(function (n) { return n >= 18 && n <= 99; });
+    if (!ages.length) return null;
+    return Math.round(ages.reduce(function (a, b) { return a + b; }, 0) / ages.length * 10) / 10;
+  }
+  function flags(cols) {
+    return cols.map(function (c) {
+      var n = rows.filter(function (o) {
+        return String(o[c[0]] || '').trim() === 'כן' ||
+          (!o.hasOwnProperty(c[0]) && String(o.activities || o.helper_roles || '').indexOf(c[1]) >= 0);
+      }).length;
+      return { label: c[1], count: n };
+    }).sort(function (a, b) { return b.count - a.count; });
+  }
+  var FULL = 'סופ"ש מלא (חמישי–שבת)', FRI = 'שישי–שבת', THU = 'חמישי–שישי';
+  function night(att) {
+    var inVenue = 0, self = 0;
+    rows.forEach(function (o) {
+      if (att.indexOf(String(o.attendance || '')) < 0) return;
+      if (String(o.lodging || '').indexOf('במתחם') >= 0) inVenue++; else self++;
     });
+    return { venue: inVenue, self: self };
+  }
 
-    $('closeDetailsBtn')?.addEventListener('click', () => {
-      renderParticipantDetails('');
+  var registrants = allValidRows.map(function (o, idx) {
+    var rec = {};
+    headers.forEach(function (h) {
+      var val = o[h];
+      rec[h] = val instanceof Date ? val.toISOString() : val;
     });
+    rec.phone = normPhone_(o.phone);
+    rec.activities = readFlags_(o, ACT_COLS) || String(o.activities || '');
+    rec.helper_roles = readFlags_(o, ROLE_COLS) || String(o.helper_roles || '');
+    var baseName = String(o.name || '').trim() || ('משתתף ' + (idx + 1));
+    var isWait = String(o.status || '').trim() === 'רשימת המתנה' || String(o.waitlist_popup || '').trim() === 'כן';
+    rec.name = isWait ? (baseName + ' [המתנה]') : baseName;
+    return rec;
+  });
 
-    $('genderFilter')?.addEventListener('change', renderNamesList);
+  return {
+    ok: true,
+    updated: new Date().toISOString(),
+    capacity: getCapacity_(),
+    total: rows.length,
+    gender: tally('gender', ['גבר', 'אישה']),
+    age: {
+      all: avgAge(function () { return true; }),
+      male: avgAge(function (o) { return o.gender === 'גבר'; }),
+      female: avgAge(function (o) { return o.gender === 'אישה'; })
+    },
+    attendance: tally('attendance', [FULL, FRI, THU]),
+    lodging: tally('lodging', ['לינה במתחם (מזרנים על פרקט)', 'לינה עצמאית (מלון / B&B)']),
+    nights: { thu: night([FULL, THU]), fri: night([FULL, FRI]) },
+    extraNight: tally('extra_night', ['כן', 'אולי', 'לא']),
+    wine: rows.filter(function (o) { return String(o.wine || '') === 'כן'; }).length,
+    activities: flags(ACT_COLS),
+    roles: flags(ROLE_COLS),
+    registrants: registrants
+  };
+}
 
-    $('namesList')?.addEventListener('change', (e) => {
-      const cb = e.target;
-      if (cb && cb.type === 'checkbox') {
-        if (cb.checked) {
-          selectedKeys.add(cb.value);
-          renderParticipantDetails(cb.value);
-        } else {
-          selectedKeys.delete(cb.value);
-        }
-        updateSelectedSummary();
-      }
-    });
+/* ---------- אישור משתתף + מייל ---------- */
+function approve_(b) {
+  if (normPhone_(b.phone) !== OWNER_PHONE) throw new Error('unauthorized');
+  var target = normPhone_(b.target);
+  if (!target) throw new Error('bad phone');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var headers = getHeaders_(sh);
+  var hit = findRow_(sh, target);
+  if (!hit) throw new Error('not found');
+  var o = hit.obj;
 
-    $('selectAllNames')?.addEventListener('click', () => {
-      const q = $('genderFilter')?.value || '';
-      const target = q ? participants.filter((p) => matchesSearch(p, q)) : participants;
-      target.forEach((p) => selectedKeys.add(p.key));
-      renderNamesList();
-    });
+  setCell_(sh, hit.row, headers, 'status', APPROVED_STATUS);
+  setCell_(sh, hit.row, headers, 'updated', new Date());
 
-    $('clearAllNames')?.addEventListener('click', () => {
-      selectedKeys.clear();
-      renderNamesList();
-    });
+  var email = String(o.email || '').trim();
+  var already = String(o.email_sent || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: true, status: APPROVED_STATUS, emailSent: false, reason: 'no email' };
+  }
+  if (already && !b.resend) {
+    return { ok: true, status: APPROVED_STATUS, emailSent: false, reason: 'already sent', email_sent: already };
+  }
 
-    $('copySelectedNames')?.addEventListener('click', async () => {
-      const chosen = participants.filter((p) => selectedKeys.has(p.key)).map((p) => p.name);
-      if (!chosen.length) {
-        updateSelectedSummary('לא סומנו שמות להעתקה.', true);
-        return;
-      }
-      const text = chosen.join('\n');
-      try {
-        await navigator.clipboard.writeText(text);
-        updateSelectedSummary(`הועתקו (<b>${chosen.length}</b>) ללוח: ${esc(chosen.join(', '))}`);
-      } catch {
-        updateSelectedSummary('לא הצלחנו להעתיק אוטומטית ללוח.', true);
-      }
-    });
+  MailApp.sendEmail({
+    to: email,
+    subject: 'ההרשמה שלך לריטריט חנוכה אושרה 🎉',
+    htmlBody: approvalHtml_(o),
+    name: MAIL_FROM_NAME
+  });
+  var stamp = Utilities.formatDate(new Date(), 'Asia/Jerusalem', 'dd/MM/yy HH:mm');
+  setCell_(sh, hit.row, headers, 'email_sent', stamp);
+  return { ok: true, status: APPROVED_STATUS, emailSent: true, email_sent: stamp };
+}
 
-    $('saveCapBtn').addEventListener('click', async () => {
-      if (!phone) {
-        $('capStatus').textContent = 'יש להתחבר תחילה עם מספר טלפון.';
-        return;
-      }
-      const cap = parseInt($('capInput').value, 10);
-      if (!Number.isFinite(cap) || cap < 0) {
-        $('capStatus').textContent = 'יש להזין מספר תקין (0 ומעלה).';
-        return;
-      }
-      $('saveCapBtn').disabled = true;
-      $('capStatus').textContent = 'שומר…';
-      try {
-        const r = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'set_capacity', phone, capacity: cap })
-        });
-        const res = await r.json();
-        if (!res.ok) throw new Error(res.error);
-        updateCapSummary(parseInt(res.capacity, 10));
-      } catch (e) {
-        $('capStatus').textContent = 'שגיאה בשמירה: ' + (e.message || e);
-      } finally {
-        $('saveCapBtn').disabled = false;
-      }
-    });
+function approvalHtml_(o) {
+  var e = function (v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var name = String(o.name || '').trim().split(/\s+/)[0] || '';
+  var price = o.price_total ? e(o.price_total) + ' ₪' + (o.price_stage ? ' (' + e(o.price_stage) + ')' : '') : '';
+  var lines = [
+    '<p>היי ' + e(name) + ',</p>',
+    '<p><b>ההרשמה שלך לריטריט חנוכה אושרה!</b> שמחים שאת/ה איתנו 🤍</p>',
+    '<p>📅 10–12 בדצמבר 2026 (חמישי–שבת)<br>📍 מתחם פעימה, מצפה רמון</p>',
+    '<p>מתי מגיעים: ' + e(o.attendance) + '<br>לינה: ' + e(o.lodging) + '</p>'
+  ];
+  if (price) lines.push('<p>סכום לתשלום: <b>' + price + '</b>' + (o.payment ? '<br>אמצעי תשלום: ' + e(o.payment) : '') + '</p>');
+  lines.push(
+    '<p><b>💳 תשלום</b><br>' +
+    'ניתן להעביר מקדמה של ' + DEPOSIT + ' ₪ לשריון מקום, ואת היתרה בהמשך.</p>' +
+    '<p><b>פייבוקס:</b> <a href="' + PAYBOX_URL + '">לתשלום בפייבוקס</a></p>' +
+    '<p><b>למעדיפים העברה בנקאית:</b><br>' +
+    e(BANK.bank) + '<br>סניף ' + e(BANK.branch) + '<br>מספר חשבון ' + e(BANK.account) + '<br>על שם ' + e(BANK.owner) + '</p>'
+  );
+  lines.push('<p>אפשר לעדכן פרטים בכל זמן עם מספר הטלפון שלך: <a href="' + FORM_URL + '">לטופס</a></p>');
+  lines.push('<p>נתראה במדבר,<br>מנגנים שרים ביחד</p>');
+  return '<div dir="rtl" style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6">' + lines.join('') + '</div>';
+}
 
-    $('gateBtn').addEventListener('click', () => {
-      phone = normPhone($('gatePhone').value);
-      try { if (phone) localStorage.setItem(LS_KEY, phone); } catch {}
-      load();
-    });
-    $('gatePhone')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        $('gateBtn').click();
-      }
-    });
-    $('refresh').addEventListener('click', load);
-    load();
-  </script>
-</body>
-</html>
-// hanukkah2026_dashboard.astro
+function setCell_(sh, row, headers, name, val) {
+  var i = headers.lastIndexOf(name);
+  if (i >= 0) sh.getRange(row, i + 1).setValue(val);
+}
+
+/* ---------- קניות ---------- */
+function savePurchase_(b) {
+  var phone = normPhone_(b.phone);
+  if (!phone) throw new Error('bad phone');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var reg = ensureSheet_(ss, REG_SHEET, REG_HEADERS);
+  var hit = findRow_(reg, phone);
+  if (!hit) throw new Error('not registered');
+  if (!/^(כן|yes|true|1|v|✓)$/i.test(String(hit.obj.buyer || '').trim())) throw new Error('not a buyer');
+
+  var amount = parseFloat(String(b.amount || '').replace(/[^\d.]/g, ''));
+  if (!(amount > 0)) throw new Error('bad amount');
+
+  var url = '', fname = '';
+  if (b.file && b.file.b64) {
+    var blob = Utilities.newBlob(Utilities.base64Decode(b.file.b64),
+      b.file.mime || 'application/octet-stream',
+      Utilities.formatDate(new Date(), 'Asia/Jerusalem', 'yyyyMMdd_HHmm') + '_' + phone + '_' + (b.file.name || 'receipt'));
+    var f = getFolder_().createFile(blob);
+    url = f.getUrl();
+    fname = f.getName();
+  }
+
+  var sh = ensureSheet_(ss, BUY_SHEET, BUY_HEADERS);
+  var headers = getHeaders_(sh);
+  var row = headers.map(function () { return ''; });
+  setCol_(row, headers, 'created', new Date());
+  setCol_(row, headers, 'phone', "'" + phone);
+  setCol_(row, headers, 'name', hit.obj.name || '');
+  setCol_(row, headers, 'amount', amount);
+  setCol_(row, headers, 'store', String(b.store || ''));
+  setCol_(row, headers, 'details', String(b.details || ''));
+  setCol_(row, headers, 'receipt_url', url);
+  setCol_(row, headers, 'receipt_name', fname);
+  sh.appendRow(row);
+
+  return { ok: true, purchases: listPurchases_(ss, phone) };
+}
+
+function listPurchases_(ss, phone) {
+  var sh = ensureSheet_(ss, BUY_SHEET, BUY_HEADERS);
+  var last = sh.getLastRow();
+  if (last < 2) return [];
+  var headers = getHeaders_(sh);
+  var vals = sh.getRange(2, 1, last - 1, headers.length).getValues();
+  var pi = headers.indexOf('phone');
+  return vals.filter(function (r) { return normPhone_(r[pi]) === phone; }).map(function (r) {
+    var o = {};
+    headers.forEach(function (h, i) { o[h] = r[i] instanceof Date ? r[i].toISOString() : r[i]; });
+    return { created: o.created, amount: o.amount, store: o.store, details: o.details, hasReceipt: !!o.receipt_url };
+  });
+}
+
+/* ---------- תמחור ---------- */
+function stageFor_(d) {
+  return d < STAGE2 ? 0 : d < STAGE3 ? 1 : 2;
+}
+function priceFor_(data, stage) {
+  var att = String(data.attendance || '');
+  var kind = att.indexOf('סופ"ש מלא') === 0 ? 'full' : (att ? 'one' : null);
+  var lod = String(data.lodging || '').indexOf('במתחם') >= 0 ? 'y' : (data.lodging ? 'n' : null);
+  if (!kind || !lod) return null;
+  var t = PRICES[lod][kind][stage] + FOOD[kind];
+  if (String(data.wine || '') === 'כן') t += WINE;
+  return t;
+}
+
+/* ---------- עזרי גיליון ---------- */
+function ensureSheet_(ss, name, headers) {
+  var sh = ss.getSheetByName(name) || ss.insertSheet(name);
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(headers);
+    sh.setFrozenRows(1);
+  } else {
+    var cur = getHeaders_(sh);
+    var missing = headers.filter(function (h) { return cur.indexOf(h) < 0; });
+    if (missing.length) {
+      sh.getRange(1, cur.length + 1, 1, missing.length).setValues([missing]);
+    }
+  }
+  var pc = getHeaders_(sh).indexOf('phone');
+  if (pc >= 0) sh.getRange(1, pc + 1, sh.getMaxRows(), 1).setNumberFormat('@');
+  return sh;
+}
+function getHeaders_(sh) {
+  var lc = sh.getLastColumn();
+  if (!lc) return [];
+  return sh.getRange(1, 1, 1, lc).getValues()[0].map(function (h) { return String(h).trim(); });
+}
+function findRow_(sh, phone) {
+  var last = sh.getLastRow();
+  if (last < 2) return null;
+  var headers = getHeaders_(sh);
+  var pi = headers.indexOf('phone');
+  var vals = sh.getRange(2, 1, last - 1, headers.length).getValues();
+  for (var r = 0; r < vals.length; r++) {
+    if (normPhone_(vals[r][pi]) === phone) {
+      var obj = {};
+      headers.forEach(function (h, i) { obj[h] = vals[r][i]; });
+      return { row: r + 2, obj: obj };
+    }
+  }
+  return null;
+}
+function writeFlags_(row, headers, cols, list) {
+  var chosen = (Array.isArray(list) ? list : String(list || '').split(','))
+    .map(function (s) { return String(s).trim(); });
+  cols.forEach(function (c) { setCol_(row, headers, c[0], chosen.indexOf(c[1]) >= 0 ? 'כן' : ''); });
+}
+function readFlags_(obj, cols) {
+  return cols.filter(function (c) { return String(obj[c[0]] || '').trim() === 'כן'; })
+    .map(function (c) { return c[1]; }).join(', ');
+}
+function setCol_(row, headers, name, val) {
+  var i = headers.lastIndexOf(name);
+  if (i >= 0) row[i] = val;
+}
+function normPhone_(p) {
+  var d = String(p == null ? '' : p).replace(/\D/g, '');
+  if (d.indexOf('972') === 0) d = '0' + d.slice(3);
+  if (d.length === 9 && d[0] !== '0') d = '0' + d;
+  return d.length >= 9 && d.length <= 10 ? d : '';
+}
+function getFolder_() {
+  var it = DriveApp.getFoldersByName(RECEIPTS_FOLDER);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(RECEIPTS_FOLDER);
+}
+function respond_(obj, callback) {
+  var json = JSON.stringify(obj);
+  if (callback) {
+    return ContentService.createTextOutput(callback + '(' + json + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
