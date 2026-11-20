@@ -3,7 +3,7 @@
 // ערב משחקים, חיבורים ומוסיקה – הרשמה ועדכון לפי טלפון (27.11.26)
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V11';
+const VERSION = 'V12';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -371,6 +371,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     </div>
     <h2 id="doneTitle">תודה, הפרטים התקבלו.</h2>
     <p class="done-note">הרשמה אינה מהווה אישור הזמנה.</p>
+    <p id="doneSolo" class="done-ontime" style="margin:0 0 16px" hidden>שימו לב: יש קדימות לנרשמים בזוג (עם +1).</p>
     <div class="done-info">
       <div class="done-date"><b>27.11.26</b><span>ערב חיבורים</span></div>
       <div class="done-times">
@@ -664,6 +665,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     const doneDialog = $('doneDialog');
     function showDone() {
+      const solo = $('doneSolo');
+      if (solo) solo.hidden = !$('no_plus')?.checked;
       if (doneDialog && doneDialog.showModal) doneDialog.showModal();
       else alert('תודה, הפרטים התקבלו.');
     }
