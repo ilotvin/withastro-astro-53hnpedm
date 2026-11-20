@@ -4,7 +4,7 @@
 // דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V9';
+const VERSION = 'V10';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -173,8 +173,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div id="participantDetails" class="participant-details" hidden>
         <div class="participant-details-head">
           <h3 id="detailsTitle">פרטי משתתף</h3>
-          <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-small" id="approveBtn" type="button">✅ אישור ושליחת מייל</button>
+            <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
+          </div>
         </div>
+        <p id="approveMsg" class="note" style="margin:0 0 10px" role="status"></p>
         <div id="detailsGrid" class="fields-grid"></div>
       </div>
     </section>
@@ -223,8 +227,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       status: 'סטטוס',
       created: 'תאריך יצירה / הרשמה',
       updated: 'תאריך עדכון',
-      total: 'סה"כ עלות'
+      total: 'סה"כ עלות',
+      email_sent: 'מייל אישור נשלח'
     };
+    const APPROVED = 'מאושר';
+    const isApproved = (p) => String(p?.raw?.status || '').trim() === APPROVED;
+    const mark = (p) => (isApproved(p) ? '✅ ' : '') + p.name;
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -357,6 +365,17 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         : `<div class="field-row"><span class="field-key">שם</span><span class="field-val">${esc(p.name)}</span></div>`;
 
       $('participantDetails').hidden = false;
+      syncApproveBtn(p);
+    }
+
+    function syncApproveBtn(p) {
+      const btn = $('approveBtn');
+      const sent = String(p.raw?.email_sent || '').trim();
+      $('approveMsg').textContent = isApproved(p)
+        ? ('מאושר' + (sent ? ' · מייל נשלח ' + sent : ' · מייל לא נשלח'))
+        : '';
+      btn.textContent = !isApproved(p) ? '✅ אישור ושליחת מייל' : (sent ? '✉️ שליחת מייל חוזרת' : '✉️ שליחת מייל');
+      btn.disabled = false;
     }
 
     function renderSelectOptions() {
@@ -364,7 +383,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       if (!sel) return;
       const current = activeDetailKey;
       sel.innerHTML = '<option value="">בחר משתתף לצפייה בכל השדות…</option>' +
-        participants.map((p) => `<option value="${esc(p.key)}"${p.key === current ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+        participants.map((p) => `<option value="${esc(p.key)}"${p.key === current ? ' selected' : ''}>${esc(mark(p))}</option>`).join('');
     }
 
     function renderNamesList() {
@@ -385,7 +404,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
       $('namesList').innerHTML = filtered.map((p) => {
         const checked = selectedKeys.has(p.key) ? ' checked' : '';
-        return `<label class="name-item"><input type="checkbox" value="${esc(p.key)}"${checked} /><span>${esc(p.name)}</span></label>`;
+        return `<label class="name-item"><input type="checkbox" value="${esc(p.key)}"${checked} /><span>${esc(mark(p))}</span></label>`;
       }).join('');
 
       updateSelectedSummary();
@@ -484,6 +503,37 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
             renderParticipantDetails(key);
           }
         } catch {}
+      }
+    });
+
+    $('approveBtn')?.addEventListener('click', async () => {
+      const p = participants.find((item) => item.key === activeDetailKey);
+      const target = normPhone(p?.raw?.phone || '');
+      if (!p || !target) return;
+      const sent = String(p.raw?.email_sent || '').trim();
+      const resend = isApproved(p) && !!sent;
+      const email = String(p.raw?.email || '').trim();
+      const q = resend ? `לשלוח שוב מייל אישור ל-${p.name}?` : `לאשר את ${p.name}${email ? ' ולשלוח מייל ל-' + email : ' (אין מייל – רק סימון כמאושר)'}?`;
+      if (!confirm(q)) return;
+      const btn = $('approveBtn');
+      btn.disabled = true;
+      $('approveMsg').textContent = 'שולח…';
+      try {
+        const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve', phone, target, resend }) });
+        const res = await r.json();
+        if (!res.ok) throw new Error(res.error === 'unauthorized' ? 'אין הרשאה.' : res.error);
+        p.raw.status = res.status;
+        if (res.email_sent) p.raw.email_sent = res.email_sent;
+        renderSelectOptions();
+        renderNamesList();
+        renderParticipantDetails(p.key);
+        if (!res.emailSent) {
+          $('approveMsg').textContent = res.reason === 'no email' ? 'סומן כמאושר. אין כתובת מייל – המייל לא נשלח.'
+            : res.reason === 'already sent' ? 'מאושר. מייל כבר נשלח ב-' + res.email_sent : 'סומן כמאושר.';
+        }
+      } catch (e) {
+        $('approveMsg').textContent = 'שגיאה: ' + (e.message || e);
+        btn.disabled = false;
       }
     });
 
