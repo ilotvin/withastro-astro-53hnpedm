@@ -1,9 +1,9 @@
 ---
-// hanukkah2026.astro
+// hanukkah2026.astro · Version: V25
 // ריטריט חנוכה 2026 – מנגנים שרים ביחד, מצפה רמון – הרשמה ועדכון לפי טלפון
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V23';
+const VERSION = 'V25';
 // =========================================
 
 // תאריך ושעת העדכון נקבעים אוטומטית ברגע ה-deploy (שעון ישראל)
@@ -120,6 +120,11 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     .buy-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
     .buy-list .amt { color: var(--sage); font-weight: 700; white-space: nowrap; }
     .buy-total { font-weight: 700; margin-top: 10px; }
+    .pay { border: 2px solid var(--sage); }
+    .pay-ok { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--sage); color: var(--sage-ink); font-weight: 700; }
+    .pay-info p { margin: 0 0 6px; }
+    .pay-info a { color: var(--sage); font-weight: 700; }
+    .pay-done { margin: 12px 0 0; color: var(--sage); font-weight: 700; }
     .msg { margin: 12px 0 0; min-height: 1.6em; }
     .msg.ok { color: var(--sage); }
     .msg.err { color: var(--danger); }
@@ -371,7 +376,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
           <!-- 8. הלפרים -->
           <fieldset class="group">
-            <legend>הלפרים <span class="req">*</span></legend>
+            <legend>הלפרים</legend>
             <div class="modes">
               <label class="role"><input type="checkbox" name="helper_roles" value="מנהל מטבח + שף" /><span>מנהל מטבח + שף<small>אחריות על הובלת הבישולים, ניהול התורנים, כמויות ומעקב אחר מצרכים. הכול בהובלה נעימה ורגישה.</small></span></label>
               <label class="role"><input type="checkbox" name="helper_roles" value="קניות" /><span>קניות<small>אחריות על הקניות (פיזי או אונליין): לוודא שלא יחסר כלום, מעקב אחר המלאי ותמיכה במנהל המטבח במהלך הריטריט.</small></span></label>
@@ -416,6 +421,42 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           </div>
           <p id="saveMsg" class="msg" role="status"></p>
         </form>
+
+        <!-- 11. דיווח תשלום – מוצג רק למי שההרשמה שלו אושרה -->
+        <section id="paySec" class="group pay" hidden aria-labelledby="pay-title">
+          <p class="pay-ok">✅ ההרשמה שלך אושרה!</p>
+          <h2 id="pay-title" style="font-size:19px;margin:0 0 8px">תשלום</h2>
+          <div class="info pay-info">
+            <p>ניתן להעביר מקדמה של 100 ₪ לשריון מקום, ואת היתרה בהמשך.</p>
+            <p><b>פייבוקס:</b> <a href="https://links.payboxapp.com/aFmrkV1Gd8b" target="_blank" rel="noopener">לתשלום בפייבוקס</a></p>
+            <p><b>העברה בנקאית:</b> בנק דיסקונט (11) · סניף 055 · חשבון 123562637 · על שם אילן לוטווין</p>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <span class="q">מה שילמתם? <span class="req">*</span></span>
+            <div class="modes inline">
+              <label><input type="radio" name="p_type" value="מקדמה" /><span>מקדמה</span></label>
+              <label><input type="radio" name="p_type" value="תשלום מלא" /><span>תשלום מלא</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="p_amount">סכום (₪) <span class="req">*</span></label>
+            <input id="p_amount" type="text" inputmode="decimal" placeholder="100" />
+          </div>
+          <div class="field">
+            <span class="q">איך שילמתם? <span class="req">*</span></span>
+            <div class="modes chips">
+              <label><input type="radio" name="p_method" value="פייבוקס" /><span>פייבוקס</span></label>
+              <label><input type="radio" name="p_method" value="העברה בנקאית" /><span>העברה בנקאית</span></label>
+              <label><input type="radio" name="p_method" value="ביט" /><span>ביט</span></label>
+              <label><input type="radio" name="p_method" value="מזומן" /><span>מזומן</span></label>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" id="payBtn" class="btn btn-primary btn-small">עדכון שביצעתי תשלום</button>
+          </div>
+          <p id="payMsg" class="msg" role="status"></p>
+          <p id="payDone" class="pay-done" hidden></p>
+        </section>
 
         <!-- 10. דיווח קניות – מוצג רק למי שסומן buyer=כן בגיליון -->
         <section id="buySec" class="group buy" hidden aria-labelledby="buy-title">
@@ -618,6 +659,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       syncSaveLabels(false);
       els.deleteBtn.hidden = true;
       $('buySec').hidden = true;
+      $('paySec').hidden = true;
       $('statsBtn').hidden = true;
       toggle();
     }
@@ -633,6 +675,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         $('statsBtn').hidden = !res.owner;
         if (res.found) {
           fillForm(res.data);
+          renderPay(res.data);
           syncSaveLabels(true);
           els.deleteBtn.hidden = false;
           setMsg(els.loadMsg, 'הפרטים נטענו. אפשר לשנות ולעדכן.');
@@ -643,6 +686,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
           syncSaveLabels(false);
           els.deleteBtn.hidden = true;
           $('buySec').hidden = true;
+          $('paySec').hidden = true;
           setMsg(els.loadMsg, 'אין עדיין הרשמה עם המספר הזה. ממלאים ושומרים.');
           toggle();
         }
@@ -769,6 +813,45 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         setMsg($('buyMsg'), 'השמירה נכשלה: ' + errText(err), 'err');
       } finally {
         $('buyBtn').disabled = false;
+      }
+    });
+
+    // ===== דיווח תשלום =====
+    let payPrice = null;
+    function renderPay(r) {
+      const approved = String(r.status || '').trim() === 'מאושר';
+      $('paySec').hidden = !approved;
+      if (!approved) return;
+      payPrice = Number(r.price_total) || null;
+      const done = String(r.paid_type || '').trim();
+      $('payDone').hidden = !done;
+      if (done) {
+        $('payDone').textContent = `💰 דיווחת: ${done} · ${fmt(r.paid_amount)} · ${r.paid_method} (${r.paid_at}). אפשר לעדכן שוב אם שילמתם עוד.`;
+      }
+      setMsg($('payMsg'), '');
+    }
+    document.querySelectorAll('input[name="p_type"]').forEach((i) => i.addEventListener('change', () => {
+      if (i.value === 'מקדמה') $('p_amount').value = '100';
+      else if (payPrice) $('p_amount').value = String(payPrice);
+    }));
+    $('payBtn').addEventListener('click', async () => {
+      const phone = normPhone(els.phone.value);
+      const type = radioVal('p_type'), method = radioVal('p_method');
+      const amount = parseFloat($('p_amount').value.replace(/[^\d.]/g, ''));
+      if (!type) return setMsg($('payMsg'), 'בחרו מקדמה או תשלום מלא.', 'err');
+      if (!(amount > 0)) return setMsg($('payMsg'), 'הזינו סכום.', 'err');
+      if (!method) return setMsg($('payMsg'), 'בחרו איך שילמתם.', 'err');
+      $('payBtn').disabled = true;
+      setMsg($('payMsg'), 'שומרים…');
+      try {
+        const res = await post({ action: 'paid', phone, type, amount, method });
+        if (!res.ok) throw new Error(res.error === 'not approved' ? 'ההרשמה עוד לא אושרה.' : res.error);
+        renderPay({ status: 'מאושר', price_total: payPrice, ...res });
+        setMsg($('payMsg'), 'תודה! עדכון התשלום נשמר.', 'ok');
+      } catch (err) {
+        setMsg($('payMsg'), 'השמירה נכשלה: ' + errText(err), 'err');
+      } finally {
+        $('payBtn').disabled = false;
       }
     });
 
