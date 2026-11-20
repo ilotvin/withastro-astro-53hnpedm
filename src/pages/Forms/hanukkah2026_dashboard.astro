@@ -1,10 +1,9 @@
-// hanukkah2026_dashboard.astro
 ---
-// hanukkah2026_dashboard.astro
+// hanukkah2026_dashboard.astro · Version: V13
 // דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V8';
+const VERSION = 'V13';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -129,30 +128,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       </div>
     </section>
 
-    <section class="card wide" id="participantsPickerCard" style="margin-bottom:12px" aria-label="בחירת שמות משתתפים והצגת פרטים">
-      <h2>משתתפים – בחירה והצגת כל השדות</h2>
-      <div class="picker-toolbar">
-        <select id="participantSelect" aria-label="בחירת משתתף לצפייה בכל השדות">
-          <option value="">בחר משתתף לצפייה בכל השדות…</option>
-        </select>
-        <input id="nameSearch" type="search" placeholder="חיפוש לפי שם או פרט…" autocomplete="off" />
-        <button class="btn btn-ghost btn-small" id="selectAllNames" type="button">סמן הכל</button>
-        <button class="btn btn-ghost btn-small" id="clearAllNames" type="button">נקה סימון</button>
-        <button class="btn btn-small" id="copySelectedNames" type="button">העתק מסומנים</button>
-      </div>
-      <div id="namesList" class="names-box">
-        <p class="note" style="margin:0">הרשימה תוצג ברגע שהנתונים ייטענו.</p>
-      </div>
-      <p id="selectedNamesSummary" class="selected-preview" role="status">מסומנים: <b>0</b> משתתפים</p>
-
-      <div id="participantDetails" class="participant-details" hidden>
-        <div class="participant-details-head">
-          <h3 id="detailsTitle">פרטי משתתף</h3>
-          <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
-        </div>
-        <div id="detailsGrid" class="fields-grid"></div>
-      </div>
-    </section>
 
     <section class="kpis" aria-label="מספרים עיקריים">
       <div class="kpi"><span>נרשמים</span><b id="k_total">–</b></div>
@@ -172,6 +147,33 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div class="card wide"><h2>פעילויות מבוקשות</h2><div id="c_act"></div></div>
       <div class="card"><h2>הלפרים לפי תפקיד</h2><div id="c_roles"></div></div>
       <div class="card"><h2>עוד נתונים</h2><div id="c_more"></div></div>
+      <div class="card wide"><h2>אישורים ותשלומים</h2><div id="c_pay"></div><p class="note">✅ מאושר · ✉️ מייל אישור נשלח · 💰 דיווח על תשלום · 📭 אין מייל</p></div>
+    </section>
+    <section class="card wide" id="participantsPickerCard" style="margin-top:12px" aria-label="בחירת שמות משתתפים והצגת פרטים">
+      <h2>משתתפים – בחירה והצגת כל השדות</h2>
+      <div class="picker-toolbar">
+        <select id="participantSelect" aria-label="בחירת משתתף לצפייה בכל השדות">
+          <option value="">בחר משתתף לצפייה בכל השדות…</option>
+        </select>
+        <select id="genderFilter" aria-label="סינון לפי מגדר">
+          <option value="">כל המגדרים</option>
+          <option value="גבר">גברים</option>
+          <option value="אישה">נשים</option>
+          <option value="__none">לא צוין</option>
+        </select>
+      </div>
+
+      <div id="participantDetails" class="participant-details" hidden>
+        <div class="participant-details-head">
+          <h3 id="detailsTitle">פרטי משתתף</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-small" id="approveBtn" type="button">✅ אישור ושליחת מייל</button>
+            <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
+          </div>
+        </div>
+        <p id="approveMsg" class="note" style="margin:0 0 10px" role="status"></p>
+        <div id="detailsGrid" class="fields-grid"></div>
+      </div>
     </section>
   </div>
 
@@ -218,15 +220,27 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       status: 'סטטוס',
       created: 'תאריך יצירה / הרשמה',
       updated: 'תאריך עדכון',
-      total: 'סה"כ עלות'
+      total: 'סה"כ עלות',
+      email_sent: 'מייל אישור נשלח',
+      paid_type: 'סוג תשלום שדווח',
+      paid_amount: 'סכום ששולם',
+      paid_method: 'אמצעי תשלום בפועל',
+      paid_at: 'מועד דיווח תשלום'
     };
+    const APPROVED = 'מאושר';
+    const isApproved = (p) => String(p?.raw?.status || '').trim() === APPROVED;
+    const hasEmail = (p) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(p?.raw?.email || '').trim());
+    const mailSent = (p) => !!String(p?.raw?.email_sent || '').trim();
+    const paidType = (p) => String(p?.raw?.paid_type || '').trim();
+    const mark = (p) => (isApproved(p) ? '✅ ' : '') + (mailSent(p) ? '✉️ ' : '') + p.name
+      + (paidType(p) ? ` 💰 ${paidType(p)}${p.raw.paid_amount ? ' ' + p.raw.paid_amount + ' ₪' : ''}` : '')
+      + (hasEmail(p) ? '' : ' 📭 אין מייל');
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     let latestTotal = 0;
     let participants = [];
     let activeDetailKey = '';
-    const selectedKeys = new Set();
 
     function normPhone(v) {
       let d = String(v || '').replace(/\D/g, '');
@@ -306,21 +320,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     function matchesSearch(p, q) {
       if (!q) return true;
-      if (p.name.toLowerCase().includes(q)) return true;
-      return Object.values(p.raw || {}).some((v) => String(v ?? '').toLowerCase().includes(q));
-    }
-
-    function updateSelectedSummary(customText, isWarn = false) {
-      const el = $('selectedNamesSummary');
-      el.className = isWarn ? 'selected-preview warn' : 'selected-preview';
-      if (customText) {
-        el.innerHTML = customText;
-        return;
-      }
-      const chosen = participants.filter((p) => selectedKeys.has(p.key)).map((p) => p.name);
-      el.innerHTML = chosen.length
-        ? `מסומנים (<b>${chosen.length}</b>): ${esc(chosen.join(', '))}`
-        : 'מסומנים: <b>0</b> משתתפים';
+      const g = String(p.raw?.gender || '').trim();
+      return q === '__none' ? !g : g === q;
     }
 
     function formatFieldValue(val) {
@@ -352,6 +353,20 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         : `<div class="field-row"><span class="field-key">שם</span><span class="field-val">${esc(p.name)}</span></div>`;
 
       $('participantDetails').hidden = false;
+      syncApproveBtn(p);
+    }
+
+    function syncApproveBtn(p) {
+      const btn = $('approveBtn');
+      const sent = String(p.raw?.email_sent || '').trim();
+      const noMail = hasEmail(p) ? '' : '📭 אין כתובת מייל – מייל אישור לא יישלח.';
+      const paidMsg = paidType(p) ? `💰 דיווח: ${paidType(p)} ${p.raw.paid_amount || ''} ₪ ב${p.raw.paid_method || ''} (${p.raw.paid_at || ''})` : '';
+      $('approveMsg').textContent = [isApproved(p)
+        ? ('✅ מאושר' + (sent ? ' · ✉️ מייל נשלח ' + sent : ' · מייל לא נשלח'))
+        : '', paidMsg, noMail].filter(Boolean).join(' · ');
+      btn.textContent = !hasEmail(p) ? (isApproved(p) ? '✅ מאושר (אין מייל)' : '✅ אישור (ללא מייל)')
+        : !isApproved(p) ? '✅ אישור ושליחת מייל' : (sent ? '✉️ שליחת מייל חוזרת' : '✉️ שליחת מייל');
+      btn.disabled = false;
     }
 
     function renderSelectOptions() {
@@ -359,31 +374,12 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       if (!sel) return;
       const current = activeDetailKey;
       sel.innerHTML = '<option value="">בחר משתתף לצפייה בכל השדות…</option>' +
-        participants.map((p) => `<option value="${esc(p.key)}"${p.key === current ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+        participants.filter((p) => matchesSearch(p, $('genderFilter')?.value || ''))
+          .map((p) => `<option value="${esc(p.key)}"${p.key === current ? ' selected' : ''}>${esc(mark(p))}</option>`).join('');
     }
 
     function renderNamesList() {
-      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
-      const filtered = participants.filter((p) => matchesSearch(p, q));
-
-      if (!participants.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">השרת החזיר נתונים מסוכמים בלבד ללא מערך משתתפים/רשומות.</p>';
-        updateSelectedSummary();
-        return;
-      }
-
-      if (!filtered.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">לא נמצאו משתתפים התואמים לחיפוש.</p>';
-        updateSelectedSummary();
-        return;
-      }
-
-      $('namesList').innerHTML = filtered.map((p) => {
-        const checked = selectedKeys.has(p.key) ? ' checked' : '';
-        return `<label class="name-item"><input type="checkbox" value="${esc(p.key)}"${checked} /><span>${esc(p.name)}</span></label>`;
-      }).join('');
-
-      updateSelectedSummary();
+      renderSelectOptions();
     }
 
     async function tryFetchParticipantsList(currentPhone) {
@@ -422,11 +418,15 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
         { label: 'לילה נוסף: כן', count: d.extraNight?.['כן'] || 0 },
         { label: 'לילה נוסף: אולי', count: d.extraNight?.['אולי'] || 0 }
       ]);
+      const ap = d.approvals || {};
+      bars('c_pay', [
+        { label: '✅ מאושרים', count: ap.approved || 0 },
+        { label: '✉️ מייל אישור נשלח', count: ap.emailSent || 0 },
+        { label: '💰 שילמו מקדמה', count: ap.paidDeposit || 0 },
+        { label: '💰 שילמו מלא', count: ap.paidFull || 0 }
+      ]);
 
       const validKeys = new Set(participants.map((p) => p.key));
-      for (const k of [...selectedKeys]) {
-        if (!validKeys.has(k)) selectedKeys.delete(k);
-      }
 
       renderSelectOptions();
       renderNamesList();
@@ -482,51 +482,42 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
     });
 
+    $('approveBtn')?.addEventListener('click', async () => {
+      const p = participants.find((item) => item.key === activeDetailKey);
+      const target = normPhone(p?.raw?.phone || '');
+      if (!p || !target) return;
+      const sent = String(p.raw?.email_sent || '').trim();
+      const resend = isApproved(p) && !!sent;
+      const email = String(p.raw?.email || '').trim();
+      const q = resend ? `לשלוח שוב מייל אישור ל-${p.name}?` : `לאשר את ${p.name}${email ? ' ולשלוח מייל ל-' + email : ' (אין מייל – רק סימון כמאושר)'}?`;
+      if (!confirm(q)) return;
+      const btn = $('approveBtn');
+      btn.disabled = true;
+      $('approveMsg').textContent = 'שולח…';
+      try {
+        const r = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'approve', phone, target, resend }) });
+        const res = await r.json();
+        if (!res.ok) throw new Error(res.error === 'unauthorized' ? 'אין הרשאה.' : res.error);
+        p.raw.status = res.status;
+        if (res.email_sent) p.raw.email_sent = res.email_sent;
+        renderSelectOptions();
+        renderNamesList();
+        renderParticipantDetails(p.key);
+        if (!res.emailSent) {
+          $('approveMsg').textContent = res.reason === 'no email' ? 'סומן כמאושר. אין כתובת מייל – המייל לא נשלח.'
+            : res.reason === 'already sent' ? 'מאושר. מייל כבר נשלח ב-' + res.email_sent : 'סומן כמאושר.';
+        }
+      } catch (e) {
+        $('approveMsg').textContent = 'שגיאה: ' + (e.message || e);
+        btn.disabled = false;
+      }
+    });
+
     $('closeDetailsBtn')?.addEventListener('click', () => {
       renderParticipantDetails('');
     });
 
-    $('nameSearch')?.addEventListener('input', renderNamesList);
-
-    $('namesList')?.addEventListener('change', (e) => {
-      const cb = e.target;
-      if (cb && cb.type === 'checkbox') {
-        if (cb.checked) {
-          selectedKeys.add(cb.value);
-          renderParticipantDetails(cb.value);
-        } else {
-          selectedKeys.delete(cb.value);
-        }
-        updateSelectedSummary();
-      }
-    });
-
-    $('selectAllNames')?.addEventListener('click', () => {
-      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
-      const target = q ? participants.filter((p) => matchesSearch(p, q)) : participants;
-      target.forEach((p) => selectedKeys.add(p.key));
-      renderNamesList();
-    });
-
-    $('clearAllNames')?.addEventListener('click', () => {
-      selectedKeys.clear();
-      renderNamesList();
-    });
-
-    $('copySelectedNames')?.addEventListener('click', async () => {
-      const chosen = participants.filter((p) => selectedKeys.has(p.key)).map((p) => p.name);
-      if (!chosen.length) {
-        updateSelectedSummary('לא סומנו שמות להעתקה.', true);
-        return;
-      }
-      const text = chosen.join('\n');
-      try {
-        await navigator.clipboard.writeText(text);
-        updateSelectedSummary(`הועתקו (<b>${chosen.length}</b>) ללוח: ${esc(chosen.join(', '))}`);
-      } catch {
-        updateSelectedSummary('לא הצלחנו להעתיק אוטומטית ללוח.', true);
-      }
-    });
+    $('genderFilter')?.addEventListener('change', renderNamesList);
 
     $('saveCapBtn').addEventListener('click', async () => {
       if (!phone) {
@@ -571,4 +562,3 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
   </script>
 </body>
 </html>
-// hanukkah2026_dashboard.astro
