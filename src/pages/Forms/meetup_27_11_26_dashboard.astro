@@ -2,7 +2,7 @@
 // File: meetup_27_11_26_dashboard.astro
 // דשבורד – ערב משחקים, חיבורים ומוסיקה (27.11.26)
 
-const VERSION = 'V3';
+const VERSION = 'V6';
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
@@ -87,7 +87,7 @@ h1 { margin: 0; font-size: 28px; }
 <p class="msg" id="msg" role="status"></p>
 
 <div class="gate" id="gate" hidden>
-  <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון (0546655862)" />
+  <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון" />
   <button class="btn" id="gateBtn" type="button">כניסה</button>
 </div>
 
@@ -110,6 +110,9 @@ h1 { margin: 0; font-size: 28px; }
 
   <div class="card wide">
     <h2>נרשמים (לחיצה מציגה את כל הפרטים)</h2>
+    <select id="personSelect" class="search-input" style="width:100%;max-width:22em;margin-bottom:8px" aria-label="בחירת אורח">
+      <option value="-1">בחרו אורח לצפייה בכל השדות…</option>
+    </select>
     <input id="searchBox" class="search-input" type="search" placeholder="חיפוש לפי שם או טלפון…" style="width:100%;max-width:22em" />
     <div id="peopleChips" class="chips"></div>
     <div id="personDetails" class="details-box" hidden></div>
@@ -132,8 +135,11 @@ const FIELD_LABELS = [
   ['guest_phone', 'טלפון +1'], ['guest_how_know', 'היכרות עם +1'], ['guest_why', 'למה ה-+1 ייהנה'],
   ['drink_track', 'מסלול שתייה'], ['guest_track', 'מסלול שתייה +1'], ['payment', 'תשלום'],
   ['share_story', 'לשתף סיפור'], ['story_details', 'פירוט סיפור'], ['game_activity', 'משחק/פעילות'],
-  ['open_question', 'הערה פתוחה'], ['waitlist_popup', 'הופיע פופ-אפ מלא']
+  ['open_question', 'הערה פתוחה'], ['waitlist_popup', 'הופיע פופ-אפ מלא'],
+  ['guest_drinks', 'ה-+1 שותה אלכוהול'], ['open_1', 'open_1'], ['open_2', 'open_2'],
+  ['created', 'נרשם בתאריך'], ['updated', 'עודכן בתאריך']
 ];
+const DATE_KEYS = ['created', 'updated'];
 
 function normPhone(v) {
   let d = String(v || '').replace(/\D/g, '');
@@ -174,7 +180,7 @@ function bars(el, tallyObj) {
 function updateCapStatus(cap) {
   const n = Math.max(0, parseInt(cap, 10) || 0);
   const active = n > 0 && latestTotal >= n;
-  $('capStatus').textContent = `שורות שנכנסו: ${latestTotal} מתוך ${n} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
+  $('capStatus').textContent = `שורות מלאות (2 טלפונים): ${latestTotal} מתוך ${n} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
 }
 
 function renderPeopleList() {
@@ -198,6 +204,7 @@ function renderPeopleList() {
     btn.addEventListener('click', () => {
       const idx = Number(btn.getAttribute('data-idx'));
       selectedIdx = selectedIdx === idx ? -1 : idx;
+      $('personSelect').value = String(selectedIdx);
       renderPeopleList();
       renderPersonDetails();
     });
@@ -211,22 +218,36 @@ function renderPersonDetails() {
     return;
   }
   const p = allPeople[selectedIdx];
-  const rows = FIELD_LABELS
+  const known = new Set(FIELD_LABELS.map(([k]) => k));
+  const extra = Object.keys(p).filter((k) => !known.has(k)).map((k) => [k, k]);
+  const rows = FIELD_LABELS.concat(extra)
     .filter(([k]) => String(p[k] ?? '').trim() !== '' && String(p[k] ?? '').toUpperCase() !== 'FALSE')
     .map(([k, lbl]) => {
-      const val = String(p[k]).toUpperCase() === 'TRUE' ? 'כן' : String(p[k]);
+      let val = String(p[k]).toUpperCase() === 'TRUE' ? 'כן' : String(p[k]);
+      if (DATE_KEYS.includes(k) && !isNaN(Date.parse(val))) {
+        val = new Date(val).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      }
       return `<div><b>${esc(lbl)}:</b> ${esc(val)}</div>`;
     });
   box.innerHTML = `<div class="details-grid">${rows.join('')}</div>`;
   box.hidden = false;
 }
 
+function renderSelect() {
+  const sel = $('personSelect');
+  sel.innerHTML = '<option value="-1">בחרו אורח לצפייה בכל השדות…</option>' +
+    allPeople.map((p, idx) => {
+      const label = `${p.name || 'ללא שם'}${p.guest_name ? ' + ' + p.guest_name : ''}`;
+      return `<option value="${idx}"${idx === selectedIdx ? ' selected' : ''}>${esc(label)}</option>`;
+    }).join('');
+}
+
 function render(d) {
   allPeople = Array.isArray(d.registrants) ? d.registrants : (Array.isArray(d.registrations) ? d.registrations : []);
-  latestTotal = typeof d.total === 'number' ? d.total : allPeople.length;
+  latestTotal = typeof d.fullPairsCount === 'number' ? d.fullPairsCount : 0;
   const g = d.gender || {};
   const a = d.age || {};
-  $('k_total').textContent = latestTotal;
+  $('k_total').textContent = typeof d.total === 'number' ? d.total : allPeople.length;
   $('k_gender').textContent = `${g['גבר'] || 0} / ${g['אישה'] || 0}`;
   $('k_gender_sub').textContent = g['לא צוין'] ? `${g['לא צוין']} ללא מגדר` : '';
   $('k_age').textContent = a.all ?? '–';
@@ -239,6 +260,8 @@ function render(d) {
     $('capInput').value = d.capacity;
   }
   updateCapStatus($('capInput').value);
+  if (selectedIdx >= allPeople.length) selectedIdx = -1;
+  renderSelect();
   renderPeopleList();
   renderPersonDetails();
   $('stamp').textContent = 'עודכן ' + new Date(d.updated).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
@@ -292,6 +315,11 @@ $('saveCapBtn').addEventListener('click', async () => {
 });
 
 $('searchBox')?.addEventListener('input', renderPeopleList);
+$('personSelect').addEventListener('change', (e) => {
+  selectedIdx = Number(e.target.value);
+  renderPeopleList();
+  renderPersonDetails();
+});
 $('gateBtn').addEventListener('click', () => {
   phone = normPhone($('gatePhone').value);
   try { localStorage.setItem(LS_KEY, phone); } catch {}
@@ -303,4 +331,3 @@ load();
 </script>
 </body>
 </html>
-// End of File: meetup_27_11_26_dashboard.astro
