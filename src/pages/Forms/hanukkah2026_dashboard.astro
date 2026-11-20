@@ -4,7 +4,7 @@
 // דשבורד – ריטריט חנוכה 2026
 
 // ===== גרסה – להעלות ב-1 בכל עדכון =====
-const VERSION = 'V8';
+const VERSION = 'V9';
 // =========================================
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
@@ -129,30 +129,6 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       </div>
     </section>
 
-    <section class="card wide" id="participantsPickerCard" style="margin-bottom:12px" aria-label="בחירת שמות משתתפים והצגת פרטים">
-      <h2>משתתפים – בחירה והצגת כל השדות</h2>
-      <div class="picker-toolbar">
-        <select id="participantSelect" aria-label="בחירת משתתף לצפייה בכל השדות">
-          <option value="">בחר משתתף לצפייה בכל השדות…</option>
-        </select>
-        <input id="nameSearch" type="search" placeholder="חיפוש לפי שם או פרט…" autocomplete="off" />
-        <button class="btn btn-ghost btn-small" id="selectAllNames" type="button">סמן הכל</button>
-        <button class="btn btn-ghost btn-small" id="clearAllNames" type="button">נקה סימון</button>
-        <button class="btn btn-small" id="copySelectedNames" type="button">העתק מסומנים</button>
-      </div>
-      <div id="namesList" class="names-box">
-        <p class="note" style="margin:0">הרשימה תוצג ברגע שהנתונים ייטענו.</p>
-      </div>
-      <p id="selectedNamesSummary" class="selected-preview" role="status">מסומנים: <b>0</b> משתתפים</p>
-
-      <div id="participantDetails" class="participant-details" hidden>
-        <div class="participant-details-head">
-          <h3 id="detailsTitle">פרטי משתתף</h3>
-          <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
-        </div>
-        <div id="detailsGrid" class="fields-grid"></div>
-      </div>
-    </section>
 
     <section class="kpis" aria-label="מספרים עיקריים">
       <div class="kpi"><span>נרשמים</span><b id="k_total">–</b></div>
@@ -172,6 +148,35 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       <div class="card wide"><h2>פעילויות מבוקשות</h2><div id="c_act"></div></div>
       <div class="card"><h2>הלפרים לפי תפקיד</h2><div id="c_roles"></div></div>
       <div class="card"><h2>עוד נתונים</h2><div id="c_more"></div></div>
+    </section>
+    <section class="card wide" id="participantsPickerCard" style="margin-top:12px" aria-label="בחירת שמות משתתפים והצגת פרטים">
+      <h2>משתתפים – בחירה והצגת כל השדות</h2>
+      <div class="picker-toolbar">
+        <select id="participantSelect" aria-label="בחירת משתתף לצפייה בכל השדות">
+          <option value="">בחר משתתף לצפייה בכל השדות…</option>
+        </select>
+        <select id="genderFilter" aria-label="סינון לפי מגדר">
+          <option value="">כל המגדרים</option>
+          <option value="גבר">גברים</option>
+          <option value="אישה">נשים</option>
+          <option value="__none">לא צוין</option>
+        </select>
+        <button class="btn btn-ghost btn-small" id="selectAllNames" type="button">סמן הכל</button>
+        <button class="btn btn-ghost btn-small" id="clearAllNames" type="button">נקה סימון</button>
+        <button class="btn btn-small" id="copySelectedNames" type="button">העתק מסומנים</button>
+      </div>
+      <div id="namesList" class="names-box">
+        <p class="note" style="margin:0">הרשימה תוצג ברגע שהנתונים ייטענו.</p>
+      </div>
+      <p id="selectedNamesSummary" class="selected-preview" role="status">מסומנים: <b>0</b> משתתפים</p>
+
+      <div id="participantDetails" class="participant-details" hidden>
+        <div class="participant-details-head">
+          <h3 id="detailsTitle">פרטי משתתף</h3>
+          <button class="btn btn-ghost btn-small" id="closeDetailsBtn" type="button">סגור תצוגת שדות</button>
+        </div>
+        <div id="detailsGrid" class="fields-grid"></div>
+      </div>
     </section>
   </div>
 
@@ -306,8 +311,8 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
 
     function matchesSearch(p, q) {
       if (!q) return true;
-      if (p.name.toLowerCase().includes(q)) return true;
-      return Object.values(p.raw || {}).some((v) => String(v ?? '').toLowerCase().includes(q));
+      const g = String(p.raw?.gender || '').trim();
+      return q === '__none' ? !g : g === q;
     }
 
     function updateSelectedSummary(customText, isWarn = false) {
@@ -363,7 +368,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     }
 
     function renderNamesList() {
-      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
+      const q = $('genderFilter')?.value || '';
       const filtered = participants.filter((p) => matchesSearch(p, q));
 
       if (!participants.length) {
@@ -373,7 +378,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       }
 
       if (!filtered.length) {
-        $('namesList').innerHTML = '<p class="note" style="margin:0">לא נמצאו משתתפים התואמים לחיפוש.</p>';
+        $('namesList').innerHTML = '<p class="note" style="margin:0">אין משתתפים במגדר הזה.</p>';
         updateSelectedSummary();
         return;
       }
@@ -486,7 +491,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
       renderParticipantDetails('');
     });
 
-    $('nameSearch')?.addEventListener('input', renderNamesList);
+    $('genderFilter')?.addEventListener('change', renderNamesList);
 
     $('namesList')?.addEventListener('change', (e) => {
       const cb = e.target;
@@ -502,7 +507,7 @@ const UPDATED = new Intl.DateTimeFormat('he-IL', {
     });
 
     $('selectAllNames')?.addEventListener('click', () => {
-      const q = ($('nameSearch')?.value || '').trim().toLowerCase();
+      const q = $('genderFilter')?.value || '';
       const target = q ? participants.filter((p) => matchesSearch(p, q)) : participants;
       target.forEach((p) => selectedKeys.add(p.key));
       renderNamesList();
