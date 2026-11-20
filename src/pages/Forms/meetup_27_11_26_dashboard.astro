@@ -2,7 +2,7 @@
 // File: meetup_27_11_26_dashboard.astro
 // דשבורד – ערב משחקים, חיבורים ומוסיקה (27.11.26)
 
-const VERSION = 'V6';
+const VERSION = 'V7';
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
@@ -242,9 +242,18 @@ function renderSelect() {
     }).join('');
 }
 
+// שורה מלאה = טלפון + טלפון +1 תקינים ושונים, ולא סומן "מחפש פרטנר"
+function countPairs(list) {
+  const ok = (x) => /^0\d{8,9}$/.test(x);
+  return list.filter((p) => {
+    const a = normPhone(p.phone), b = normPhone(p.guest_phone);
+    return String(p.no_plus).toUpperCase() !== 'TRUE' && ok(a) && ok(b) && a !== b;
+  }).length;
+}
+
 function render(d) {
   allPeople = Array.isArray(d.registrants) ? d.registrants : (Array.isArray(d.registrations) ? d.registrations : []);
-  latestTotal = typeof d.fullPairsCount === 'number' ? d.fullPairsCount : 0;
+  latestTotal = typeof d.fullPairsCount === 'number' ? d.fullPairsCount : countPairs(allPeople);
   const g = d.gender || {};
   const a = d.age || {};
   $('k_total').textContent = typeof d.total === 'number' ? d.total : allPeople.length;
@@ -274,6 +283,7 @@ async function load() {
   try {
     const d = await jsonp({ action: 'stats', phone });
     if (!d || !d.ok) throw new Error(d?.error === 'unauthorized' ? 'אין הרשאה לצפות בנתונים.' : (d?.error || 'שגיאה בטעינה'));
+    if (d.attendance || d.nights) throw new Error('הכתובת מריצה את קוד חנוכה ולא של 27.11. יש להדביק את Code_meetup_27_11_26.gs בפרויקט Hiburim ולעשות New version.');
     $('gate').hidden = true;
     render(d);
   } catch (e) {
