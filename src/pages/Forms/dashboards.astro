@@ -1,0 +1,205 @@
+---
+// File: src/pages/Forms/dashboards.astro
+// דשבורד ראשי – כל האירועים במקום אחד
+
+// ===== גרסה – להעלות ב-1 בכל עדכון =====
+const VERSION = 'V1';
+// =========================================
+const UPDATED = new Intl.DateTimeFormat('he-IL', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+}).format(new Date()).replace(',', '');
+---
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#1F2430" />
+<title>דשבורד ראשי – מנגנים שרים ביחד</title>
+<style is:global>
+:root {
+  --bg: #1F2430; --surface: #2A3040; --ink: #FFFFFF; --muted: #C9CFDB; --line: #3D4558;
+  --sage: #FFD23F; --sage-ink: #2A2100; --danger: #FFB4B4; --ok: #9BE59B; --track: #171B24;
+  --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 900px; margin: 0 auto; padding: 32px 16px 56px; position: relative; }
+.version { position: absolute; top: 10px; left: 16px; font-size: 11px; color: var(--muted); opacity: .55; }
+header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 28px; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.btn { font: inherit; font-weight: 700; padding: 9px 16px; border-radius: 999px; border: 0; background: var(--sage); color: var(--sage-ink); cursor: pointer; text-decoration: none; display: inline-block; }
+.btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--sage); }
+.btn-small { padding: 6px 12px; font-size: 13px; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.msg { color: var(--danger); margin: 0 0 14px; }
+.msg:empty { display: none; }
+.gate { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+.gate input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; min-width: 12em; }
+.events { display: grid; gap: 14px; }
+.ev { background: var(--surface); border: 1px solid var(--line); border-inline-start: 6px solid var(--accent, var(--sage)); border-radius: 14px; padding: 16px; }
+.ev-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.ev h2 { margin: 0; font-size: 19px; }
+.ev .when { font-size: 14px; color: var(--muted); }
+.ev-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--track); border-radius: 10px; padding: 10px; }
+.stat span { display: block; font-size: 12px; color: var(--muted); }
+.stat b { display: block; font-size: 24px; color: var(--sage); font-variant-numeric: tabular-nums; }
+.stat small { display: block; font-size: 12px; color: var(--muted); }
+.cap { margin-top: 12px; }
+.cap .top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+.cap .track { height: 10px; background: var(--track); border-radius: 999px; overflow: hidden; }
+.cap .fill { height: 100%; background: var(--sage); }
+.cap.full .fill { background: var(--danger); }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.pill.on { background: var(--danger); color: #3A0000; }
+.pill.off { background: var(--ok); color: #0A2A0A; }
+.err { color: var(--danger); font-size: 14px; }
+@media (max-width: 600px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="version" dir="ltr">{VERSION} · {UPDATED}</div>
+  <header>
+    <div>
+      <h1>כל האירועים</h1>
+      <p class="sub">מנגנים שרים ביחד · <span id="stamp">טוען…</span></p>
+    </div>
+    <button class="btn" id="refresh" type="button">רענון</button>
+  </header>
+
+  <p class="msg" id="msg" role="status"></p>
+  <div class="gate" id="gate" hidden>
+    <input id="gatePhone" type="tel" inputmode="numeric" placeholder="מספר טלפון" />
+    <button class="btn" id="gateBtn" type="button">כניסה</button>
+  </div>
+
+  <section class="events" id="events"></section>
+</div>
+
+<script is:inline>
+// ===== אירועים – להוסיף אירוע חדש = להוסיף שורה כאן =====
+const EVENTS = [
+  {
+    title: 'ערב חיבורים', when: '27.11.26 · שישי בערב', accent: '#0A7090',
+    script: 'https://script.google.com/macros/s/AKfycbwAcpkaCneX6EVNnFlr0LAzcfsQWJrLRi-6PiXGsDAgQOUzPyp5_qioB8LTtOLhaCay/exec',
+    dash: '/Forms/meetup_27_11_26_dashboard', form: '/Forms/meetup_27_11_26',
+    lsKey: 'meetup_27_11_26_phone',
+    capField: 'fullPairsCount', capLabel: 'שורות מלאות (זוגות)'
+  },
+  {
+    title: 'ריטריט חנוכה', when: '10–12.12.26 · מצפה רמון', accent: '#A35A32',
+    script: 'https://script.google.com/macros/s/AKfycbxSk0jbyPUpu-osqMjW2FWCFBR_sK2IQH1Tl36UsnKR1_65zwxwtuiP0hE7v0mmTGGw/exec',
+    dash: '/Forms/hanukkah2026_dashboard', form: '/Forms/hanukkah2026',
+    lsKey: 'hanukkah2026_phone',
+    capField: 'total', capLabel: 'נרשמים'
+  }
+];
+const LS_KEY = 'hub_owner_phone';
+// =========================================================
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let phone = '';
+try { phone = localStorage.getItem(LS_KEY) || ''; } catch {}
+
+function normPhone(v) {
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.startsWith('972')) d = '0' + d.slice(3);
+  if (/^[1-9]\d{7,8}$/.test(d)) d = '0' + d;
+  return d;
+}
+
+function jsonp(url, params) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    const s = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 20000);
+    function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+    window[cb] = (data) => { cleanup(); resolve(data); };
+    s.onerror = () => { cleanup(); reject(new Error('network')); };
+    s.src = url + '?' + new URLSearchParams({ ...params, callback: cb, t: Date.now() });
+    document.head.appendChild(s);
+  });
+}
+
+function shell(ev, i) {
+  return `<article class="ev" style="--accent:${esc(ev.accent)}">
+    <div class="ev-head">
+      <div><h2>${esc(ev.title)}</h2><div class="when">${esc(ev.when)}</div></div>
+      <div class="ev-links">
+        <a class="btn btn-small" href="${esc(ev.dash)}">דשבורד מלא</a>
+        <a class="btn btn-ghost btn-small" href="${esc(ev.form)}">טופס</a>
+      </div>
+    </div>
+    <div id="body_${i}"><span class="when">טוען…</span></div>
+  </article>`;
+}
+
+function body(ev, d) {
+  const g = d.gender || {}, a = d.age || {};
+  const used = Number(d[ev.capField] ?? d.total ?? 0);
+  const cap = Number(d.capacity ?? 0);
+  const full = cap > 0 && used >= cap;
+  const pct = cap > 0 ? Math.min(100, (used / cap) * 100) : 0;
+  return `<div class="stats">
+      <div class="stat"><span>נרשמים</span><b>${Number(d.total) || 0}</b></div>
+      <div class="stat"><span>גברים</span><b>${g['גבר'] || 0}</b><small>${a.male != null ? 'גיל ' + a.male : ''}</small></div>
+      <div class="stat"><span>נשים</span><b>${g['אישה'] || 0}</b><small>${a.female != null ? 'גיל ' + a.female : ''}</small></div>
+      <div class="stat"><span>גיל ממוצע</span><b>${a.all ?? '–'}</b></div>
+    </div>
+    <div class="cap${full ? ' full' : ''}">
+      <div class="top"><span>${esc(ev.capLabel)}: <b>${used} / ${cap || '∞'}</b></span>
+        <span class="pill ${full ? 'on' : 'off'}">פופ-אפ מלא: ${full ? 'פעיל' : 'כבוי'}</span></div>
+      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+async function loadOne(ev, i) {
+  const el = $('body_' + i);
+  try {
+    const d = await jsonp(ev.script, { action: 'stats', phone });
+    if (!d || !d.ok) throw new Error(d?.error === 'unauthorized' ? 'unauthorized' : (d?.error || 'שגיאה'));
+    el.innerHTML = body(ev, d);
+    return true;
+  } catch (e) {
+    el.innerHTML = `<span class="err">${e.message === 'unauthorized' ? 'אין הרשאה.' : 'הטעינה נכשלה. נסו לרענן.'}</span>`;
+    return e.message !== 'unauthorized';
+  }
+}
+
+async function load() {
+  if (!phone) { $('gate').hidden = false; $('stamp').textContent = ''; return; }
+  $('refresh').disabled = true;
+  $('msg').textContent = '';
+  $('events').innerHTML = EVENTS.map(shell).join('');
+  const results = await Promise.all(EVENTS.map(loadOne));
+  if (results.every((ok) => !ok)) {
+    $('gate').hidden = false;
+    $('msg').textContent = 'אין הרשאה לצפות בנתונים.';
+  } else {
+    $('gate').hidden = true;
+    // כניסה אוטומטית לדשבורדים של כל אירוע
+    try { EVENTS.forEach((ev) => localStorage.setItem(ev.lsKey, phone)); } catch {}
+  }
+  $('stamp').textContent = 'עודכן ' + new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+  $('refresh').disabled = false;
+}
+
+$('gateBtn').addEventListener('click', () => {
+  phone = normPhone($('gatePhone').value);
+  try { localStorage.setItem(LS_KEY, phone); } catch {}
+  load();
+});
+$('gatePhone').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('gateBtn').click(); } });
+$('refresh').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
