@@ -2,7 +2,7 @@
 // File: meetup_27_11_26_dashboard.astro
 // דשבורד – ערב משחקים, חיבורים ומוסיקה (27.11.26)
 
-const VERSION = 'V3';
+const VERSION = 'V4';
 const UPDATED = new Intl.DateTimeFormat('he-IL', {
   timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: '2-digit',
   hour: '2-digit', minute: '2-digit', hour12: false
@@ -174,7 +174,7 @@ function bars(el, tallyObj) {
 function updateCapStatus(cap) {
   const n = Math.max(0, parseInt(cap, 10) || 0);
   const active = n > 0 && latestTotal >= n;
-  $('capStatus').textContent = `שורות שנכנסו: ${latestTotal} מתוך ${n} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
+  $('capStatus').textContent = `שורות מלאות (2 טלפונים): ${latestTotal} מתוך ${n} · פופ-אפ: ${active ? 'פעיל' : 'כבוי'}`;
 }
 
 function renderPeopleList() {
@@ -223,10 +223,10 @@ function renderPersonDetails() {
 
 function render(d) {
   allPeople = Array.isArray(d.registrants) ? d.registrants : (Array.isArray(d.registrations) ? d.registrations : []);
-  latestTotal = typeof d.total === 'number' ? d.total : allPeople.length;
+  latestTotal = typeof d.fullPairsCount === 'number' ? d.fullPairsCount : 0;
   const g = d.gender || {};
   const a = d.age || {};
-  $('k_total').textContent = latestTotal;
+  $('k_total').textContent = typeof d.total === 'number' ? d.total : allPeople.length;
   $('k_gender').textContent = `${g['גבר'] || 0} / ${g['אישה'] || 0}`;
   $('k_gender_sub').textContent = g['לא צוין'] ? `${g['לא צוין']} ללא מגדר` : '';
   $('k_age').textContent = a.all ?? '–';
